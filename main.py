@@ -5,7 +5,6 @@
 # @File    : main.py
 import sys
 
-from module import WARES
 from goods import Sku, SkuManager
 
 if __name__ == '__main__':
