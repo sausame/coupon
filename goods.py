@@ -88,31 +88,36 @@ class SkuManager():
         self.other_all_skuids = list()
         self.SkuidsList = list()
         self.otherSkuidsList = list()
-        #self.GroupSkuids = list()
         self.SkuidsDict = list()
-        self.__apptoken = apptoken
 
-        # Update the first coupon lists
         self.updateFromCouponPromotion()
-        self.SkuidsDict = self.GetSkuidsDict()
-
-        # Update other lists
-        self.updateFromHomeCouponPromotion()
-        self.getOtherSkus()
+        self.updateFromDiscountPromotion()
 
     def updateFromCouponPromotion(self):
 
-        #url = 'http://qwd.jd.com/fcgi-bin/qwd_actclassify_list?g_tk=1915885660&actid=10473'
+        skuIds = self.getFromCouponPromotion()
+        self.SkuidsDict = self.updateSkuList(skuIds, isCoupon=True)
+
+    def updateFromDiscountPromotion(self):
+
+        skuIds = self.getFromDiscountPromotion()
+        self.other_all_skuids = self.updateSkuList(skuIds, isDiscount=True)
+
+    def getFromCouponPromotion(self):
+
+        skuIds = list()
+
         COUPON_PROMOTION_URL = 'http://qwd.jd.com/fcgi-bin/qwd_actclassify_list?g_tk={}&actid={}'
 
-        g_tk = 1915885660
+        G_TK = 1915885660
         actid = 10473
 
-        r = requests.get(COUPON_PROMOTION_URL.format(g_tk, actid))
-        print r.text
+        r = requests.get(COUPON_PROMOTION_URL.format(G_TK, actid))
 
         obj = json.loads(r.text)
         objs = obj.pop('oItemList')
+
+        ids = list()
 
         for item in objs:
             ids = item.pop('skuIds')
@@ -120,44 +125,44 @@ class SkuManager():
                 continue
 
             idlist = ids.split(',')
-            self.SkuidsList.extend(idlist)
+            skuIds.extend(idlist)
 
-        print 'Retrieve', len(self.SkuidsList), 'SKUs'
+        print 'Retrieve', len(skuIds), 'SKUs'
+        return skuIds
 
-    def updateFromHomeCouponPromotion(self):
+    def getFromDiscountPromotion(self):
 
-        #url = 'http://qwd.jd.com/fcgi-bin/qwd_activity_list?g_tk=166988782&env=3'
+        skuIds = list()
 
         HOME_COUPON_PROMOTION_URL = 'http://qwd.jd.com/fcgi-bin/qwd_activity_list?g_tk={}&env={}'
 
-        g_tk = 1915885660
+        G_TK = 1915885660
         env = 3
 
-        r = requests.get(HOME_COUPON_PROMOTION_URL.format(g_tk, env))
-        print r.text
+        r = requests.get(HOME_COUPON_PROMOTION_URL.format(G_TK, env))
 
         obj = json.loads(r.text)
         objs = obj.pop('act')
 
         for item in objs:
+            uniqueId = item.pop('uniqueId')
             ids = item.pop('skuIds')
             if 0 == len(ids):
                 continue
 
             idlist = ids.split(',')
-            self.otherSkuidsList.extend(idlist)
+            skuIds.extend(idlist)
 
-        print 'Retrieve', len(self.otherSkuidsList), 'SKUs'
+        print 'Retrieve', len(skuIds), 'SKUs'
+        return skuIds
 
-    def getOtherSkus(self):
+    def updateSkuList(self, skuIds, isCoupon=False, isDiscount=False):
 
-        size = len(self.otherSkuidsList)
+        skus = list()
+
+        size = len(skuIds)
 
         GROUP_SIZE = 20
-
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_2 like Mac OS X) AppleWebKit/603.2.4 (KHTML, like Gecko) Mobile/14F89 (4330609152);jdapp; JXJ/1.3.7.70717',
-            'Referer': 'http://qwd.jd.com/goodslist.shtml?actId=10473&title=%E4%BC%98%E6%83%A0%E5%88%B8%E6%8E%A8%E5%B9%BF'}
 
         for index in range(1 + size/GROUP_SIZE):
 
@@ -167,83 +172,42 @@ class SkuManager():
             if end > size:
                 end = size
 
-            group = self.otherSkuidsList[start:end]
-            print start, end, group
-            #getchar()
+            group = skuIds[start:end]
 
-            skus = '|'.join(group)
-            url = 'http://qwd.jd.com/fcgi-bin/qwd_searchitem_ex?g_tk=166988782&skuid={0}'.format(skus)
+            basicInfors = self.searchItem(group)
 
-            r = requests.get(url, headers=headers) #, cookies={'apptoken': self.__apptoken})
-            obj = json.loads(r.text)
-            skuObjs = obj.pop('sku')
+            if isCoupon:
+                extraInfors = self.searchCoupon(group)
+            elif isDiscount:
+                extraInfors = self.searchDiscount(group)
 
-            #print '-----------------------------------------'
-            #print r.text
-            #getchar()
-
-            skus = ','.join(group)
-            url = 'http://qwd.jd.com/fcgi-bin/qwd_discount_query?g_tk=166988782&vsku={0}'.format(skus)
-
-            r = requests.get(url, headers=headers) #, cookies={'apptoken': self.__apptoken})
-            obj = json.loads(r.text)
-            discountSkuObjs = obj.pop('skulist')
-
-            #print r.text
-            #print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-            #getchar()
+            print '-->', (end - start), len(basicInfors), len(extraInfors), group
 
             for skuid in group:
+
                 sku = Sku(skuid)
-                sku.set_title_goodcom(skuObjs)
 
-                if discountSkuObjs is not None:
-                    sku.set_promoPrice(discountSkuObjs)
+                sku.set_title_goodcom(basicInfors)
 
-                #print sku.get_dict()
-                #getchar()
+                if isCoupon:
+                    sku.set_link_price_couponprice(extraInfors)
+                elif isDiscount:
+                    sku.set_promoPrice(extraInfors)
 
-                self.other_all_skuids.append(sku.get_dict())
+                data = sku.get_dict()
+                skus.append(data)
+                '''
+                try:
+                    if self.judge(data):
+                        skus.append(data)
+                except Exception as e:
+                    print e, data
+                    getchar()
+                '''
 
-    def GETLinks(self, group):
-        '''获得20个商品的优惠券信息'''
+        return skus
 
-        skus = ','.join(group)
-
-        # referer 这个信息必须有，否则返回结果为空
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_2 like Mac OS X) AppleWebKit/603.2.4 (KHTML, like Gecko) Mobile/14F89 (4330609152);jdapp; JXJ/1.3.7.70717',
-            'Referer': 'https://qwd.jd.com/goodslist.shtml?actId=10473&title=%E4%BC%98%E6%83%A0%E5%88%B8%E6%8E%A8%E5%B9%BF'}
-        url = 'https://qwd.jd.com/fcgi-bin/qwd_coupon_query?g_tk=1915885660&sku={0}'.format(skus)
-        res = requests.get(url=url, headers=headers, cookies={'apptoken': self.__apptoken})
-        if len(res.text):
-            data = json.loads(res.text)['data']
-            if len(data):
-                return data
-        else:
-            return None
-
-    def GETTitle(self, group):
-
-        '''获得20个商品的名字信息'''
-
-        skus = '|'.join(group)
-
-        # referer必须有，否则结果为空
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_2 like Mac OS X) AppleWebKit/603.2.4 (KHTML, like Gecko) Mobile/14F89 (4330609152);jdapp; JXJ/1.3.7.70717',
-            'Referer': 'http://qwd.jd.com/goodslist.shtml?actId=10473&title=%E4%BC%98%E6%83%A0%E5%88%B8%E6%8E%A8%E5%B9%BF'}
-        url = 'http://qwd.jd.com/fcgi-bin/qwd_searchitem_ex?g_tk=959337321&skuid={0}'.format(skus)
-        res = requests.get(url=url, headers=headers, cookies={'apptoken': self.__apptoken})
-
-        if len(res.text):
-            data = json.loads(res.text)['sku']
-            if len(data) > 0:
-                return data
-        else:
-            return None
-
-    def GetSkuidsDict(self):
+    def updateGetSkuidsDict(self):
 
         skuidsdict = list()
 
@@ -259,22 +223,15 @@ class SkuManager():
             if end > size:
                 end = size
 
-            print start, end
-
             group = self.SkuidsList[start:end]
 
             # 获得优惠券的json信息
-            link_json = self.GETLinks(group)
-            # 获得名字的json信息
-            title_json = self.GETTitle(group)
+            link_json = self.searchCoupon(group)
 
-            '''
-            if link_json is None or title_json is None:
-                print group
-                print link_json
-                print title_json
-                getchar()
-            '''
+            # 获得名字的json信息
+            title_json = self.searchItem(group)
+
+            print '-->', (end - start), len(link_json), len(title_json)
 
             for skuid in group:
 
@@ -292,6 +249,97 @@ class SkuManager():
                     print data
 
         return skuidsdict
+
+    def getOtherSkus(self):
+
+        size = len(self.otherSkuidsList)
+
+        GROUP_SIZE = 20
+
+        for index in range(1 + size/GROUP_SIZE):
+
+            start = index * GROUP_SIZE
+            end = start + GROUP_SIZE
+
+            if end > size:
+                end = size
+
+            group = self.otherSkuidsList[start:end]
+            print start, end, group
+
+            skuObjs = self.searchItem(group)
+            discountSkuObjs = self.searchDiscount(group)
+
+            # Sometimes, searchitem doesn't return all items
+            print '---->', len(skuObjs), len(discountSkuObjs), len(group)
+
+            for skuid in group:
+                for sku in skuObjs:
+                    if skuid == sku['skuid']:
+                        break
+                else:
+                    print 'Can not find', skuid, 'in searching'
+
+                for sku in discountSkuObjs:
+                    if skuid == sku['skuid']:
+                        break
+                else:
+                    print 'Can not find', skuid, 'in discount'
+
+            for skuid in group:
+                sku = Sku(skuid)
+                sku.set_title_goodcom(skuObjs)
+
+                if discountSkuObjs is not None:
+                    sku.set_promoPrice(discountSkuObjs)
+
+                #print sku.get_dict()
+                #getchar()
+
+                self.other_all_skuids.append(sku.get_dict())
+
+    def querySkuList(self, separator, templateUrl, listTagName, itemIds=None, itemId=None):
+
+        if itemIds is not None:
+            ids = separator.join(itemIds)
+        elif itemId is not None:
+            ids = itemId
+        else:
+            raise TypeError('Id or Ids can be all None')
+
+        USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_2 like Mac OS X) AppleWebKit/603.2.4 (KHTML, like Gecko) Mobile/14F89 (4330609152);jdapp; JXJ/1.3.7.70717'
+        REFERER = 'http://qwd.jd.com/goodslist.shtml?actId=10473&title=%E4%BC%98%E6%83%A0%E5%88%B8%E6%8E%A8%E5%B9%BF'
+
+        G_TK = 959337321
+
+        # Referer is needed
+        headers = {'User-Agent': USER_AGENT, 'Referer': REFERER}
+        url = templateUrl.format(G_TK, ids)
+        r = requests.get(url, headers=headers)
+
+        # TODO: add other judgement for http response
+
+        # Error code
+        obj = json.loads(r.text)
+        errCode = int(obj.pop('errCode'))
+
+        if errCode is not 0:
+            print 'Response of', url, 'is', r.text
+            return []
+
+        return obj.pop(listTagName)
+
+    def searchCoupon(self, itemIds=None, itemId=None):
+        SEARCH_COUPON_URL_TEMPLATE = 'https://qwd.jd.com/fcgi-bin/qwd_coupon_query?g_tk={}&sku={}'
+        return self.querySkuList(',', SEARCH_COUPON_URL_TEMPLATE, 'data', itemIds=itemIds, itemId=itemId)
+
+    def searchItem(self, itemIds=None, itemId=None):
+        SEARCH_ITEM_URL_TEMPLATE = 'http://qwd.jd.com/fcgi-bin/qwd_searchitem_ex?g_tk={}&skuid={}'
+        return self.querySkuList('|', SEARCH_ITEM_URL_TEMPLATE, 'sku', itemIds=itemIds, itemId=itemId)
+
+    def searchDiscount(self, itemIds=None, itemId=None):
+        SEARCH_DISCOUNT_URL_TEMPLATE = 'http://qwd.jd.com/fcgi-bin/qwd_discount_query?g_tk={}&vsku={}'
+        return self.querySkuList(',', SEARCH_DISCOUNT_URL_TEMPLATE, 'skulist', itemIds=itemIds, itemId=itemId)
 
     @staticmethod
     def judge(data):
