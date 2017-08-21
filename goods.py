@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# @Time    : 2017/7/26 17:04
-# @Author  : lingxiangxiang
-# @File    : goods.py
+
 import json
 
 import requests
@@ -13,10 +11,34 @@ def getchar():
     print 'Please press return key to continue'
     sys.stdin.read(1)
 
-class Coupon:
+class SkuBase:
+
+    def __init__(self, data):
+        self.data = data
+
+    def equals(self, skuid):
+        return skuid == self.data['skuid']
+
+    def __repr__(self):
+        return json.dumps(self.data, ensure_ascii=False, indent=4, sort_keys=True)
+
+class SKU(SkuBase):
+
+    def __init__(self, data):
+        SkuBase.__init__(self)
+
+class Coupon(SkuBase):
 
     def __init__(self):
-        pass
+        SkuBase.__init__(self)
+
+        # Set as the same name
+        self.data['skuid'] = self.data.pop('skuId')
+
+class Discount(SkuBase):
+
+    def __init__(self):
+        SkuBase.__init__(self)
 
 class Sku():
 
@@ -33,7 +55,6 @@ class Sku():
         self.__linkstarttime = ''
         self.__linkendtime = ''
 
-
     def set_link_price_couponprice(self, link_json):
         '''获得sku的优惠券link， 价格price， 优惠券价格couponprice， 购买价aftercouponprice'''
         for ware in link_json:
@@ -49,8 +70,6 @@ class Sku():
         for i in link_json:
             if self.__skuid == i['skuid']:
                 self.__AfterCouponPrice = i['promoPrice']
-                #print(self.__AfterCouponPrice)
-                #print(i['promoPrice'])
 
     def set_title_goodcom(self, title_json):
         '''获得sku的名字， 好评数'''
@@ -61,8 +80,6 @@ class Sku():
                 self.__salecount = title['salecount']
                 self.__skuimgurl = title['skuimgurl']
                 self.__Price = title['price']
-
-
 
     def get_dict(self):
         # 把sku转换成字典
@@ -82,26 +99,26 @@ class Sku():
 
 class SkuManager():
 
-    def __init__(self, apptoken):
+    def __init__(self):
 
         #self.g_tk = 1915885660
-        self.other_all_skuids = list()
-        self.SkuidsList = list()
-        self.otherSkuidsList = list()
-        self.SkuidsDict = list()
+        self.skuList = list()
 
         self.updateFromCouponPromotion()
         self.updateFromDiscountPromotion()
 
+        for sku in self.skuList:
+            print json.dumps(sku, indent=4, ensure_ascii=False)
+
     def updateFromCouponPromotion(self):
 
         skuIds = self.getFromCouponPromotion()
-        self.SkuidsDict = self.updateSkuList(skuIds, isCoupon=True)
+        self.skuList.extend(self.updateSkuList(skuIds, isCoupon=True))
 
     def updateFromDiscountPromotion(self):
 
         skuIds = self.getFromDiscountPromotion()
-        self.other_all_skuids = self.updateSkuList(skuIds, isDiscount=True)
+        self.skuList.extend(self.updateSkuList(skuIds, isDiscount=True))
 
     def getFromCouponPromotion(self):
 
@@ -195,108 +212,17 @@ class SkuManager():
                     sku.set_promoPrice(extraInfors)
 
                 data = sku.get_dict()
-                skus.append(data)
-                '''
-                try:
-                    if self.judge(data):
-                        skus.append(data)
-                except Exception as e:
-                    print e, data
-                    getchar()
-                '''
+
+                if isCoupon:
+                    try:
+                        if self.judge(data):
+                            skus.append(data)
+                    except Exception as e:
+                        print e
+                else:
+                    skus.append(data)
 
         return skus
-
-    def updateGetSkuidsDict(self):
-
-        skuidsdict = list()
-
-        size = len(self.SkuidsList)
-
-        GROUP_SIZE = 20
-
-        for index in range(1 + size/GROUP_SIZE):
-
-            start = index * GROUP_SIZE
-            end = start + GROUP_SIZE
-
-            if end > size:
-                end = size
-
-            group = self.SkuidsList[start:end]
-
-            # 获得优惠券的json信息
-            link_json = self.searchCoupon(group)
-
-            # 获得名字的json信息
-            title_json = self.searchItem(group)
-
-            print '-->', (end - start), len(link_json), len(title_json)
-
-            for skuid in group:
-
-                sku = Sku(skuid)
-
-                sku.set_link_price_couponprice(link_json)
-                sku.set_title_goodcom(title_json)
-
-                data = sku.get_dict()
-                try:
-                    if self.judge(data):
-                        skuidsdict.append(data)
-                        # print(data)
-                except Exception as e:
-                    print data
-
-        return skuidsdict
-
-    def getOtherSkus(self):
-
-        size = len(self.otherSkuidsList)
-
-        GROUP_SIZE = 20
-
-        for index in range(1 + size/GROUP_SIZE):
-
-            start = index * GROUP_SIZE
-            end = start + GROUP_SIZE
-
-            if end > size:
-                end = size
-
-            group = self.otherSkuidsList[start:end]
-            print start, end, group
-
-            skuObjs = self.searchItem(group)
-            discountSkuObjs = self.searchDiscount(group)
-
-            # Sometimes, searchitem doesn't return all items
-            print '---->', len(skuObjs), len(discountSkuObjs), len(group)
-
-            for skuid in group:
-                for sku in skuObjs:
-                    if skuid == sku['skuid']:
-                        break
-                else:
-                    print 'Can not find', skuid, 'in searching'
-
-                for sku in discountSkuObjs:
-                    if skuid == sku['skuid']:
-                        break
-                else:
-                    print 'Can not find', skuid, 'in discount'
-
-            for skuid in group:
-                sku = Sku(skuid)
-                sku.set_title_goodcom(skuObjs)
-
-                if discountSkuObjs is not None:
-                    sku.set_promoPrice(discountSkuObjs)
-
-                #print sku.get_dict()
-                #getchar()
-
-                self.other_all_skuids.append(sku.get_dict())
 
     def querySkuList(self, separator, templateUrl, listTagName, itemIds=None, itemId=None):
 
@@ -310,7 +236,8 @@ class SkuManager():
         USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_2 like Mac OS X) AppleWebKit/603.2.4 (KHTML, like Gecko) Mobile/14F89 (4330609152);jdapp; JXJ/1.3.7.70717'
         REFERER = 'http://qwd.jd.com/goodslist.shtml?actId=10473&title=%E4%BC%98%E6%83%A0%E5%88%B8%E6%8E%A8%E5%B9%BF'
 
-        G_TK = 959337321
+        #G_TK = 959337321
+        G_TK = 1915885660
 
         # Referer is needed
         headers = {'User-Agent': USER_AGENT, 'Referer': REFERER}
