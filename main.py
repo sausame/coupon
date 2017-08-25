@@ -3,7 +3,8 @@
 
 import sys
 
-from goods import SkuManager, CouponManager, DiscountManager, SeckillManager
+from coupon import SkuManager, CouponManager, DiscountManager
+from seckill import SeckillManager
 from history import PriceHistoryManager
 
 if __name__ == '__main__':
