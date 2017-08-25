@@ -8,45 +8,8 @@ import requests
 import sys
 import time
 
-from network import saveHttpData
-
-def getchar():
-    print 'Please press return key to continue'
-    sys.stdin.read(1)
-
-class BaseDict:
-
-    def __init__(self, data):
-        self.data = data
-
-    def __repr__(self):
-        return json.dumps(self.data, ensure_ascii=False, indent=4, sort_keys=True)
-
-class SkuBase(BaseDict):
-
-    def __init__(self, data):
-        BaseDict.__init__(self, data)
-
-    def equals(self, skuid):
-        return skuid == self.data['skuid']
-
-class Sku(SkuBase):
-
-    def __init__(self, data):
-        SkuBase.__init__(self, data)
-
-class Coupon(SkuBase):
-
-    def __init__(self, data):
-        SkuBase.__init__(self, data)
-
-        # Set as the same name
-        self.data['skuid'] = self.data.pop('skuId')
-
-class Discount(SkuBase):
-
-    def __init__(self, data):
-        SkuBase.__init__(self, data)
+from base import getchar, Sku, Coupon, Discount, MatchesItem, Seckill, PromotionHistory, PriceHistoryData
+from network import Network
 
 class SkuManagerBase:
 
@@ -237,21 +200,6 @@ class DiscountManager(SkuManagerBase):
         print 'Retrieve', len(skuIds), 'SKUs'
         return skuIds
 
-class MatchesItem(BaseDict):
-
-    def __init__(self, data):
-        BaseDict.__init__(self, data)
-
-class Seckill(BaseDict):
-
-    def __init__(self, data):
-        BaseDict.__init__(self, data)
-
-    def setPeriod(self, startTime, endTime):
-
-        self.data['startTime'] = startTime
-        self.data['endTime'] = endTime
-
 class SeckillInfo:
 
     def __init__(self, gid):
@@ -268,7 +216,7 @@ class SeckillInfo:
 
         path = 'data/%d.json' % self.gid
 
-        ret = saveHttpData(path, 'http://coupon.m.jd.com/seckill/seckillList.json?gid=%d' % self.gid)
+        ret = Network.saveHttpData(path, 'http://coupon.m.jd.com/seckill/seckillList.json?gid=%d' % self.gid)
         if ret < 0:
             return False
 
@@ -396,9 +344,6 @@ class SeckillManager:
                 continue
 
             self.seckillInfoList.append(seckillInfo)
-
-            # Sleep for a while
-            time.sleep(1.0 + random.random())
 
     def updateSkuIdList(self):
 

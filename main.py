@@ -4,16 +4,20 @@
 import sys
 
 from goods import SkuManager, CouponManager, DiscountManager, SeckillManager
+from history import PriceHistoryManager
 
 if __name__ == '__main__':
 
     reload(sys)
     sys.setdefaultencoding('utf-8')
 
+    skuManager = SkuManager('')
+
     couponManager = CouponManager('')
     discountManager = DiscountManager('')
-    skuManager = SkuManager('')
     seckillManager = SeckillManager()
+
+    priceHistoryManager = PriceHistoryManager()
 
     couponManager.update()
     discountManager.update()
@@ -27,8 +31,21 @@ if __name__ == '__main__':
     #print len(skuList3), len(seckillManager.seckillList)
     print len(skuList1), len(skuList2), len(skuList3)
 
+    skus = list()
+    skus.extend(skuList1)
+    skus.extend(skuList2)
+    skus.extend(skuList3)
+
+    print '============================'
+    print len(skus)
+
     '''
     ids = ['10155948944', '3256907']
-    print skuManager.getSkuList(ids)
+    skus = skuManager.getSkuList(ids)
     '''
+    priceHistoryDataList = priceHistoryManager.getPriceHistoryDataList(skus=skus)
+    print '============================'
+    print len(priceHistoryDataList)
+
+    print priceHistoryDataList
 
