@@ -1,6 +1,6 @@
 import json
 
-from base import getchar, PromotionHistory, PriceHistoryData
+from base import PromotionHistory, PriceHistoryData
 from js import JsExecutor
 from network import Network
 

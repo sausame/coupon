@@ -6,7 +6,7 @@ import random
 import requests
 import time
 
-from base import getchar, Sku, Coupon, Discount
+from base import Sku, Coupon, Discount
 
 class SkuManagerBase:
 

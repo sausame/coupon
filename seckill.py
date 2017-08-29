@@ -4,7 +4,7 @@
 import json
 import os
 
-from base import getchar, MatchesItem, Seckill
+from base import MatchesItem, Seckill
 from network import Network
 
 class SeckillInfo:

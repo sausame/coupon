@@ -3,11 +3,6 @@
 
 import json
 import os
-import sys
-
-def getchar():
-    print 'Please press return key to continue'
-    sys.stdin.read(1)
 
 class BaseDict:
 
