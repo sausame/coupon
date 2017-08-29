@@ -1,8 +1,9 @@
 import dataset
 import sqlalchemy
+
 import MySQLdb
 
-from utils import getProperty, toVisibleAscll, AutoReleaseThread
+from utils import getProperty, AutoReleaseThread
 
 def toDbText(src):
     if None == src or 0 == len(src): return ''
@@ -73,7 +74,7 @@ class Database(AutoReleaseThread):
 
         try:
             print 'Connecting', self.dbName, 'in', self.host
-            self.db = dataset.connect('mysql://{}:{}@{}/{}'.format(self.username,
+            self.db = dataset.connect('mysql://{}:{}@{}/{}?charset=utf8'.format(self.username,
                 self.password, self.host, self.dbName))
             print 'Connected', self.dbName, 'in', self.host
             return True
@@ -96,29 +97,63 @@ class Database(AutoReleaseThread):
 
         return True
 
+    def getTable(self, tableName, primary_id='id', primary_type='Integer'):
+
+        if not self.enabled: return True
+
+        self.initialize()
+
+        try:
+            table = self.db.load_table(tableName)
+        except sqlalchemy.exc.NoSuchTableError as e:
+            table = self.db.create_table(tableName, primary_id=primary_id, primary_type=primary_type)
+
+        return table
+
     def insert(self, tableName, recordDict):
 
-        if self.db is None:
-            return
+        if not self.enabled: return True
+
+        self.initialize()
 
         table = self.db[tableName]
         table.insert(recordDict)
 
     def update(self, tableName, recordDict, keys):
 
-        if self.db is None:
-            return
+        if not self.enabled: return True
+
+        self.initialize()
 
         table = self.db[tableName]
         table.update(recordDict, keys)
 
     def query(self, sql):
 
-        if self.db is None:
-            return None
+        if not self.enabled: return True
+
+        self.initialize()
 
         try:
             return self.db.query(sql)
         except sqlalchemy.exc.ProgrammingError as e:
             print e
+
+    def alertTextColumnToUft8(self, tableName, columnName):
+
+        sql = ''' ALTER TABLE `{0}`
+                  CHANGE `{1}` `{1}` TEXT CHARACTER
+                  SET utf8 COLLATE utf8_general_ci NULL
+                  DEFAULT NULL;'''.format(tableName, columnName)
+
+        self.query(sql)
+
+    def updateUtf8Text(self, tableName, recordDict, keys):
+
+        for columnName in recordDict.keys():
+            if columnName not in keys:
+                self.alertTextColumnToUft8(tableName, columnName)
+
+        table = self.getTable(tableName)
+        table.update(recordDict, keys)
 

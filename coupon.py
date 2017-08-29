@@ -10,8 +10,9 @@ from base import Sku, Coupon, Discount
 
 class SkuManagerBase:
 
-    def __init__(self, configFile):
+    def __init__(self, configFile, db):
         self.configFile = configFile
+        self.db = db
 
     def update(self):
         raise TypeError('No implement')
@@ -51,6 +52,9 @@ class SkuManagerBase:
     def search(self, itemIds=None, itemId=None):
         raise TypeError('No implement')
 
+    def getSkuId(self, param):
+        raise TypeError('No implement')
+
     def create(self, param):
         raise TypeError('No implement')
 
@@ -78,18 +82,20 @@ class SkuManagerBase:
 
             if paramList is not None:
                 for param in paramList:
-                    sku = self.create(param)
 
-                    skuid = sku.data['skuid']
+                    skuid = self.getSkuId(param)
 
                     for i in range(len(group)):
                         if skuid == group[i]:
                             del(group[i])
                             break
                     else:
-                        print 'An alien:\n', sku
-                    
-                    skuList.append(sku)
+                        print 'An alien:\n', param
+
+                    sku = self.create(param)
+
+                    if sku is not None:
+                        skuList.append(sku)
                 else:
                     if len(group) > 0:
                         print 'No matches:', group
@@ -103,20 +109,46 @@ class SkuManagerBase:
 
 class SkuManager(SkuManagerBase):
 
-    def __init__(self, configFile):
-        SkuManagerBase.__init__(self, configFile)
+    def __init__(self, configFile, db):
+
+        SkuManagerBase.__init__(self, configFile, db)
+        self.table = self.db.getTable('SkuTable')
 
     def search(self, itemIds=None, itemId=None):
         SEARCH_ITEM_URL_TEMPLATE = 'http://qwd.jd.com/fcgi-bin/qwd_searchitem_ex?g_tk={}&skuid={}'
         return self.searchSkuList('|', SEARCH_ITEM_URL_TEMPLATE, 'sku', itemIds=itemIds, itemId=itemId)
 
+    def getSkuId(self, param):
+        return param['skuid']
+
     def create(self, param):
-        return Sku(param)
+
+        if self.table.find_one(skuid=self.getSkuId(param)):
+            # Already exists
+            return None
+
+        sku = Sku(param)
+
+        recordId = self.table.insert(sku.data)
+
+        # TODO: not a good solution
+        if 1 == recordId:
+
+            data = dict()
+
+            data['id'] = recordId
+            data['title'] = sku.data['title'] 
+
+            self.db.updateUtf8Text('SkuTable', data, ['id'])
+
+        return sku
 
 class CouponManager(SkuManagerBase):
 
-    def __init__(self, configFile):
-        SkuManagerBase.__init__(self, configFile)
+    def __init__(self, configFile, db):
+
+        SkuManagerBase.__init__(self, configFile, db)
+        self.table = self.db.getTable('CouponTable')
 
     def search(self, itemIds=None, itemId=None):
         SEARCH_COUPON_URL_TEMPLATE = 'https://qwd.jd.com/fcgi-bin/qwd_coupon_query?g_tk={}&sku={}'
@@ -152,20 +184,49 @@ class CouponManager(SkuManagerBase):
         self.skuIdList = self.retrieve()
         self.skuList = self.getSkuList(self.skuIdList)
 
+    def getSkuId(self, param):
+        return param['skuId']
+
     def create(self, param):
-        return Coupon(param)
+
+        if self.table.find_one(skuid=self.getSkuId(param)):
+            # Already exists
+            return None
+
+        coupon = Coupon(param)
+        coupon.data['used'] = 0
+
+        self.table.insert(coupon.data)
+
+        return coupon
 
 class DiscountManager(SkuManagerBase):
 
-    def __init__(self, configFile):
-        SkuManagerBase.__init__(self, configFile)
+    def __init__(self, configFile, db):
+
+        SkuManagerBase.__init__(self, configFile, db)
+        #self.table = self.db.getTable('DiscountTable', 'skuid', 'String')
+        self.table = self.db.getTable('DiscountTable')
 
     def search(self, itemIds=None, itemId=None):
         SEARCH_DISCOUNT_URL_TEMPLATE = 'http://qwd.jd.com/fcgi-bin/qwd_discount_query?g_tk={}&vsku={}'
         return self.searchSkuList(',', SEARCH_DISCOUNT_URL_TEMPLATE, 'skulist', itemIds=itemIds, itemId=itemId)
 
+    def getSkuId(self, param):
+        return param['skuid']
+
     def create(self, param):
-        return Discount(param)
+
+        if self.table.find_one(skuid=self.getSkuId(param)):
+            # Already exists
+            return None
+
+        discount = Discount(param)
+        discount.data['used'] = 0
+
+        self.table.insert(discount.data)
+
+        return discount
 
     def update(self):
         self.skuIdList = self.retrieve()
@@ -196,4 +257,7 @@ class DiscountManager(SkuManagerBase):
 
         print 'Retrieve', len(skuIds), 'SKUs'
         return skuIds
+
+
+
 
