@@ -22,7 +22,7 @@ def run(configfile):
         discountManager = DiscountManager(configFile, db)
         seckillManager = SeckillManager(db)
 
-        priceHistoryManager = PriceHistoryManager()
+        priceHistoryManager = PriceHistoryManager(db)
 
         couponManager.update()
         discountManager.update()
@@ -53,7 +53,7 @@ def run(configfile):
         print '============================'
         print len(priceHistoryDataList)
 
-        print priceHistoryDataList
+        #print priceHistoryDataList
 
     except:
         traceback.print_exc(file=sys.stdout)
