@@ -9,7 +9,7 @@ from network import Network
 
 class SeckillInfo:
 
-    def __init__(self, gid, db, table):
+    def __init__(self, gid, db):
 
         self.seckillInfo = None
 
@@ -20,7 +20,6 @@ class SeckillInfo:
         self.gid = gid
 
         self.db = db
-        self.table = table
 
     def update(self):
 
@@ -101,17 +100,14 @@ class SeckillInfo:
 
         for data in self.seckillInfo['itemList']:
 
-            if self.table.find_one(wareId=data['wareId']):
+            if self.db.findOne('SeckillTable', wareId=data['wareId']):
                 # Already exists
                 continue
 
             seckill = Seckill(data)
             seckill.setPeriod(startTime, endTime)
 
-            #print seckill
-            #getchar()
-
-            recordId = self.table.insert(seckill.data)
+            recordId = self.db.insert('SeckillTable', seckill.data)
 
             # TODO: not a good solution
             if 1 == recordId:
@@ -119,6 +115,7 @@ class SeckillInfo:
                 data = dict()
 
                 data['id'] = recordId
+                data['wareId'] = seckill.data['wareId'] 
                 data['startTimeMills'] = seckill.data['startTimeMills'] 
                 data['rate'] = seckill.data['rate'] 
                 data['wname'] = seckill.data['wname'] 
@@ -135,7 +132,6 @@ class SeckillManager:
     def __init__(self, db, isLocal=False):
 
         self.db = db
-        self.table = self.db.getTable('SeckillTable')
 
         self.isLocal = isLocal
 
@@ -151,7 +147,7 @@ class SeckillManager:
 
         ENTRANCE_GID = 26
 
-        seckillInfo = SeckillInfo(ENTRANCE_GID, self.db, self.table)
+        seckillInfo = SeckillInfo(ENTRANCE_GID, self.db)
 
         if not seckillInfo.update():
             return None
@@ -173,7 +169,7 @@ class SeckillManager:
 
         for gid in gids:
 
-            seckillInfo = SeckillInfo(gid, self.db, self.table)
+            seckillInfo = SeckillInfo(gid, self.db)
 
             if not seckillInfo.update():
                 continue

@@ -30,6 +30,7 @@ class Database(AutoReleaseThread):
 
         self.dbName = dbName
         self.db = None
+        self.tableDict = None
 
         if self.enabled:
             self.start()
@@ -52,6 +53,10 @@ class Database(AutoReleaseThread):
 
         if self.db is None:
             return
+
+        if self.tableDict is not None:
+            self.tableDict.clear()
+            self.tableDict = None
 
         self.db.commit()
         self.db = None
@@ -103,30 +108,38 @@ class Database(AutoReleaseThread):
 
         self.initialize()
 
+        if self.tableDict is not None and self.tableDict.has_key(tableName):
+            return self.tableDict[tableName]
+
         try:
             table = self.db.load_table(tableName)
         except sqlalchemy.exc.NoSuchTableError as e:
             table = self.db.create_table(tableName, primary_id=primary_id, primary_type=primary_type)
 
+        if self.tableDict is None:
+            self.tableDict = dict()
+
+        self.tableDict[tableName] = table
+
         return table
+
+    def findOne(self, tableName, *args, **kwargs):
+
+        if not self.enabled: return True
+
+        return self.getTable(tableName).find_one(*args, **kwargs)
 
     def insert(self, tableName, recordDict):
 
         if not self.enabled: return True
 
-        self.initialize()
-
-        table = self.db[tableName]
-        table.insert(recordDict)
+        return self.getTable(tableName).insert(recordDict)
 
     def update(self, tableName, recordDict, keys):
 
         if not self.enabled: return True
 
-        self.initialize()
-
-        table = self.db[tableName]
-        table.update(recordDict, keys)
+        self.getTable(tableName).update(recordDict, keys)
 
     def query(self, sql):
 
@@ -160,6 +173,5 @@ class Database(AutoReleaseThread):
                 sql = generateSql(tableName, k, v)
                 self.query(sql)
 
-        table = self.getTable(tableName)
-        table.update(recordDict, keys)
+        self.update(tableName, recordDict, keys)
 

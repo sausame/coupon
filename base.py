@@ -24,18 +24,22 @@ class Sku(SkuBase):
     def __init__(self, data):
         SkuBase.__init__(self, data)
 
+        self.data['skuid'] = int(self.data.pop('skuid'))
+
 class Coupon(SkuBase):
 
     def __init__(self, data):
         SkuBase.__init__(self, data)
 
         # Set as the same name
-        self.data['skuid'] = self.data.pop('skuId')
+        self.data['skuid'] = int(self.data.pop('skuId'))
 
 class Discount(SkuBase):
 
     def __init__(self, data):
         SkuBase.__init__(self, data)
+
+        self.data['skuid'] = int(self.data.pop('skuid'))
 
 class MatchesItem(BaseDict):
 
