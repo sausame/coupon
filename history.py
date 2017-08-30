@@ -4,12 +4,31 @@ from base import PromotionHistory, PriceHistoryData
 from js import JsExecutor
 from network import Network
 
-class PriceHistory:
+class PriceHistoryManager:
 
     def __init__(self):
-        self.priceHistoryData = None
+        self.priceHistoryDataList = None
 
-    def update(self, sku, executor):
+    def getPriceHistoryDataList(self, skus=None, sku=None):
+
+        executor = JsExecutor('js/huihui.js')
+
+        if sku is not None:
+            skus = [sku]
+
+        self.priceHistoryDataList = list()
+
+        for sku in skus:
+
+            priceHistoryData = PriceHistoryManager.getPriceHistoryData(sku, executor)
+
+            if priceHistoryData is not None:
+                self.priceHistoryDataList.append(priceHistoryData)
+
+        return self.priceHistoryDataList
+
+    @staticmethod
+    def getPriceHistoryData(sku, executor):
 
         url = 'http://item.jd.com/{}.html'.format(sku.data['skuid']) # For history searching
         # Get URL for price history
@@ -21,11 +40,17 @@ class PriceHistory:
         ret = Network.saveHttpData(path, url)
         print 'Update', path, ':', sku.data['title']
 
-        if ret is 0:
-            if self.parse(path) is not None:
-                self.getPriceHistoryData()
+        if ret is not 0:
+            return None
 
-    def parse(self, path):
+        obj = PriceHistoryManager.parse(path)
+        if obj is None:
+            return None
+
+        return PriceHistoryManager.generatePriceHistoryData(obj)
+
+    @staticmethod
+    def parse(path):
 
         def getJsonString(path):
 
@@ -49,19 +74,15 @@ class PriceHistory:
             print 'Wrong format: {}'.format(path)
             return None
 
-        self.obj = json.loads(data)
+        return json.loads(data)
 
-        return self.obj
-
-    def getPriceHistoryData(self):
-
-        if self.priceHistoryData is not None:
-            return self.priceHistoryData
+    @staticmethod
+    def generatePriceHistoryData(obj):
 
         promotionHistoryList = None
 
         try:
-            for data in self.obj['promotionHistory']:
+            for data in obj['promotionHistory']:
                 if promotionHistoryList is None:
                     promotionHistoryList = list()
 
@@ -72,36 +93,12 @@ class PriceHistory:
             pass
 
         try:
-            self.priceHistoryData = PriceHistoryData(self.obj['priceHistoryData'])
-            self.priceHistoryData.updatePromotion(promotionHistoryList)
+            priceHistoryData = PriceHistoryData(obj['priceHistoryData'])
+            priceHistoryData.updatePromotion(promotionHistoryList)
         except AttributeError:
             pass
         except KeyError:
             pass
 
-        return self.priceHistoryData
-
-class PriceHistoryManager:
-
-    def __init__(self):
-        self.priceHistoryDataList = None
-
-    def getPriceHistoryDataList(self, skus=None, sku=None):
-
-        executor = JsExecutor('js/huihui.js')
-
-        if sku is not None:
-            skus = [sku]
-
-        self.priceHistoryDataList = list()
-
-        for sku in skus:
-
-            priceHistory = PriceHistory()
-            priceHistory.update(sku, executor)
-            priceHistoryData = priceHistory.getPriceHistoryData()
-
-            self.priceHistoryDataList.append(priceHistoryData)
-
-        return self.priceHistoryDataList
+        return priceHistoryData
 
