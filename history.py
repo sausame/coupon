@@ -6,8 +6,9 @@ from network import Network
 
 class PriceHistoryManager:
 
-    def __init__(self):
+    def __init__(self, db):
         self.priceHistoryDataList = None
+        self.db = db
 
     def getPriceHistoryDataList(self, skus=None, sku=None):
 
@@ -19,26 +20,52 @@ class PriceHistoryManager:
         self.priceHistoryDataList = list()
 
         for sku in skus:
-
-            priceHistoryData = PriceHistoryManager.getPriceHistoryData(sku, executor)
-
-            if priceHistoryData is not None:
-                self.priceHistoryDataList.append(priceHistoryData)
+            self.create(executor, sku)
 
         return self.priceHistoryDataList
 
-    @staticmethod
-    def getPriceHistoryData(sku, executor):
+    def create(self, executor, sku):
 
-        url = 'http://item.jd.com/{}.html'.format(sku.data['skuid']) # For history searching
+        skuid = sku.data['skuid']
+
+        if self.db.findOne('HistoryTable', skuid=skuid):
+            # Already exists
+            return None
+
+        title = sku.data['title']
+
+        priceHistoryData = PriceHistoryManager.getPriceHistoryData(executor,
+                skuid, title)
+
+        if priceHistoryData is None:
+            return None
+
+        recordId = self.db.insert('HistoryTable', priceHistoryData.data)
+
+        # TODO: not a good solution
+        if 1 == recordId:
+
+            data = dict()
+
+            data['id'] = recordId
+            data['skuid'] = priceHistoryData.data['skuid'] 
+
+            self.db.alertColumn('HistoryTable', data, ['id'])
+
+        self.priceHistoryDataList.append(priceHistoryData)
+
+    @staticmethod
+    def getPriceHistoryData(executor, skuid, title):
+
+        url = 'http://item.jd.com/{}.html'.format(skuid) # For history searching
         # Get URL for price history
-        url = executor.context.requestPriceInfo(sku.data['title'], url)
+        url = executor.context.requestPriceInfo(title, url)
 
         # Get price histories
-        path = 'data/{}.js'.format(sku.data['skuid'])
+        path = 'data/{}.js'.format(skuid)
 
         ret = Network.saveHttpData(path, url)
-        print 'Update', path, ':', sku.data['title']
+        print 'Update', path, ':', title
 
         if ret is not 0:
             return None
@@ -47,7 +74,7 @@ class PriceHistoryManager:
         if obj is None:
             return None
 
-        return PriceHistoryManager.generatePriceHistoryData(obj)
+        return PriceHistoryManager.generatePriceHistoryData(skuid, obj)
 
     @staticmethod
     def parse(path):
@@ -77,8 +104,9 @@ class PriceHistoryManager:
         return json.loads(data)
 
     @staticmethod
-    def generatePriceHistoryData(obj):
+    def generatePriceHistoryData(skuid, obj):
 
+        priceHistoryData = None
         promotionHistoryList = None
 
         try:
@@ -95,6 +123,11 @@ class PriceHistoryManager:
         try:
             priceHistoryData = PriceHistoryData(obj['priceHistoryData'])
             priceHistoryData.updatePromotion(promotionHistoryList)
+
+            priceHistoryData.data['skuid'] = skuid
+            priceHistoryData.data['list'] = json.dumps(priceHistoryData.data.pop('list'),
+                    ensure_ascii=False, indent=4, sort_keys=True)
+
         except AttributeError:
             pass
         except KeyError:
