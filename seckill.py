@@ -9,7 +9,7 @@ from network import Network
 
 class SeckillInfo:
 
-    def __init__(self, gid):
+    def __init__(self, gid, db, table):
 
         self.seckillInfo = None
 
@@ -18,6 +18,9 @@ class SeckillInfo:
         self.seckillList = None
 
         self.gid = gid
+
+        self.db = db
+        self.table = table
 
     def update(self):
 
@@ -98,8 +101,30 @@ class SeckillInfo:
 
         for data in self.seckillInfo['itemList']:
 
+            if self.table.find_one(wareId=data['wareId']):
+                # Already exists
+                continue
+
             seckill = Seckill(data)
             seckill.setPeriod(startTime, endTime)
+
+            #print seckill
+            #getchar()
+
+            recordId = self.table.insert(seckill.data)
+
+            # TODO: not a good solution
+            if 1 == recordId:
+
+                data = dict()
+
+                data['id'] = recordId
+                data['startTimeMills'] = seckill.data['startTimeMills'] 
+                data['rate'] = seckill.data['rate'] 
+                data['wname'] = seckill.data['wname'] 
+                data['tagText'] = seckill.data['tagText'] 
+
+                self.db.alertColumn('SeckillTable', data, ['id'])
 
             self.seckillList.append(seckill)
 
@@ -107,7 +132,10 @@ class SeckillInfo:
 
 class SeckillManager:
 
-    def __init__(self, isLocal=False):
+    def __init__(self, db, isLocal=False):
+
+        self.db = db
+        self.table = self.db.getTable('SeckillTable')
 
         self.isLocal = isLocal
 
@@ -123,7 +151,7 @@ class SeckillManager:
 
         ENTRANCE_GID = 26
 
-        seckillInfo = SeckillInfo(ENTRANCE_GID)
+        seckillInfo = SeckillInfo(ENTRANCE_GID, self.db, self.table)
 
         if not seckillInfo.update():
             return None
@@ -145,7 +173,7 @@ class SeckillManager:
 
         for gid in gids:
 
-            seckillInfo = SeckillInfo(gid)
+            seckillInfo = SeckillInfo(gid, self.db, self.table)
 
             if not seckillInfo.update():
                 continue

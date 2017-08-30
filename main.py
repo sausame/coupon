@@ -20,7 +20,7 @@ def run(configfile):
 
         couponManager = CouponManager(configFile, db)
         discountManager = DiscountManager(configFile, db)
-        seckillManager = SeckillManager()
+        seckillManager = SeckillManager(db)
 
         priceHistoryManager = PriceHistoryManager()
 

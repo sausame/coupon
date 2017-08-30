@@ -139,7 +139,7 @@ class SkuManager(SkuManagerBase):
             data['id'] = recordId
             data['title'] = sku.data['title'] 
 
-            self.db.updateUtf8Text('SkuTable', data, ['id'])
+            self.db.alertColumn('SkuTable', data, ['id'])
 
         return sku
 

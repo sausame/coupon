@@ -139,20 +139,26 @@ class Database(AutoReleaseThread):
         except sqlalchemy.exc.ProgrammingError as e:
             print e
 
-    def alertTextColumnToUft8(self, tableName, columnName):
+    def alertColumn(self, tableName, recordDict, keys):
 
-        sql = ''' ALTER TABLE `{0}`
-                  CHANGE `{1}` `{1}` TEXT CHARACTER
-                  SET utf8 COLLATE utf8_general_ci NULL
-                  DEFAULT NULL;'''.format(tableName, columnName)
+        def generateSql(tableName, columnName, columnValue):
 
-        self.query(sql)
+            if isinstance(columnValue, unicode):
+                return ("ALTER TABLE `{0}` "
+                        "CHANGE `{1}` `{1}` TEXT CHARACTER "
+                        "SET utf8 COLLATE utf8_general_ci NULL "
+                        "DEFAULT NULL;").format(tableName, columnName)
+            elif isinstance(columnValue, int):
+                return ("ALTER TABLE `{0}` "
+                        "CHANGE `{1}` `{1}` BIGINT NULL "
+                        "DEFAULT NULL;").format(tableName, columnName)
+            else:
+                raise TypeError('No implement')
 
-    def updateUtf8Text(self, tableName, recordDict, keys):
-
-        for columnName in recordDict.keys():
-            if columnName not in keys:
-                self.alertTextColumnToUft8(tableName, columnName)
+        for (k, v) in recordDict.items():
+            if k not in keys:
+                sql = generateSql(tableName, k, v)
+                self.query(sql)
 
         table = self.getTable(tableName)
         table.update(recordDict, keys)
