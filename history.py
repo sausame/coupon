@@ -34,8 +34,7 @@ class PriceHistoryManager:
 
         title = sku.data['title']
 
-        priceHistoryData = PriceHistoryManager.getPriceHistoryData(executor,
-                skuid, title)
+        priceHistoryData = PriceHistoryManager.getPriceHistoryData(executor, sku)
 
         if priceHistoryData is None:
             return None
@@ -55,7 +54,10 @@ class PriceHistoryManager:
         self.priceHistoryDataList.append(priceHistoryData)
 
     @staticmethod
-    def getPriceHistoryData(executor, skuid, title):
+    def getPriceHistoryData(executor, sku):
+
+        skuid = sku.data['skuid']
+        title = sku.data['title']
 
         url = 'http://item.jd.com/{}.html'.format(skuid) # For history searching
         # Get URL for price history
@@ -74,7 +76,7 @@ class PriceHistoryManager:
         if obj is None:
             return None
 
-        return PriceHistoryManager.generatePriceHistoryData(skuid, obj)
+        return PriceHistoryManager.generatePriceHistoryData(sku, obj)
 
     @staticmethod
     def parse(path):
@@ -104,7 +106,7 @@ class PriceHistoryManager:
         return json.loads(data)
 
     @staticmethod
-    def generatePriceHistoryData(skuid, obj):
+    def generatePriceHistoryData(sku, obj):
 
         priceHistoryData = None
         promotionHistoryList = None
@@ -124,7 +126,9 @@ class PriceHistoryManager:
             priceHistoryData = PriceHistoryData(obj['priceHistoryData'])
             priceHistoryData.updatePromotion(promotionHistoryList)
 
-            priceHistoryData.data['skuid'] = skuid
+            priceHistoryData.data['skuid'] = sku.data['skuid']
+            priceHistoryData.update(sku)
+
             priceHistoryData.data['list'] = json.dumps(priceHistoryData.data.pop('list'),
                     ensure_ascii=False, indent=4, sort_keys=True)
 
@@ -134,4 +138,6 @@ class PriceHistoryManager:
             pass
 
         return priceHistoryData
+
+
 
