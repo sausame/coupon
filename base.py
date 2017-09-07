@@ -119,7 +119,7 @@ class PriceHistoryData(BaseDict):
 
         # Calculate prices ratios
         prices = []
-        self.totalDays = 0
+        totalDays = 0
 
         size = len(self.histories)
 
@@ -134,7 +134,7 @@ class PriceHistoryData(BaseDict):
 
                 days = (nextDate - thisDate).days
 
-            self.totalDays += days
+            totalDays += days
 
             prices.append((history.price, days))
 
@@ -144,26 +144,26 @@ class PriceHistoryData(BaseDict):
         for price in prices:
             if pos >= 0 and self.prices[pos].price == price[0]:
                 self.prices[pos].days += price[1]
-                self.prices[pos].ratio = float(self.prices[pos].days) / float(self.totalDays)
+                self.prices[pos].ratio = float(self.prices[pos].days) / float(totalDays)
             else:
-                self.prices.append(Price(price[0], price[1], float(price[1]) / float(self.totalDays)))
+                self.prices.append(Price(price[0], price[1], float(price[1]) / float(totalDays)))
                 pos += 1
 
         # Calculate prices and discounts
-        self.lowestPrice = float(int(100 * self.prices[0].price)) / 100
+        lowestPrice = float(int(100 * self.prices[0].price)) / 100
 
-        self.avgPrice = 0.0
+        avgPrice = 0.0
         for price in self.prices:
-            self.avgPrice += float(price.price) * price.ratio
+            avgPrice += float(price.price) * price.ratio
 
-        self.avgPrice = float(int(100 * self.avgPrice)) / 100
+        avgPrice = float(int(100 * avgPrice)) / 100
 
         # Calculate discounts
-        self.discount = int(100 * float(nowPrice) / float(self.avgPrice))
-        if 0 == self.discount:
-            self.discount = 1
+        discount = int(100 * float(nowPrice) / float(avgPrice))
+        if 0 == discount:
+            discount = 1
 
-        self.lowestRatio = int(100 * float(self.lowestPrice) / float(self.avgPrice))
+        lowestRatio = int(100 * float(lowestPrice) / float(avgPrice))
 
         # Calculate weights
         '''
@@ -173,12 +173,19 @@ class PriceHistoryData(BaseDict):
         3, off amount
         4, days
         '''
-        lowestDiscount = float(nowPrice) / float(self.lowestPrice)
+        lowestDiscount = float(nowPrice) / float(lowestPrice)
 
-        lg = math.log(self.totalDays)
+        lg = math.log(totalDays)
         if 0 == lg: lg = 0.1 # Log(1) is 0.0
 
-        self.weight = lowestDiscount / lg
+        weight = lowestDiscount / lg
+
+        self.data['totalDays'] = totalDays
+        self.data['weight'] = weight
+        self.data['lowestPrice'] = lowestPrice
+        self.data['avgPrice'] = avgPrice
+        self.data['discount'] = discount
+        self.data['lowestRatio'] = lowestRatio
 
     def __repr__(self):
         fields = ['    {}={}'.format(k, v)

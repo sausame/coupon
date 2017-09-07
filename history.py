@@ -57,9 +57,9 @@ class PriceHistoryManager:
         path = 'data/{}.js'.format(skuid)
 
         ret = Network.saveHttpData(path, url)
-        print 'Update', path, ':', title
+        print 'Update', path, ':', ret, ':', title
 
-        if ret is not 0:
+        if ret < 0:
             return None
 
         obj = PriceHistoryManager.parse(path)
@@ -122,9 +122,9 @@ class PriceHistoryManager:
             priceHistoryData.data['list'] = json.dumps(priceHistoryData.data.pop('list'),
                     ensure_ascii=False, indent=4, sort_keys=True)
 
-        except AttributeError:
+        except AttributeError as e:
             pass
-        except KeyError:
+        except KeyError as e:
             pass
 
         return priceHistoryData

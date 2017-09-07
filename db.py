@@ -125,7 +125,7 @@ class Database(AutoReleaseThread):
 
     def findOne(self, tableName, *args, **kwargs):
 
-        if not self.enabled: return True
+        if not self.enabled: return False
 
         return self.getTable(tableName).find_one(*args, **kwargs)
 
@@ -189,8 +189,13 @@ class Database(AutoReleaseThread):
                 return ("ALTER TABLE `{0}` "
                         "CHANGE `{1}` `{1}` BIGINT NULL "
                         "DEFAULT NULL;").format(tableName, columnName)
+            elif isinstance(columnValue, float):
+                return ("ALTER TABLE `{0}` "
+                        "CHANGE `{1}` `{1}` DOUBLE NULL "
+                        "DEFAULT NULL;").format(tableName, columnName)
             else:
-                raise TypeError('No implement')
+                raise TypeError('No implement of {} and type {}'.format(columnName,
+                    type(columnValue)))
 
         for (k, v) in recordDict.items():
             sql = generateSql(tableName, k, v)
