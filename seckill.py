@@ -122,6 +122,8 @@ class SeckillManager:
 
         self.isLocal = isLocal
 
+        self.skuIdList = None
+
         self.seckillInfoList = None
         self.seckillList = None
 

@@ -14,6 +14,8 @@ class SkuManagerBase:
         self.configFile = configFile
         self.db = db
 
+        self.skuIdList = None
+
     def update(self):
         raise TypeError('No implement')
 
@@ -59,6 +61,9 @@ class SkuManagerBase:
         raise TypeError('No implement')
 
     def getSkuList(self, skuIds):
+
+        if skuIds is None:
+            return None
 
         GROUP_SIZE = 20
         size = len(skuIds)
