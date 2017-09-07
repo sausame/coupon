@@ -28,14 +28,15 @@ class Network:
         ret = Network._instance.saveHttpDataImpl(pathname, url, host)
 
         # Sleep for a while
-        time.sleep(random.random())
+        if ret is 0:
+            time.sleep(random.random())
 
         return ret
 
     def saveHttpDataImpl(self, pathname, url, host):
 
         if self.isLocal and os.path.exists(pathname):
-            return 0
+            return 1
 
         if None == host:
             start = url.find('//') + 2
