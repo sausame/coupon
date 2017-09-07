@@ -129,11 +129,35 @@ class Database(AutoReleaseThread):
 
         return self.getTable(tableName).find_one(*args, **kwargs)
 
-    def insert(self, tableName, recordDict):
+    def insert(self, tableName, recordDict, alterKeys=None):
 
-        if not self.enabled: return True
+        if not self.enabled: return 0
 
-        return self.getTable(tableName).insert(recordDict)
+        try:
+            recordId = self.getTable(tableName).insert(recordDict)
+
+        except Exception as e:
+            # XXX: Unable to insert a record
+            print 'DATABASE ERROR:\n', e
+            recordId = 0L
+
+        # TODO: not a good solution
+        if alterKeys is not None and (0 == recordId or 1 == recordId):
+
+            data = dict()
+
+            for key in alterKeys:
+                data[key] = recordDict[key]
+
+            self.alterColumn(tableName, recordDict)
+
+            if 0 == recordId:
+                recordId = self.getTable(tableName).insert(recordDict)
+            else: # 1L
+                data['id'] = recordId
+                self.update(tableName, recordDict, ['id'])
+
+        return recordId
 
     def update(self, tableName, recordDict, keys):
 
@@ -152,7 +176,7 @@ class Database(AutoReleaseThread):
         except sqlalchemy.exc.ProgrammingError as e:
             print e
 
-    def alertColumn(self, tableName, recordDict, keys):
+    def alterColumn(self, tableName, recordDict):
 
         def generateSql(tableName, columnName, columnValue):
 
@@ -169,9 +193,6 @@ class Database(AutoReleaseThread):
                 raise TypeError('No implement')
 
         for (k, v) in recordDict.items():
-            if k not in keys:
-                sql = generateSql(tableName, k, v)
-                self.query(sql)
-
-        self.update(tableName, recordDict, keys)
+            sql = generateSql(tableName, k, v)
+            self.query(sql)
 

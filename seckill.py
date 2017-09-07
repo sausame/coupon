@@ -107,21 +107,8 @@ class SeckillInfo:
             seckill = Seckill(data)
             seckill.setPeriod(startTime, endTime)
 
-            recordId = self.db.insert('SeckillTable', seckill.data)
-
-            # TODO: not a good solution
-            if 1 == recordId:
-
-                data = dict()
-
-                data['id'] = recordId
-                data['wareId'] = seckill.data['wareId'] 
-                data['startTimeMills'] = seckill.data['startTimeMills'] 
-                data['rate'] = seckill.data['rate'] 
-                data['wname'] = seckill.data['wname'] 
-                data['tagText'] = seckill.data['tagText'] 
-
-                self.db.alertColumn('SeckillTable', data, ['id'])
+            self.db.insert('SeckillTable', seckill.data, ['wareId',
+                'startTimeMills', 'rate', 'wname', 'tagText'])
 
             self.seckillList.append(seckill)
 

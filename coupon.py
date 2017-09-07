@@ -128,19 +128,7 @@ class SkuManager(SkuManagerBase):
 
         sku = Sku(param)
 
-        recordId = self.db.insert('SkuTable', sku.data)
-
-        # TODO: not a good solution
-        if 1 == recordId:
-
-            data = dict()
-
-            data['id'] = recordId
-
-            data['skuid'] = sku.data['skuid'] 
-            data['title'] = sku.data['title'] 
-
-            self.db.alertColumn('SkuTable', data, ['id'])
+        self.db.insert('SkuTable', sku.data, ['skuid', 'title'])
 
         return sku
 
@@ -195,17 +183,7 @@ class CouponManager(SkuManagerBase):
         coupon = Coupon(param)
         coupon.data['used'] = 0
 
-        recordId = self.db.insert('CouponTable', coupon.data)
-
-        # TODO: not a good solution
-        if 1 == recordId:
-
-            data = dict()
-
-            data['id'] = recordId
-            data['skuid'] = coupon.data['skuid'] 
-
-            self.db.alertColumn('CouponTable', data, ['id'])
+        self.db.insert('CouponTable', coupon.data, ['skuid'])
 
         return coupon
 
@@ -230,17 +208,7 @@ class DiscountManager(SkuManagerBase):
         discount = Discount(param)
         discount.data['used'] = 0
 
-        recordId = self.db.insert('DiscountTable', discount.data)
-
-        # TODO: not a good solution
-        if 1 == recordId:
-
-            data = dict()
-
-            data['id'] = recordId
-            data['skuid'] = discount.data['skuid'] 
-
-            self.db.alertColumn('DiscountTable', data, ['id'])
+        self.db.insert('DiscountTable', discount.data, ['skuid'])
 
         return discount
 

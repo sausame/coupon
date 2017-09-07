@@ -39,17 +39,7 @@ class PriceHistoryManager:
         if priceHistoryData is None:
             return None
 
-        recordId = self.db.insert('HistoryTable', priceHistoryData.data)
-
-        # TODO: not a good solution
-        if 1 == recordId:
-
-            data = dict()
-
-            data['id'] = recordId
-            data['skuid'] = priceHistoryData.data['skuid'] 
-
-            self.db.alertColumn('HistoryTable', data, ['id'])
+        self.db.insert('HistoryTable', priceHistoryData.data, ['skuid'])
 
         self.priceHistoryDataList.append(priceHistoryData)
 
