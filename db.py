@@ -81,7 +81,6 @@ class Database(AutoReleaseThread):
             print 'Connecting', self.dbName, 'in', self.host
             self.db = dataset.connect('mysql://{}:{}@{}/{}?charset=utf8'.format(self.username,
                 self.password, self.host, self.dbName))
-            self.db.begin()
             print 'Connected', self.dbName, 'in', self.host
             return True
 
