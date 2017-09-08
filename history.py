@@ -129,5 +129,3 @@ class PriceHistoryManager:
 
         return priceHistoryData
 
-
-

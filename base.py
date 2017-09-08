@@ -29,6 +29,13 @@ class Sku(SkuBase):
         SkuBase.__init__(self, data)
 
         self.data['skuid'] = int(self.data.pop('skuid'))
+        self.data['price'] = float(self.data.pop('price'))
+        self.data['comRate'] = float(self.data.pop('comRate'))
+
+        # TODO: Commission price can be calculate by price and comRate
+        self.data['commissionprice'] = float(self.data.pop('commissionprice'))
+        self.data['goodCom'] = int(self.data.pop('goodCom'))
+        self.data['salecount'] = int(self.data.pop('salecount'))
 
 class Coupon(SkuBase):
 
@@ -37,6 +44,10 @@ class Coupon(SkuBase):
 
         # Set as the same name
         self.data['skuid'] = int(self.data.pop('skuId'))
+        self.data['quota'] = float(self.data.pop('quota'))
+        self.data['denomination'] = float(self.data.pop('denomination'))
+        self.data['usedNum'] = int(self.data.pop('usedNum'))
+        self.data['couponNum'] = int(self.data.pop('couponNum'))
 
 class Discount(SkuBase):
 
@@ -44,6 +55,7 @@ class Discount(SkuBase):
         SkuBase.__init__(self, data)
 
         self.data['skuid'] = int(self.data.pop('skuid'))
+        self.data['promoPrice'] = float(self.data.pop('promoPrice'))
 
 class MatchesItem(BaseDict):
 
@@ -54,6 +66,8 @@ class Seckill(BaseDict):
 
     def __init__(self, data):
         BaseDict.__init__(self, data)
+
+        self.data['miaoShaPrice'] = float(self.data.pop('miaoShaPrice'))
 
     def setPeriod(self, startTime, endTime):
 
