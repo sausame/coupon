@@ -87,21 +87,6 @@ class Database(AutoReleaseThread):
         except sqlalchemy.exc.OperationalError as e:
             return False
 
-    def execute(self, sql):
-
-        if not self.enabled: return True
-
-        self.initialize()
-
-        try:
-            self.cursor.execute(sql)
-
-        except Exception as e:
-            print 'DATABASE ERROR (', e, '):', sql
-            return False
-
-        return True
-
     def getTable(self, tableName, primary_id='id', primary_type='Integer'):
 
         if not self.enabled: return True
@@ -167,14 +152,16 @@ class Database(AutoReleaseThread):
 
     def query(self, sql):
 
-        if not self.enabled: return True
+        if not self.enabled: return None
 
         self.initialize()
 
         try:
             return self.db.query(sql)
         except sqlalchemy.exc.ProgrammingError as e:
-            print e
+            print 'DATABASE ERROR (', e, '):', sql
+
+        return None
 
     def alterColumn(self, tableName, recordDict):
 
