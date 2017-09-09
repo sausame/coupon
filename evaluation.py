@@ -12,14 +12,34 @@ class Evaluation:
         self.configFile = configFile
         self.db = db
 
-    def evaluate(self, manager, priceHistoryManager):
+        self.specialList = list()
 
-        if isinstance(manager, CouponManager):
-            pass
-        elif isinstance(manager, DiscountManager):
-            pass
-        elif isinstance(manager, SeckillManager):
-            pass
+    def evaluateCoupon(self):
+
+        sql = ''' SELECT CouponTable.skuid, CouponTable.specialPrice,
+                      SkuTable.price, SkuTable.comRate, HistoryTable.list 
+                  FROM `CouponTable` 
+                  INNER JOIN SkuTable ON SkuTable.skuid = CouponTable.skuid
+                  INNER JOIN HistoryTable ON HistoryTable.skuid = CouponTable.skuid'''
+
+        result = self.db.query(sql)
+        for row in result:
+            special = Special(row, Evaluation.VERSION)
+            special.update()
+            self.specialList.append(special)
+            print special
+
+    def evaluateDiscount(self):
+        pass
+
+    def evaluateSeckill(self):
+        pass
+
+    def evaluate(self):
+
+        self.evaluateCoupon()
+        self.evaluateDiscount()
+        self.evaluateSeckill()
 
     def store(self):
         pass

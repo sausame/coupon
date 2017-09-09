@@ -6,6 +6,7 @@ import traceback
 
 from coupon import SkuManager, CouponManager, DiscountManager
 from db import Database
+from evaluation import Evaluation
 from seckill import SeckillManager
 from history import PriceHistoryManager
 
@@ -23,6 +24,7 @@ def run(configfile):
         seckillManager = SeckillManager(db)
 
         priceHistoryManager = PriceHistoryManager(db)
+        evaluation = Evaluation(configFile, db)
 
         couponManager.update()
         discountManager.update()
@@ -33,7 +35,6 @@ def run(configfile):
         skuList3 = skuManager.getSkuList(seckillManager.skuIdList)
 
         print '============================'
-        #print len(skuList3), len(seckillManager.seckillList)
         print len(skuList1), len(skuList2), len(skuList3)
 
         skus = list()
@@ -54,6 +55,8 @@ def run(configfile):
         print len(priceHistoryDataList)
 
         #print priceHistoryDataList
+
+        evaluation.evaluate()
 
     except:
         traceback.print_exc(file=sys.stdout)

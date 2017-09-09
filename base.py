@@ -51,7 +51,7 @@ class Coupon(SkuBase):
         self.data['denomination'] = float(self.data.pop('denomination'))
         self.data['usedNum'] = int(self.data.pop('usedNum'))
         self.data['couponNum'] = int(self.data.pop('couponNum'))
-        self.data['priceByCoupon'] = self.data['quota'] - self.data['denomination']
+        self.data['specialPrice'] = self.data['quota'] - self.data['denomination']
         self.data['link'] = u'http:{}'.format(self.data.pop('link'))
 
 class Discount(SkuBase):
@@ -122,8 +122,29 @@ class PriceHistoryData(BaseDict):
         pass
 
     def update(self, sku):
+        # XXX: Do nothing
+        pass
 
-        nowPrice = sku.data['price']
+    def __repr__(self):
+        fields = ['    {}={}'.format(k, v)
+            for k, v in self.__dict__.items()
+                if not k.startswith('_') and 'data' != k]
+
+        str = BaseDict.__repr__(self)
+
+        return '{}:\n{}\n{}'.format(self.__class__.__name__, '\n'.join(fields), str)
+
+class Special(BaseDict):
+
+    def __init__(self, data, version):
+        BaseDict.__init__(self, data)
+
+        self.data['version'] = version
+        self.data['list'] = json.loads(self.data.pop('list'))
+
+    def update(self):
+
+        nowPrice = self.data['specialPrice']
 
         self.prices = list()
         self.histories = list()
@@ -206,19 +227,4 @@ class PriceHistoryData(BaseDict):
         self.data['discount'] = discount
         self.data['lowestRatio'] = lowestRatio
 
-    def __repr__(self):
-        fields = ['    {}={}'.format(k, v)
-            for k, v in self.__dict__.items()
-                if not k.startswith('_') and 'data' != k]
-
-        str = BaseDict.__repr__(self)
-
-        return '{}:\n{}\n{}'.format(self.__class__.__name__, '\n'.join(fields), str)
-
-class Special(BaseDict):
-
-    def __init__(self, data, version):
-        BaseDict.__init__(self, data)
-
-        self.data['version'] = version
 
