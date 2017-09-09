@@ -16,7 +16,7 @@ class Evaluation:
 
     def evaluateCoupon(self):
 
-        sql = ''' SELECT CouponTable.skuid, CouponTable.specialPrice,
+        sql = ''' SELECT CouponTable.skuid, CouponTable.specialPrice, CouponTable.link as couponLink,
                       SkuTable.price, SkuTable.comRate, HistoryTable.list 
                   FROM `CouponTable` 
                   INNER JOIN SkuTable ON SkuTable.skuid = CouponTable.skuid

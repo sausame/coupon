@@ -142,6 +142,12 @@ class Special(BaseDict):
         self.data['version'] = version
         self.data['list'] = json.loads(self.data.pop('list'))
 
+        keys = ['couponLink']
+
+        for key in keys:
+            if key not in self.data.keys():
+                self.data[key] = None
+
     def update(self):
 
         nowPrice = self.data['specialPrice']
