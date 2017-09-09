@@ -60,7 +60,7 @@ class Discount(SkuBase):
         SkuBase.__init__(self, data)
 
         self.data['skuid'] = int(self.data.pop('skuid'))
-        self.data['promoPrice'] = float(self.data.pop('promoPrice'))
+        self.data['specialPrice'] = float(self.data.pop('promoPrice'))
 
 class MatchesItem(BaseDict):
 
@@ -72,7 +72,7 @@ class Seckill(BaseDict):
     def __init__(self, data):
         BaseDict.__init__(self, data)
 
-        self.data['miaoShaPrice'] = float(self.data.pop('miaoShaPrice'))
+        self.data['specialPrice'] = float(self.data.pop('miaoShaPrice'))
 
     def setPeriod(self, startTime, endTime):
 
