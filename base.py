@@ -44,10 +44,15 @@ class Coupon(SkuBase):
 
         # Set as the same name
         self.data['skuid'] = int(self.data.pop('skuId'))
+
+        # XXX: Sometimes quota is NOT as same as price in SKU, because the coupon
+        # may be invalid then. So don't worry about that.
         self.data['quota'] = float(self.data.pop('quota'))
         self.data['denomination'] = float(self.data.pop('denomination'))
         self.data['usedNum'] = int(self.data.pop('usedNum'))
         self.data['couponNum'] = int(self.data.pop('couponNum'))
+        self.data['priceByCoupon'] = self.data['quota'] - self.data['denomination']
+        self.data['link'] = u'http:{}'.format(self.data.pop('link'))
 
 class Discount(SkuBase):
 
