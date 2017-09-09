@@ -210,3 +210,10 @@ class PriceHistoryData(BaseDict):
 
         return '{}:\n{}\n{}'.format(self.__class__.__name__, '\n'.join(fields), str)
 
+class Special(BaseDict):
+
+    def __init__(self, data, version):
+        BaseDict.__init__(self, data)
+
+        self.data['version'] = version
+
