@@ -157,7 +157,7 @@ class Special(BaseDict):
 
         self.histories.append(PriceHistory(price=float(nowPrice), time=datetime.now().strftime('%Y-%m-%d')))
 
-        for history in self.data['list']:
+        for history in self.data.pop('list'):
             self.histories.append(PriceHistory(price=float(history['price']), time=history['time']))
 
         # Sort histories
