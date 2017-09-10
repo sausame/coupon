@@ -23,6 +23,9 @@ class Evaluation:
                   INNER JOIN HistoryTable ON HistoryTable.skuid = CouponTable.skuid'''
 
         result = self.db.query(sql)
+        if result is None:
+            return
+
         for row in result:
             special = Special(row, Evaluation.VERSION)
             special.update()
@@ -37,6 +40,9 @@ class Evaluation:
                   INNER JOIN HistoryTable ON HistoryTable.skuid = DiscountTable.skuid'''
 
         result = self.db.query(sql)
+        if result is None:
+            return
+
         for row in result:
             special = Special(row, Evaluation.VERSION)
             special.update()
