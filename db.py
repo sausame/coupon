@@ -140,7 +140,7 @@ class Database(AutoReleaseThread):
                 recordId = self.getTable(tableName).insert(recordDict)
             else: # 1L
                 data['id'] = recordId
-                self.update(tableName, recordDict, ['id'])
+                self.update(tableName, data, ['id'])
 
         return recordId
 
