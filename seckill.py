@@ -108,7 +108,8 @@ class SeckillInfo:
             seckill.setPeriod(startTime, endTime)
 
             self.db.insert('SeckillTable', seckill.data, ['skuid',
-                'startTimeMills', 'rate', 'wname', 'tagText'])
+                'startTimeMills', 'rate', 'wname', 'tagText', 'cName',
+                'tips', 'mTips', 'adword'])
 
             self.seckillList.append(seckill)
 
