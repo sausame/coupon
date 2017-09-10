@@ -11,6 +11,12 @@ import threading
 import time
 import traceback
 
+from datetime import tzinfo, timedelta, datetime
+
+def seconds2Datetime(seconds):
+    #return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(seconds))
+    return datetime.fromtimestamp(seconds).strftime('%Y-%m-%d %H:%M:%S')
+
 def getchar():
     print 'Please press return key to continue'
     sys.stdin.read(1)

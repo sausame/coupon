@@ -6,6 +6,7 @@ import math
 
 from datetime import tzinfo, timedelta, datetime
 from operator import attrgetter
+from utils import seconds2Datetime
 
 class BaseDict:
 
@@ -53,6 +54,8 @@ class Coupon(SkuBase):
         self.data['couponNum'] = int(self.data.pop('couponNum'))
         self.data['specialPrice'] = self.data['quota'] - self.data['denomination']
         self.data['link'] = u'http:{}'.format(self.data.pop('link'))
+        self.data['validBeginTime'] = int(self.data.pop('validBeginTime'))
+        self.data['validEndTime'] = int(self.data.pop('validEndTime'))
 
 class Discount(SkuBase):
 
@@ -148,6 +151,12 @@ class Special(BaseDict):
         for key in keys:
             if key not in self.data.keys():
                 self.data[key] = None
+
+        if 'validBeginTime' in self.data.keys():
+            self.data['startTime'] = seconds2Datetime(self.data.pop('validBeginTime') / 1000L)
+
+        if 'validEndTime' in self.data.keys():
+            self.data['endTime'] = seconds2Datetime(self.data.pop('validEndTime') / 1000L)
 
     def update(self):
 

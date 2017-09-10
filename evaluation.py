@@ -8,6 +8,7 @@ class Evaluation:
     VERSION = 1.0
 
     COUPON_SQL = ''' SELECT CouponTable.skuid, CouponTable.specialPrice, CouponTable.link as couponLink,
+                          CouponTable.validBeginTime, CouponTable.validEndTime,
                          SkuTable.price, SkuTable.comRate, HistoryTable.list 
                      FROM `CouponTable` 
                      INNER JOIN SkuTable ON SkuTable.skuid = CouponTable.skuid

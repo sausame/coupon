@@ -188,7 +188,8 @@ class CouponManager(SkuManagerBase):
         coupon = Coupon(param)
         coupon.data['used'] = 0
 
-        self.db.insert('CouponTable', coupon.data, ['skuid'])
+        self.db.insert('CouponTable', coupon.data, ['skuid', 'validBeginTime',
+            'validEndTime'])
 
         return coupon
 
