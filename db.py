@@ -167,7 +167,9 @@ class Database(AutoReleaseThread):
 
         def generateSql(tableName, columnName, columnValue):
 
-            if isinstance(columnValue, unicode):
+            if columnValue is None:
+                return None
+            elif isinstance(columnValue, unicode):
                 return ("ALTER TABLE `{0}` "
                         "CHANGE `{1}` `{1}` TEXT CHARACTER "
                         "SET utf8 COLLATE utf8_general_ci NULL "
@@ -180,11 +182,15 @@ class Database(AutoReleaseThread):
                 return ("ALTER TABLE `{0}` "
                         "CHANGE `{1}` `{1}` DOUBLE NULL "
                         "DEFAULT NULL;").format(tableName, columnName)
+            elif isinstance(columnValue, long):
+                # Do nothing
+                return None
             else:
                 raise TypeError('No implement of {} and type {}'.format(columnName,
                     type(columnValue)))
 
         for (k, v) in recordDict.items():
             sql = generateSql(tableName, k, v)
-            self.query(sql)
+            if sql is not None:
+                self.query(sql)
 
