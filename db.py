@@ -134,7 +134,7 @@ class Database(AutoReleaseThread):
             for key in alterKeys:
                 data[key] = recordDict[key]
 
-            self.alterColumn(tableName, recordDict)
+            self.alterColumn(tableName, data)
 
             if 0 == recordId:
                 recordId = self.getTable(tableName).insert(recordDict)
