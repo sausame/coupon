@@ -27,10 +27,21 @@ class Evaluation:
             special = Special(row, Evaluation.VERSION)
             special.update()
             self.specialList.append(special)
-            print special
+#            print special
 
     def evaluateDiscount(self):
-        pass
+        sql = ''' SELECT DiscountTable.skuid, DiscountTable.specialPrice,
+                      SkuTable.price, SkuTable.comRate, HistoryTable.list 
+                  FROM `DiscountTable` 
+                  INNER JOIN SkuTable ON SkuTable.skuid = DiscountTable.skuid
+                  INNER JOIN HistoryTable ON HistoryTable.skuid = DiscountTable.skuid'''
+
+        result = self.db.query(sql)
+        for row in result:
+            special = Special(row, Evaluation.VERSION)
+            special.update()
+            self.specialList.append(special)
+            print special
 
     def evaluateSeckill(self):
         pass
