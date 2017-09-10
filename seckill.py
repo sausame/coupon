@@ -100,14 +100,14 @@ class SeckillInfo:
 
         for data in self.seckillInfo['itemList']:
 
-            if self.db.findOne('SeckillTable', wareId=data['wareId']):
+            if self.db.findOne('SeckillTable', skuid=data['wareId']):
                 # Already exists
                 continue
 
             seckill = Seckill(data)
             seckill.setPeriod(startTime, endTime)
 
-            self.db.insert('SeckillTable', seckill.data, ['wareId',
+            self.db.insert('SeckillTable', seckill.data, ['skuid',
                 'startTimeMills', 'rate', 'wname', 'tagText'])
 
             self.seckillList.append(seckill)

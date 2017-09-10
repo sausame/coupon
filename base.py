@@ -72,6 +72,7 @@ class Seckill(BaseDict):
     def __init__(self, data):
         BaseDict.__init__(self, data)
 
+        self.data['skuid'] = int(self.data.pop('wareId'))
         self.data['specialPrice'] = float(self.data.pop('miaoShaPrice'))
 
     def setPeriod(self, startTime, endTime):
@@ -142,7 +143,7 @@ class Special(BaseDict):
         self.data['version'] = version
         self.data['list'] = json.loads(self.data.pop('list'))
 
-        keys = ['couponLink']
+        keys = ['couponLink', 'startTime', 'endTime']
 
         for key in keys:
             if key not in self.data.keys():
@@ -232,5 +233,4 @@ class Special(BaseDict):
         self.data['avgPrice'] = avgPrice
         self.data['discount'] = discount
         self.data['lowestRatio'] = lowestRatio
-
 
