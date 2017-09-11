@@ -13,6 +13,12 @@ class BaseDict:
     def __init__(self, data):
         self.data = data
 
+    def insert(self, db, tableName):
+        db.insert(tableName, self.data, self.getAlterKeys())
+
+    def getAlterKeys(self):
+        return None
+
     def __repr__(self):
         return json.dumps(self.data, ensure_ascii=False, indent=4, sort_keys=True)
 
@@ -37,6 +43,42 @@ class Sku(SkuBase):
         self.data['commissionprice'] = float(self.data.pop('commissionprice'))
         self.data['goodCom'] = int(self.data.pop('goodCom'))
         self.data['salecount'] = int(self.data.pop('salecount'))
+
+class Comment(BaseDict):
+
+    def __init__(self, skuid, data):
+        BaseDict.__init__(self, data)
+
+        self.data.pop('code')
+
+        self.data['skuid'] = skuid
+
+        self.data['allCnt'] = int(self.data.pop('allCnt'))
+        self.data['goodCnt'] = int(self.data.pop('goodCnt'))
+        self.data['badCnt'] = int(self.data.pop('badCnt'))
+        self.data['normalCnt'] = int(self.data.pop('normalCnt'))
+        self.data['pictureCnt'] = int(self.data.pop('pictureCnt'))
+        self.data['showPicCnt'] = int(self.data.pop('showPicCnt'))
+        self.data['consultationCount'] = int(self.data.pop('consultationCount'))
+        self.data['percentOfGoodComments'] = self.data.pop('goods')
+
+        commentInfoList = list()
+        for info in self.data.pop('commentInfoList'):
+
+            commentInfo = dict()
+
+            commentInfo['commentShareUrl'] = info['commentShareUrl']
+            commentInfo['userNickName'] = info['userNickName']
+            commentInfo['commentData'] = info['commentData']
+            commentInfo['commentScore'] = int(info['commentScore'])
+
+            commentInfoList.append(commentInfo)
+
+        self.data['list'] = json.dumps(commentInfoList, ensure_ascii=False,
+                indent=4, sort_keys=True)
+
+    def getAlterKeys(self):
+        return ['skuid']
 
 class Coupon(SkuBase):
 
