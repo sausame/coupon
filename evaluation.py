@@ -77,3 +77,14 @@ class Evaluation:
 
         print len(self.specialList), len(self.inforList)
 
+    def output(self):
+
+        sql = ''' SELECT SkuTable.skuid, SpecialTable.specialPrice, SpecialTable.avgPrice, SkuTable.price, 
+                        InformationTable.goodCnt, InformationTable.allCnt, InformationTable.percentOfGoodComments,
+                        SkuTable.salecount, SpecialTable.comRate,
+                        SpecialTable.totalDays, SpecialTable.weight,
+                        SkuTable.title, InformationTable.slogan, InformationTable.list
+                FROM SpecialTable 
+                LEFT OUTER JOIN SkuTable ON SkuTable.skuid = SpecialTable.skuid 
+                LEFT OUTER JOIN InformationTable ON InformationTable.skuid = SpecialTable.skuid '''
+
