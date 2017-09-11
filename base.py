@@ -44,14 +44,24 @@ class Sku(SkuBase):
         self.data['goodCom'] = int(self.data.pop('goodCom'))
         self.data['salecount'] = int(self.data.pop('salecount'))
 
-class Comment(BaseDict):
+class SkuInformation(BaseDict):
 
-    def __init__(self, skuid, data):
-        BaseDict.__init__(self, data)
-
-        self.data.pop('code')
+    def __init__(self, skuid):
+        BaseDict.__init__(self, dict())
 
         self.data['skuid'] = skuid
+
+    def isNull(self):
+        return (len(self.data.keys()) is 1) # Only skuid exists
+
+    def setSlogan(self, slogan):
+        self.data['slogan'] = slogan
+
+    def setComments(self, data):
+
+        self.data.update(data)
+
+        self.data.pop('code')
 
         self.data['allCnt'] = int(self.data.pop('allCnt'))
         self.data['goodCnt'] = int(self.data.pop('goodCnt'))
@@ -78,7 +88,7 @@ class Comment(BaseDict):
                 indent=4, sort_keys=True)
 
     def getAlterKeys(self):
-        return ['skuid']
+        return ['skuid', 'slogan', 'list']
 
 class Coupon(SkuBase):
 

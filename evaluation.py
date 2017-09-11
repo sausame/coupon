@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-from base import Special
+import random
+import time
+
+from base import SkuInformation, Special
+from infor import getSlogan, getComment
 
 class Evaluation:
 
@@ -35,6 +39,7 @@ class Evaluation:
     def evaluate(self):
 
         self.specialList = list()
+        self.inforList = list()
 
         sqls = [Evaluation.COUPON_SQL, Evaluation.DISCOUNT_SQL, Evaluation.SECKILL_SQL]
 
@@ -50,7 +55,25 @@ class Evaluation:
 
                 self.db.insert('SpecialTable', special.data, ['skuid'])
 
+                skuid = row['skuid']
+
+                infor = SkuInformation(skuid)
+
+                slogan = getSlogan(skuid)
+                if slogan is not None:
+                    infor.setSlogan(slogan)
+                    time.sleep(random.random())
+
+                comment = getComment(skuid)
+                if comment is not None:
+                    infor.setComments(comment)
+                    time.sleep(random.random())
+
+                if not infor.isNull():
+                    infor.insert(self.db, 'InformationTable')
+                    self.inforList.append(infor)
+
                 self.specialList.append(special)
 
-        print len(self.specialList)
+        print len(self.specialList), len(self.inforList)
 

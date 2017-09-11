@@ -4,7 +4,6 @@ import json
 import sys
 import requests
 
-from base import Comment
 from utils import getMatchString
 
 def getSlogan(skuid):
@@ -29,7 +28,5 @@ def getComment(skuid):
     # TODO: add other judgement for http response
 
     obj = json.loads(r.text)
-    obj = obj.pop('wareDetailComment')
-
-    return Comment(skuid, obj)
+    return obj.pop('wareDetailComment')
 
