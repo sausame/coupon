@@ -109,7 +109,7 @@ class SeckillInfo:
 
             self.db.insert('SeckillTable', seckill.data, ['skuid',
                 'startTimeMills', 'rate', 'wname', 'tagText', 'cName',
-                'tips', 'mTips', 'adword'])
+                'adword'])
 
             self.seckillList.append(seckill)
 
