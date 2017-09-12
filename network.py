@@ -1,6 +1,7 @@
 import httplib  
 import os
 import random
+import requests
 import socket
 import time
 
@@ -19,6 +20,33 @@ class Network:
 
         Network._instance.isLocal = isLocal
 
+    @staticmethod
+    def saveGetUrl(pathname, url):
+
+        if Network._instance is None:
+            Network._instance = Network()
+
+        ret = Network._instance.saveGetUrlImpl(pathname, url)
+
+        # Sleep for a while
+        if ret is 0:
+            time.sleep(random.random())
+
+        return ret
+
+    def saveGetUrlImpl(self, pathname, url):
+
+        if self.isLocal and os.path.exists(pathname):
+            return 1
+
+        r = requests.get(url)
+        # TODO: add other judgement for http response
+
+        with open(pathname, 'w') as fp:
+            fp.write(r.text)
+
+        return 0
+ 
     @staticmethod
     def saveHttpData(pathname, url, host=None):
 
