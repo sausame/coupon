@@ -22,7 +22,8 @@ class Evaluation:
                            SkuTable.price, SkuTable.comRate, HistoryTable.list 
                        FROM `DiscountTable` 
                        INNER JOIN SkuTable ON SkuTable.skuid = DiscountTable.skuid
-                       INNER JOIN HistoryTable ON HistoryTable.skuid = DiscountTable.skuid'''
+                       INNER JOIN HistoryTable ON HistoryTable.skuid = DiscountTable.skuid
+                       WHERE DiscountTable.haveDiscount = 1'''
 
     SECKILL_SQL = ''' SELECT SeckillTable.skuid, SeckillTable.specialPrice,
                           SeckillTable.startTime, SeckillTable.endTime,
