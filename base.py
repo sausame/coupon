@@ -49,7 +49,7 @@ class SkuInformation(BaseDict):
     def __init__(self, skuid):
         BaseDict.__init__(self, dict())
 
-        self.data['skuid'] = skuid
+        self.data['skuid'] = int(skuid)
 
     def isNull(self):
         return (len(self.data.keys()) is 1) # Only skuid exists
