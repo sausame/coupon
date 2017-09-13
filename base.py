@@ -44,6 +44,9 @@ class Sku(SkuBase):
         self.data['goodCom'] = int(self.data.pop('goodCom'))
         self.data['salecount'] = int(self.data.pop('salecount'))
 
+    def getAlterKeys(self):
+        return ['skuid', 'title']
+
 class SkuInformation(BaseDict):
 
     def __init__(self, skuid):
@@ -109,6 +112,9 @@ class Coupon(SkuBase):
         self.data['validBeginTime'] = int(self.data.pop('validBeginTime'))
         self.data['validEndTime'] = int(self.data.pop('validEndTime'))
 
+    def getAlterKeys(self):
+        return ['skuid', 'validBeginTime', 'validEndTime']
+
 class Discount(SkuBase):
 
     def __init__(self, data):
@@ -116,6 +122,9 @@ class Discount(SkuBase):
 
         self.data['skuid'] = int(self.data.pop('skuid'))
         self.data['specialPrice'] = float(self.data.pop('promoPrice'))
+
+    def getAlterKeys(self):
+        return ['skuid']
 
 class MatchesItem(BaseDict):
 
@@ -134,6 +143,9 @@ class Seckill(BaseDict):
 
         self.data['startTime'] = startTime
         self.data['endTime'] = endTime
+
+    def getAlterKeys(self):
+        return ['skuid', 'startTimeMills', 'rate', 'wname', 'tagText', 'cName', 'adword']
 
 class PromotionHistory(BaseDict):
 
@@ -173,6 +185,9 @@ class PriceHistoryData(BaseDict):
     def __init__(self, data):
         BaseDict.__init__(self, data)
 
+    def getAlterKeys(self):
+        return ['skuid']
+
     def updatePromotion(self, promotionHistoryList):
         # TODO: Update history price by the promotion history
         pass
@@ -209,6 +224,9 @@ class Special(BaseDict):
 
         if 'validEndTime' in self.data.keys():
             self.data['endTime'] = seconds2Datetime(self.data.pop('validEndTime') / 1000L)
+
+    def getAlterKeys(self):
+        return ['skuid']
 
     def update(self):
 

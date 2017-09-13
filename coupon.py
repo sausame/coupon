@@ -132,8 +132,7 @@ class SkuManager(SkuManagerBase):
             return None
 
         sku = Sku(param)
-
-        self.db.insert('SkuTable', sku.data, ['skuid', 'title'])
+        sku.insert(self.db, 'SkuTable')
 
         return sku
 
@@ -187,9 +186,7 @@ class CouponManager(SkuManagerBase):
 
         coupon = Coupon(param)
         coupon.data['used'] = 0
-
-        self.db.insert('CouponTable', coupon.data, ['skuid', 'validBeginTime',
-            'validEndTime'])
+        coupon.insert(self.db, 'CouponTable')
 
         return coupon
 
@@ -213,8 +210,7 @@ class DiscountManager(SkuManagerBase):
 
         discount = Discount(param)
         discount.data['used'] = 0
-
-        self.db.insert('DiscountTable', discount.data, ['skuid'])
+        discount.insert(self.db, 'DiscountTable')
 
         return discount
 

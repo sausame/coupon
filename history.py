@@ -39,7 +39,7 @@ class PriceHistoryManager:
         if priceHistoryData is None:
             return None
 
-        self.db.insert('HistoryTable', priceHistoryData.data, ['skuid'])
+        priceHistoryData.insert(self.db, 'HistoryTable')
 
         self.priceHistoryDataList.append(priceHistoryData)
 

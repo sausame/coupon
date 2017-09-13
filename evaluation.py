@@ -54,8 +54,7 @@ class Evaluation:
             for row in result:
                 special = Special(row, Evaluation.VERSION)
                 special.update()
-
-                self.db.insert('SpecialTable', special.data, ['skuid'])
+                special.insert(self.db, 'SpecialTable')
 
                 skuid = int(row['skuid'])
 
