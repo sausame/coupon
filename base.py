@@ -111,6 +111,7 @@ class Coupon(SkuBase):
         self.data['link'] = u'http:{}'.format(self.data.pop('link'))
         self.data['validBeginTime'] = int(self.data.pop('validBeginTime'))
         self.data['validEndTime'] = int(self.data.pop('validEndTime'))
+        self.data['couponValid'] = int(self.data.pop('couponValid'))
 
     def getAlterKeys(self):
         return ['skuid', 'validBeginTime', 'validEndTime']
