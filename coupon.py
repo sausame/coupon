@@ -185,7 +185,6 @@ class CouponManager(SkuManagerBase):
             return None
 
         coupon = Coupon(param)
-        coupon.data['used'] = 0
         coupon.insert(self.db, 'CouponTable')
 
         return coupon
@@ -209,7 +208,6 @@ class DiscountManager(SkuManagerBase):
             return None
 
         discount = Discount(param)
-        discount.data['used'] = 0
         discount.insert(self.db, 'DiscountTable')
 
         return discount
