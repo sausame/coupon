@@ -172,7 +172,7 @@ class Database(AutoReleaseThread):
             elif isinstance(columnValue, unicode):
                 return ("ALTER TABLE `{0}` "
                         "CHANGE `{1}` `{1}` TEXT CHARACTER "
-                        "SET utf8 COLLATE utf8_general_ci NULL "
+                        "SET utf32 COLLATE utf32_general_ci NULL "
                         "DEFAULT NULL;").format(tableName, columnName)
             elif isinstance(columnValue, int):
                 return ("ALTER TABLE `{0}` "
