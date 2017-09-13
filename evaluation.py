@@ -16,7 +16,8 @@ class Evaluation:
                          SkuTable.price, SkuTable.comRate, HistoryTable.list 
                      FROM `CouponTable` 
                      INNER JOIN SkuTable ON SkuTable.skuid = CouponTable.skuid
-                     INNER JOIN HistoryTable ON HistoryTable.skuid = CouponTable.skuid'''
+                     INNER JOIN HistoryTable ON HistoryTable.skuid = CouponTable.skuid
+                     WHERE CouponTable.couponValid = 1'''
 
     DISCOUNT_SQL = ''' SELECT DiscountTable.skuid, DiscountTable.specialPrice,
                            SkuTable.price, SkuTable.comRate, HistoryTable.list 
@@ -56,19 +57,17 @@ class Evaluation:
 
                 self.db.insert('SpecialTable', special.data, ['skuid'])
 
-                skuid = row['skuid']
+                skuid = int(row['skuid'])
 
                 infor = SkuInformation(skuid)
 
                 slogan = getSlogan(skuid)
                 if slogan is not None:
                     infor.setSlogan(slogan)
-                    time.sleep(random.random())
 
                 comment = getComment(skuid)
                 if comment is not None:
                     infor.setComments(comment)
-                    time.sleep(random.random())
 
                 if not infor.isNull():
                     infor.insert(self.db, 'InformationTable')
@@ -87,5 +86,7 @@ class Evaluation:
                         SkuTable.title, InformationTable.slogan, InformationTable.list
                 FROM SpecialTable 
                 LEFT OUTER JOIN SkuTable ON SkuTable.skuid = SpecialTable.skuid 
-                LEFT OUTER JOIN InformationTable ON InformationTable.skuid = SpecialTable.skuid '''
+                LEFT OUTER JOIN InformationTable ON InformationTable.skuid = SpecialTable.skuid
+                WHERE SpecialTable.specialPrice <= SpecialTable.lowestPrice AND SpecialTable.totalDays > 30
+                ORDER BY `SpecialTable`.`weight` ASC '''
 
