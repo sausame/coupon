@@ -15,9 +15,26 @@ class SkuManagerBase:
         self.db = db
 
         self.skuIdList = None
+        self.newSkuIdList = None
 
     def update(self):
         raise TypeError('No implement')
+
+    def updateDb(self, tableName, skuIdList):
+
+        if skuIdList is None or len(skuIdList) == 0:
+            return
+
+        sql = ''' SELECT COUNT(*) AS num FROM `{}`
+                  WHERE skuid NOT IN ({}) '''.format(tableName, ', '.join(skuIdList))
+        result = self.db.query(sql)
+
+        for row in result:
+            print 'Delete', row['num'], 'records in', tableName
+
+        sql = ''' DELETE FROM `{}`
+                  WHERE skuid NOT IN ({}) '''.format(tableName, ', '.join(skuIdList))
+        self.db.query(sql)
 
     def searchSkuList(self, separator, templateUrl, listTagName, itemIds=None, itemId=None):
 
@@ -60,13 +77,16 @@ class SkuManagerBase:
     def create(self, param):
         raise TypeError('No implement')
 
-    def getSkuList(self, skuIds):
+    def retrieveSkuList(self, skuIds):
 
         if skuIds is None:
             return None
 
         GROUP_SIZE = 20
         size = len(skuIds)
+
+        newSkuIds = list()
+        actualSkuIds = list()
 
         skuList = list()
 
@@ -90,6 +110,8 @@ class SkuManagerBase:
 
                     skuid = self.getSkuId(param)
 
+                    actualSkuIds.append(skuid)
+
                     for i in range(len(group)):
                         if skuid == group[i]:
                             del(group[i])
@@ -100,6 +122,7 @@ class SkuManagerBase:
                     sku = self.create(param)
 
                     if sku is not None:
+                        newSkuIds.append(skuid)
                         skuList.append(sku)
                 else:
                     if len(group) > 0:
@@ -110,7 +133,7 @@ class SkuManagerBase:
             # Sleep for a while
             time.sleep(1.0 + random.random())
 
-        return skuList
+        return skuList, actualSkuIds, newSkuIds
 
 class SkuManager(SkuManagerBase):
 
@@ -136,6 +159,9 @@ class SkuManager(SkuManagerBase):
 
         return sku
 
+    def update(self, skuIds):
+        self.updateDb('SkuTable', skuIds)
+
 class CouponManager(SkuManagerBase):
 
     def __init__(self, configFile, db):
@@ -145,7 +171,7 @@ class CouponManager(SkuManagerBase):
         SEARCH_COUPON_URL_TEMPLATE = 'https://qwd.jd.com/fcgi-bin/qwd_coupon_query?g_tk={}&sku={}'
         return self.searchSkuList(',', SEARCH_COUPON_URL_TEMPLATE, 'data', itemIds=itemIds, itemId=itemId)
 
-    def retrieve(self):
+    def retrieveSkuIdList(self):
 
         skuIdList = list()
 
@@ -172,8 +198,10 @@ class CouponManager(SkuManagerBase):
 
     def update(self):
 
-        self.skuIdList = self.retrieve()
-        self.skuList = self.getSkuList(self.skuIdList)
+        skuIdList = self.retrieveSkuIdList()
+        self.skuList, self.skuIdList, self.newSkuIdList = self.retrieveSkuList(skuIdList)
+
+        self.updateDb('CouponTable', self.skuIdList)
 
     def getSkuId(self, param):
         return param['skuId']
@@ -213,10 +241,13 @@ class DiscountManager(SkuManagerBase):
         return discount
 
     def update(self):
-        self.skuIdList = self.retrieve()
-        self.skuList = self.getSkuList(self.skuIdList)
 
-    def retrieve(self):
+        skuIdList = self.retrieveSkuIdList()
+        self.skuList, self.skuIdList, self.newSkuIdList = self.retrieveSkuList(skuIdList)
+
+        self.updateDb('DiscountTable', self.skuIdList)
+
+    def retrieveSkuIdList(self):
 
         skuIds = list()
 

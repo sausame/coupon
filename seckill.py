@@ -97,12 +97,15 @@ class SeckillInfo:
             return None
 
         self.seckillList = list()
+        self.newSkuIdList = list()
 
         for data in self.seckillInfo['itemList']:
 
             if self.db.findOne('SeckillTable', skuid=data['wareId']):
                 # Already exists
                 continue
+
+            self.newSkuIdList.append(data['wareId'])
 
             seckill = Seckill(data)
             seckill.setPeriod(startTime, endTime)
@@ -179,9 +182,35 @@ class SeckillManager:
 
             self.seckillList.extend(seckillInfo.getSeckillList())
 
+    def updateNewSkuIdList(self):
+
+        self.newSkuIdList = list()
+
+        for seckillInfo in self.seckillInfoList:
+
+            self.newSkuIdList.extend(seckillInfo.newSkuIdList)
+
+    def updateDb(self):
+
+        if self.skuIdList is None or len(self.skuIdList) == 0:
+            return
+
+        sql = ''' SELECT COUNT(*) AS num FROM `SeckillTable`
+                  WHERE skuid NOT IN ({}) '''.format(', '.join(self.skuIdList))
+        result = self.db.query(sql)
+
+        for row in result:
+            print 'Delete', row['num'], 'records in SeckillTable'
+
+        sql = ''' DELETE FROM `SeckillTable`
+                  WHERE skuid NOT IN ({}) '''.format(', '.join(self.skuIdList))
+        self.db.query(sql)
+
     def update(self):
 
         self.updateSeckillInfoList()
         self.updateSkuIdList()
         self.updateSeckillList()
+        self.updateNewSkuIdList()
+        self.updateDb()
 
