@@ -5,6 +5,7 @@ import random
 import time
 
 from base import SkuInformation, Special
+from datetime import timedelta, datetime
 from infor import getSlogan, getComment
 
 class Evaluation:
@@ -101,14 +102,31 @@ class Evaluation:
 
     def output(self):
 
-        sql = ''' SELECT SkuTable.skuid, SpecialTable.specialPrice, SpecialTable.avgPrice, SkuTable.price, 
-                        InformationTable.goodCnt, InformationTable.allCnt, InformationTable.percentOfGoodComments,
-                        SkuTable.salecount, SpecialTable.comRate,
-                        SpecialTable.totalDays, SpecialTable.weight,
-                        SkuTable.title, InformationTable.slogan, InformationTable.list
-                FROM SpecialTable 
-                LEFT OUTER JOIN SkuTable ON SkuTable.skuid = SpecialTable.skuid 
-                LEFT OUTER JOIN InformationTable ON InformationTable.skuid = SpecialTable.skuid
-                WHERE SpecialTable.specialPrice <= SpecialTable.lowestPrice AND SpecialTable.totalDays > 30
-                ORDER BY `SpecialTable`.`weight` ASC '''
+        now = datetime.now()
+
+        startTime = now.strftime('%Y-%m-%d %H:%M:%S')
+        endTime = (now + timedelta(hours=2)).replace(minute=0,
+                second=0, microsecond=0).strftime('%Y-%m-%d %H:%M:%S')
+
+        sql = ''' SELECT SkuTable.skuid,
+                      SpecialTable.specialPrice, SpecialTable.avgPrice, SkuTable.price, 
+                      InformationTable.goodCnt, InformationTable.allCnt, InformationTable.percentOfGoodComments,
+                      SkuTable.salecount, SpecialTable.comRate,
+                      SpecialTable.totalDays, SpecialTable.weight,
+                      SkuTable.title, InformationTable.slogan, InformationTable.list
+                  FROM SpecialTable 
+                  LEFT OUTER JOIN SkuTable ON SkuTable.skuid = SpecialTable.skuid 
+                  LEFT OUTER JOIN InformationTable ON InformationTable.skuid = SpecialTable.skuid
+                  WHERE NOT SpecialTable.used
+                      AND SpecialTable.specialPrice <= SpecialTable.lowestPrice
+                      AND SpecialTable.totalDays > 30
+                      AND SpecialTable.startTime <= '{}' and SpecialTable.endTime >= '{}'
+                  ORDER BY SpecialTable.endTime ASC,
+                      `SpecialTable`.`weight` ASC 
+                  LIMIT 1'''.format(startTime, endTime)
+
+        result = self.db.query(sql)
+
+        for row in result:
+            print row
 
