@@ -99,13 +99,16 @@ class Evaluation:
                       InformationTable.goodCnt, InformationTable.allCnt, InformationTable.percentOfGoodComments,
                       SkuTable.salecount, InformationTable.comRate,
                       InformationTable.totalDays, InformationTable.weight,
-                      SkuTable.title, InformationTable.slogan, InformationTable.list
+                      SkuTable.title, InformationTable.slogan,
+                      InformationTable.couponLink, InformationTable.list,
+                      InformationTable.startTime, InformationTable.endTime
                   FROM InformationTable 
                   LEFT OUTER JOIN SkuTable ON SkuTable.skuid = InformationTable.skuid 
                   WHERE NOT InformationTable.used
                       AND InformationTable.specialPrice <= InformationTable.lowestPrice
                       AND InformationTable.totalDays > 30
-                      AND InformationTable.startTime <= '{}' and InformationTable.endTime >= '{}'
+                      AND ((InformationTable.startTime <= '{}' AND InformationTable.endTime >= '{}')
+                          OR InformationTable.startTime IS NULL OR InformationTable.endTime IS NULL)
                   ORDER BY InformationTable.endTime ASC,
                       `InformationTable`.`weight` ASC 
                   LIMIT 1 '''.format(startTime, endTime)
@@ -113,5 +116,5 @@ class Evaluation:
         result = self.db.query(sql)
 
         for row in result:
-            print row
+            print Special(row)
 

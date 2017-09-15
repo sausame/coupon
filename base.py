@@ -324,5 +324,8 @@ class SkuInformation(BaseDict):
         self.updateComments()
 
 class Special(BaseDict):
-    pass
+
+    def __repr__(self):
+        content = BaseDict.__repr__(self)
+        return content
 
