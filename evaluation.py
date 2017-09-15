@@ -38,6 +38,19 @@ class Evaluation:
         self.configFile = configFile
         self.db = db
 
+    def update(self):
+
+        WHERE_CONDITION = ''' WHERE skuid NOT IN ( SELECT CouponTable.skuid FROM CouponTable )
+                  AND skuid NOT IN ( SELECT DiscountTable.skuid FROM DiscountTable )
+                  AND skuid NOT IN ( SELECT SeckillTable.skuid FROM SeckillTable )'''
+
+        tableNames = ['SpecialTable', 'SkuTable', 'InformationTable']
+
+        for tableName in tableNames:
+
+            sql = 'DELETE FROM {} {}'.format(tableName, WHERE_CONDITION)
+            self.db.query(sql)
+
     def evaluate(self):
 
         self.specialList = list()
