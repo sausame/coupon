@@ -31,7 +31,7 @@ def getSlogan(skuid):
 
     return None
 
-def getComment(skuid):
+def getComments(skuid):
 
     COMMENT_URL_TEMPLATE = 'http://item.m.jd.com/ware/getDetailCommentList.json?wareId={}'
     url = COMMENT_URL_TEMPLATE.format(skuid)

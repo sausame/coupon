@@ -5,6 +5,7 @@ import json
 import math
 
 from datetime import tzinfo, timedelta, datetime
+from infor import getSlogan, getComments
 from operator import attrgetter
 from utils import seconds2Datetime
 
@@ -46,52 +47,6 @@ class Sku(SkuBase):
 
     def getAlterKeys(self):
         return ['skuid', 'title']
-
-class SkuInformation(BaseDict):
-
-    def __init__(self, skuid):
-        BaseDict.__init__(self, dict())
-
-        self.data['skuid'] = int(skuid)
-
-    def isNull(self):
-        return (len(self.data.keys()) is 1) # Only skuid exists
-
-    def setSlogan(self, slogan):
-        self.data['slogan'] = slogan
-
-    def setComments(self, data):
-
-        self.data.update(data)
-
-        self.data.pop('code')
-
-        self.data['allCnt'] = int(self.data.pop('allCnt'))
-        self.data['goodCnt'] = int(self.data.pop('goodCnt'))
-        self.data['badCnt'] = int(self.data.pop('badCnt'))
-        self.data['normalCnt'] = int(self.data.pop('normalCnt'))
-        self.data['pictureCnt'] = int(self.data.pop('pictureCnt'))
-        self.data['showPicCnt'] = int(self.data.pop('showPicCnt'))
-        self.data['consultationCount'] = int(self.data.pop('consultationCount'))
-        self.data['percentOfGoodComments'] = self.data.pop('goods')
-
-        commentInfoList = list()
-        for info in self.data.pop('commentInfoList'):
-
-            commentInfo = dict()
-
-            commentInfo['commentShareUrl'] = info['commentShareUrl']
-            commentInfo['userNickName'] = info['userNickName']
-            commentInfo['commentData'] = info['commentData']
-            commentInfo['commentScore'] = int(info['commentScore'])
-
-            commentInfoList.append(commentInfo)
-
-        self.data['list'] = json.dumps(commentInfoList, ensure_ascii=False,
-                indent=4, sort_keys=True)
-
-    def getAlterKeys(self):
-        return ['skuid', 'slogan', 'list']
 
 class Coupon(SkuBase):
 
@@ -206,11 +161,12 @@ class PriceHistoryData(BaseDict):
 
         return '{}:\n{}\n{}'.format(self.__class__.__name__, '\n'.join(fields), str)
 
-class Special(BaseDict):
+class SkuInformation(BaseDict):
 
     def __init__(self, data, version):
         BaseDict.__init__(self, data)
 
+        self.data['skuid'] = int(self.data.pop('skuid'))
         self.data['version'] = version
         self.data['list'] = json.loads(self.data.pop('list'))
 
@@ -226,10 +182,43 @@ class Special(BaseDict):
         if 'validEndTime' in self.data.keys():
             self.data['endTime'] = seconds2Datetime(self.data.pop('validEndTime') / 1000L)
 
-    def getAlterKeys(self):
-        return ['skuid']
+    def setSlogan(self, slogan):
+        self.data['slogan'] = slogan
 
-    def update(self):
+    def setComments(self, data):
+
+        self.data.update(data)
+
+        self.data.pop('code')
+
+        self.data['allCnt'] = int(self.data.pop('allCnt'))
+        self.data['goodCnt'] = int(self.data.pop('goodCnt'))
+        self.data['badCnt'] = int(self.data.pop('badCnt'))
+        self.data['normalCnt'] = int(self.data.pop('normalCnt'))
+        self.data['pictureCnt'] = int(self.data.pop('pictureCnt'))
+        self.data['showPicCnt'] = int(self.data.pop('showPicCnt'))
+        self.data['consultationCount'] = int(self.data.pop('consultationCount'))
+        self.data['percentOfGoodComments'] = self.data.pop('goods')
+
+        commentInfoList = list()
+        for info in self.data.pop('commentInfoList'):
+
+            commentInfo = dict()
+
+            commentInfo['commentShareUrl'] = info['commentShareUrl']
+            commentInfo['userNickName'] = info['userNickName']
+            commentInfo['commentData'] = info['commentData']
+            commentInfo['commentScore'] = int(info['commentScore'])
+
+            commentInfoList.append(commentInfo)
+
+        self.data['list'] = json.dumps(commentInfoList, ensure_ascii=False,
+                indent=4, sort_keys=True)
+
+    def getAlterKeys(self):
+        return ['skuid', 'slogan', 'list']
+
+    def updatePrices(self):
 
         nowPrice = self.data['specialPrice']
 
@@ -313,4 +302,27 @@ class Special(BaseDict):
         self.data['avgPrice'] = avgPrice
         self.data['discount'] = discount
         self.data['lowestRatio'] = lowestRatio
+
+    def updateSlogan(self):
+
+        slogan = getSlogan(self.data['skuid'])
+
+        if slogan is not None:
+            self.setSlogan(slogan)
+
+    def updateComments(self):
+
+        comments = getComments(self.data['skuid'])
+
+        if comments is not None:
+            self.setComments(comments)
+
+    def update(self):
+
+        self.updatePrices()
+        self.updateSlogan()
+        self.updateComments()
+
+class Special(BaseDict):
+    pass
 

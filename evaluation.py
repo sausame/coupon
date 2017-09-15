@@ -6,7 +6,6 @@ import time
 
 from base import SkuInformation, Special
 from datetime import timedelta, datetime
-from infor import getSlogan, getComment
 
 class Evaluation:
 
@@ -45,12 +44,15 @@ class Evaluation:
                   AND skuid NOT IN ( SELECT DiscountTable.skuid FROM DiscountTable )
                   AND skuid NOT IN ( SELECT SeckillTable.skuid FROM SeckillTable )'''
 
-        tableNames = ['SpecialTable', 'SkuTable', 'InformationTable']
+        tableNames = ['SkuTable', 'InformationTable']
 
         for tableName in tableNames:
 
             sql = 'SELECT COUNT(*) AS num FROM {} {}'.format(tableName, WHERE_CONDITION)
             result = self.db.query(sql)
+
+            if result is None:
+                continue
 
             for row in result:
                 print 'Delete', row['num'], 'records in', tableName
@@ -73,32 +75,16 @@ class Evaluation:
 
             for row in result:
 
-                special = Special(row, Evaluation.VERSION)
+                infor = SkuInformation(row, Evaluation.VERSION)
 
-                special.data['used'] = False
-                special.update()
+                infor.data['used'] = False
+                infor.update()
 
-                special.insert(self.db, 'SpecialTable')
+                infor.insert(self.db, 'InformationTable')
 
-                skuid = int(row['skuid'])
+                self.inforList.append(infor)
 
-                infor = SkuInformation(skuid)
-
-                slogan = getSlogan(skuid)
-                if slogan is not None:
-                    infor.setSlogan(slogan)
-
-                comment = getComment(skuid)
-                if comment is not None:
-                    infor.setComments(comment)
-
-                if not infor.isNull():
-                    infor.insert(self.db, 'InformationTable')
-                    self.inforList.append(infor)
-
-                self.specialList.append(special)
-
-        print len(self.specialList), len(self.inforList)
+        print len(self.inforList)
 
     def output(self):
 
@@ -109,21 +95,20 @@ class Evaluation:
                 second=0, microsecond=0).strftime('%Y-%m-%d %H:%M:%S')
 
         sql = ''' SELECT SkuTable.skuid,
-                      SpecialTable.specialPrice, SpecialTable.avgPrice, SkuTable.price, 
+                      InformationTable.specialPrice, InformationTable.avgPrice, SkuTable.price, 
                       InformationTable.goodCnt, InformationTable.allCnt, InformationTable.percentOfGoodComments,
-                      SkuTable.salecount, SpecialTable.comRate,
-                      SpecialTable.totalDays, SpecialTable.weight,
+                      SkuTable.salecount, InformationTable.comRate,
+                      InformationTable.totalDays, InformationTable.weight,
                       SkuTable.title, InformationTable.slogan, InformationTable.list
-                  FROM SpecialTable 
-                  LEFT OUTER JOIN SkuTable ON SkuTable.skuid = SpecialTable.skuid 
-                  LEFT OUTER JOIN InformationTable ON InformationTable.skuid = SpecialTable.skuid
-                  WHERE NOT SpecialTable.used
-                      AND SpecialTable.specialPrice <= SpecialTable.lowestPrice
-                      AND SpecialTable.totalDays > 30
-                      AND SpecialTable.startTime <= '{}' and SpecialTable.endTime >= '{}'
-                  ORDER BY SpecialTable.endTime ASC,
-                      `SpecialTable`.`weight` ASC 
-                  LIMIT 1'''.format(startTime, endTime)
+                  FROM InformationTable 
+                  LEFT OUTER JOIN SkuTable ON SkuTable.skuid = InformationTable.skuid 
+                  WHERE NOT InformationTable.used
+                      AND InformationTable.specialPrice <= InformationTable.lowestPrice
+                      AND InformationTable.totalDays > 30
+                      AND InformationTable.startTime <= '{}' and InformationTable.endTime >= '{}'
+                  ORDER BY InformationTable.endTime ASC,
+                      `InformationTable`.`weight` ASC 
+                  LIMIT 1 '''.format(startTime, endTime)
 
         result = self.db.query(sql)
 
