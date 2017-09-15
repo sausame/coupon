@@ -48,6 +48,12 @@ class Evaluation:
 
         for tableName in tableNames:
 
+            sql = 'SELECT COUNT(*) AS num FROM {} {}'.format(tableName, WHERE_CONDITION)
+            result = self.db.query(sql)
+
+            for row in result:
+                print 'Delete', row['num'], 'records in', tableName
+
             sql = 'DELETE FROM {} {}'.format(tableName, WHERE_CONDITION)
             self.db.query(sql)
 
@@ -65,8 +71,12 @@ class Evaluation:
                 continue
 
             for row in result:
+
                 special = Special(row, Evaluation.VERSION)
+
+                special.data['used'] = False
                 special.update()
+
                 special.insert(self.db, 'SpecialTable')
 
                 skuid = int(row['skuid'])

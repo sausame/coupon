@@ -38,6 +38,8 @@ def run(configfile):
 
         skuManager.update(skuIds)
 
+        evaluation.update()
+
         skuList1 = skuManager.retrieveSkuList(couponManager.newSkuIdList)[0]
         skuList2 = skuManager.retrieveSkuList(discountManager.newSkuIdList)[0]
         skuList3 = skuManager.retrieveSkuList(seckillManager.newSkuIdList)[0]
