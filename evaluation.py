@@ -65,9 +65,21 @@ class Evaluation:
         self.specialList = list()
         self.inforList = list()
 
-        sqls = [Evaluation.COUPON_SQL, Evaluation.DISCOUNT_SQL, Evaluation.SECKILL_SQL]
+        sqlDict = {'CouponTable': Evaluation.COUPON_SQL,
+                'DiscountTable': Evaluation.DISCOUNT_SQL,
+                'SeckillTable': Evaluation.SECKILL_SQL}
 
-        for sql in sqls:
+        condition = ' AND {}.skuid NOT IN (SELECT skuid FROM InformationTable) '
+
+        for tableName in sqlDict.keys():
+
+            result = self.db.query('SELECT id FROM InformationTable LIMIT 1')
+
+            sql = sqlDict[tableName]
+
+            if result is not None:
+                sql += condition.format(tableName)
+
             result = self.db.query(sql)
 
             if result is None:
