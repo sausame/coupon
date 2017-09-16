@@ -161,7 +161,7 @@ class SkuManager(SkuManagerBase):
 
     def update(self):
 
-        sql = 'SELECT skuid FROM SkuTable LIMIT 1'
+        sql = 'SELECT id FROM SkuTable LIMIT 1'
         result = self.db.query(sql)
 
         sql = ''' SELECT skuid
