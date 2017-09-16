@@ -128,5 +128,7 @@ class Evaluation:
         result = self.db.query(sql)
 
         for row in result:
-            print Special(row)
+            special = Special(row)
+            special.update()
+            print special
 

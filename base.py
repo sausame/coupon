@@ -339,7 +339,35 @@ class Special(SkuBase):
         for i in range(len(self.data['list'])):
             self.data['list'][i]['commentData'] = unhexlifyUtf8(self.data['list'][i].pop('commentData'))
 
+    def update(self):
+
+        self.skuid = self.data['skuid']
+
+        self.title = self.data['title']
+        self.slogan = self.data['slogan']
+
+        self.price = self.data['price']
+        self.avgPrice = self.data['avgPrice']
+        self.specialPrice = self.data['specialPrice']
+        self.totalDays = self.data['totalDays']
+
+        self.percentOfGoodComments = self.data['percentOfGoodComments']
+
+        self.comments = ''
+        for comment in self.data['list']:
+
+            if '' == self.comments:
+                self.comments = u'用户评价：\n'
+
+            self.comments += u'{}：{}\n'.format(comment['userNickName'], comment['commentData'])
+
+        if self.data['couponLink'] is not None:
+            self.couponLink = u'领券：{}\n'.format(self.data['couponLink'])
+        else:
+            self.couponLink = ''
+
     def __repr__(self):
-        content = SkuBase.__repr__(self)
+        with open('plate/special.txt') as fp:
+            content = fp.read().format(self)
         return content
 

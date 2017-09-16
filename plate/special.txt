@@ -9,15 +9,7 @@
 
 好评率：{0.percentOfGoodComments}
 ----------------------------
-用户评价：
-{0.userNickName0}：
-{0.commentData0}
-{0.userNickName1}：
-{0.commentData1}
-{0.userNickName2}：
-{0.commentData2}
-
+{0.comments}
 ----------------------------
-领券：{0.couponLink}
+{0.couponLink}
 购买：http://item.jd.com/{0.skuid}.html
-
