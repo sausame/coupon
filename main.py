@@ -30,41 +30,10 @@ def run(configfile):
         discountManager.update()
         seckillManager.update()
 
-        skuIds = list()
-
-        skuIds.extend(couponManager.skuIdList)
-        skuIds.extend(discountManager.skuIdList)
-        skuIds.extend(seckillManager.skuIdList)
-
-        skuManager.update(skuIds)
-
+        skuManager.update()
         evaluation.update()
 
-        skuList1 = skuManager.retrieveSkuList(couponManager.newSkuIdList)[0]
-        skuList2 = skuManager.retrieveSkuList(discountManager.newSkuIdList)[0]
-        skuList3 = skuManager.retrieveSkuList(seckillManager.newSkuIdList)[0]
-
-        print '============================'
-        print len(skuList1), len(skuList2), len(skuList3)
-
-        skus = list()
-        skus.extend(skuList1)
-        skus.extend(skuList2)
-        skus.extend(skuList3)
-
-        print '============================'
-        print len(skus)
-
-        '''
-        ids = ['10155948944', '3256907']
-        skus = skuManager.retrieveSkuList(ids)
-        '''
-
-        priceHistoryDataList = priceHistoryManager.getPriceHistoryDataList(skus=skus)
-        print '============================'
-        print len(priceHistoryDataList)
-
-        #print priceHistoryDataList
+        priceHistoryManager.update()
 
         evaluation.evaluate()
 
