@@ -329,9 +329,17 @@ class SkuInformation(BaseDict):
         self.updateSlogan()
         self.updateComments()
 
-class Special(BaseDict):
+class Special(SkuBase):
+
+    def __init__(self, data):
+        SkuBase.__init__(self, data)
+
+        self.data['list'] = json.loads(self.data.pop('list'))
+
+        for i in range(len(self.data['list'])):
+            self.data['list'][i]['commentData'] = unhexlifyUtf8(self.data['list'][i].pop('commentData'))
 
     def __repr__(self):
-        content = BaseDict.__repr__(self)
+        content = SkuBase.__repr__(self)
         return content
 
