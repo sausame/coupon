@@ -1,6 +1,6 @@
 import json
 
-from base import PromotionHistory, PriceHistoryData
+from base import Sku, PromotionHistory, PriceHistoryData
 from js import JsExecutor
 from network import Network
 
@@ -10,19 +10,29 @@ class PriceHistoryManager:
         self.priceHistoryDataList = None
         self.db = db
 
-    def getPriceHistoryDataList(self, skus=None, sku=None):
+    def update(self):
+
+        sql = 'SELECT id FROM HistoryTable LIMIT 1'
+        result = self.db.query(sql)
+
+        sql = 'SELECT * FROM SkuTable'
+        where = ' WHERE skuid NOT IN (SELECT skuid FROM HistoryTable) '
+
+        if result is not None:
+            sql += where
+
+        result = self.db.query(sql)
+
+        if result is None:
+            return
 
         executor = JsExecutor('js/huihui.js')
-
-        if sku is not None:
-            skus = [sku]
-
         self.priceHistoryDataList = list()
 
-        for sku in skus:
-            self.create(executor, sku)
+        for row in result:
 
-        return self.priceHistoryDataList
+            priceHistoryData = self.create(executor, Sku(row))
+            self.priceHistoryDataList.append(priceHistoryData)
 
     def create(self, executor, sku):
 
@@ -41,7 +51,7 @@ class PriceHistoryManager:
 
         priceHistoryData.insert(self.db, 'HistoryTable')
 
-        self.priceHistoryDataList.append(priceHistoryData)
+        return priceHistoryData
 
     @staticmethod
     def getPriceHistoryData(executor, sku):
