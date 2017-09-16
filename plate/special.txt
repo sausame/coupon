@@ -6,10 +6,9 @@
 平均价格：{0.avgPrice}
 当前价格：{0.specialPrice}
 上架天数：{0.totalDays}
-
+{0.period}
 好评率：{0.percentOfGoodComments}
 ----------------------------
 {0.comments}
 ----------------------------
-{0.couponLink}
-购买：http://item.jd.com/{0.skuid}.html
+{0.couponLink}购买：http://item.jd.com/{0.skuid}.html

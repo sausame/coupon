@@ -353,6 +353,12 @@ class Special(SkuBase):
 
         self.percentOfGoodComments = self.data['percentOfGoodComments']
 
+        if self.data['startTime'] is not None and self.data['endTime'] is not None:
+            self.period = u'时间：{}到{}'.format(self.data['startTime'],
+                    self.data['endTime'])
+        else:
+            self.period = ''
+
         self.comments = ''
         for comment in self.data['list']:
 
