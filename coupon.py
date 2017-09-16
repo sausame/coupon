@@ -159,8 +159,38 @@ class SkuManager(SkuManagerBase):
 
         return sku
 
-    def update(self, skuIds):
-        self.updateDb('SkuTable', skuIds)
+    def update(self):
+
+        sql = 'SELECT skuid FROM SkuTable LIMIT 1'
+        result = self.db.query(sql)
+
+        sql = ''' SELECT skuid
+                  FROM (
+                        SELECT skuid FROM CouponTable WHERE couponValid = 1
+                        UNION
+                        SELECT skuid FROM DiscountTable WHERE haveDiscount = 1
+                        UNION
+                        SELECT skuid FROM SeckillTable
+                       ) A '''
+
+        where = ' WHERE skuid NOT IN (SELECT skuid FROM SkuTable) '
+
+        if result is not None:
+            sql += where
+
+        result = self.db.query(sql)
+
+        if result is None:
+            return
+
+        skuIds = list()
+
+        for row in result:
+            skuIds.append(str(row['skuid']))
+
+        print 'Update', len(skuIds), 'SKUs'
+
+        self.retrieveSkuList(skuIds)
 
 class CouponManager(SkuManagerBase):
 
