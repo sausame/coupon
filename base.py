@@ -7,7 +7,7 @@ import math
 from datetime import tzinfo, timedelta, datetime
 from infor import getSlogan, getComments
 from operator import attrgetter
-from utils import seconds2Datetime
+from utils import seconds2Datetime, hexlifyUtf8, unhexlifyUtf8
 
 class BaseDict:
 
@@ -213,7 +213,7 @@ class SkuInformation(BaseDict):
 
             commentInfo['commentShareUrl'] = info['commentShareUrl']
             commentInfo['userNickName'] = info['userNickName']
-            commentInfo['commentData'] = info['commentData']
+            commentInfo['commentData'] = hexlifyUtf8(info['commentData'])
             commentInfo['commentScore'] = int(info['commentScore'])
 
             commentInfoList.append(commentInfo)
