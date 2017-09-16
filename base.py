@@ -15,7 +15,13 @@ class BaseDict:
         self.data = data
 
     def insert(self, db, tableName):
-        db.insert(tableName, self.data, self.getAlterKeys())
+        keys = self.getAlterKeys()
+
+        for key in keys:
+            if key not in self.data.keys():
+                self.data[key] = None
+
+        db.insert(tableName, self.data, keys)
 
     def getAlterKeys(self):
         return None
