@@ -6,6 +6,7 @@ import traceback
 
 from db import Database
 from evaluation import Evaluation
+from utils import getchar
 
 def run(configfile):
 
@@ -15,7 +16,9 @@ def run(configfile):
         db.initialize()
 
         evaluation = Evaluation(configFile, db)
-        evaluation.output()
+
+        while evaluation.output():
+            getchar()
 
     except:
         traceback.print_exc(file=sys.stdout)

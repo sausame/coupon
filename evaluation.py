@@ -113,7 +113,7 @@ class Evaluation:
         endTime = (now + timedelta(hours=2)).replace(minute=0,
                 second=0, microsecond=0).strftime('%Y-%m-%d %H:%M:%S')
 
-        sql = ''' SELECT SkuTable.skuid,
+        sql = ''' SELECT InformationTable.id, SkuTable.skuid,
                       InformationTable.specialPrice, InformationTable.avgPrice, SkuTable.price, 
                       InformationTable.goodCnt, InformationTable.allCnt, InformationTable.percentOfGoodComments,
                       SkuTable.salecount, InformationTable.comRate,
@@ -130,12 +130,18 @@ class Evaluation:
                           OR InformationTable.startTime IS NULL OR InformationTable.endTime IS NULL)
                   ORDER BY InformationTable.endTime ASC,
                       `InformationTable`.`weight` ASC 
-                  LIMIT 1 '''.format(startTime, endTime)
+                  LIMIT 1 '''.format(startTime, endTime) #
 
         result = self.db.query(sql)
 
+        if result is None:
+            return False
+
         for row in result:
             special = Special(row)
-            special.update(self.qwd)
+            special.update(self.qwd, self.db, 'InformationTable')
             print special
+            return True
+
+        return False
 
