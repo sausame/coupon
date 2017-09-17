@@ -11,4 +11,5 @@
 ----------------------------
 {0.comments}
 ----------------------------
-{0.couponLink}购买：http://item.jd.com/{0.skuid}.html
+{0.couponLink}
+购买：{0.shareUrl}

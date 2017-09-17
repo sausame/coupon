@@ -6,6 +6,8 @@ import time
 
 from base import SkuInformation, Special
 from datetime import timedelta, datetime
+from qwd import QWD
+from utils import getchar
 
 class Evaluation:
 
@@ -37,6 +39,9 @@ class Evaluation:
 
         self.configFile = configFile
         self.db = db
+
+        self.qwd = QWD(configFile)
+        self.qwd.login()
 
     def update(self):
 
@@ -129,6 +134,6 @@ class Evaluation:
 
         for row in result:
             special = Special(row)
-            special.update()
+            special.update(self.qwd)
             print special
 

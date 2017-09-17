@@ -348,9 +348,7 @@ class Special(SkuBase):
         for i in range(len(self.data['list'])):
             self.data['list'][i]['commentData'] = unhexlifyUtf8(self.data['list'][i].pop('commentData'))
 
-    def update(self):
-
-        self.skuid = self.data['skuid']
+    def update(self, qwd):
 
         self.title = self.data['title']
         self.slogan = self.data['slogan']
@@ -377,12 +375,15 @@ class Special(SkuBase):
             self.comments += u'{}：{}\n'.format(comment['userNickName'], comment['commentData'])
 
         if self.data['couponLink'] is not None:
-            self.couponLink = u'领券：{}\n'.format(self.data['couponLink'])
+            self.couponLink = u'领券：{}'.format(self.data['couponLink'])
         else:
             self.couponLink = ''
+
+        self.shareUrl = qwd.getShareUrl(self.data['skuid'])
 
     def __repr__(self):
         with open('plate/special.txt') as fp:
             content = fp.read().format(self)
+
         return content
 
