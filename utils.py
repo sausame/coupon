@@ -13,6 +13,7 @@ import time
 import traceback
 
 from datetime import tzinfo, timedelta, datetime
+from network import Network
 
 def seconds2Datetime(seconds):
     #return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(seconds))
@@ -370,15 +371,15 @@ class UrlUtils:
             'url_long': originalUrl,
             'callback': UrlUtils.SHORT_URL_CALLBACK}
 
-        r = requests.get(UrlUtils.SHORT_URL_TRANSLATOR_URL, params=params, headers=HEADERS)
+        content = Network.getUrl(UrlUtils.SHORT_URL_TRANSLATOR_URL, params, HEADERS)
 
-        start = r.text.find('(')
-        end = r.text.rfind(')')
+        start = content.find('(')
+        end = content.rfind(')')
 
         if start < 0 or end < 0:
             return None
 
-        obj = json.loads(r.text[start+1:end-1].decode('utf-8', 'ignore'))
+        obj = json.loads(content[start+1:end-1].decode('utf-8', 'ignore'))
         objs = obj.pop('urls')
 
         if objs is None or type(objs) is not list or 0 == len(objs):

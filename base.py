@@ -7,7 +7,7 @@ import math
 from datetime import tzinfo, timedelta, datetime
 from infor import getSlogan, getComments
 from operator import attrgetter
-from utils import seconds2Datetime, hexlifyUtf8, unhexlifyUtf8
+from utils import seconds2Datetime, hexlifyUtf8, unhexlifyUtf8, UrlUtils
 
 class BaseDict:
 
@@ -181,16 +181,6 @@ class SkuInformation(BaseDict):
             if key not in self.data.keys():
                 self.data[key] = None
 
-        couponLink = None
-        if 'couponLink' in self.data.keys():
-            couponLink = self.data.pop('couponLink')
-            if couponLink is not None:
-                pos = couponLink.find('?')
-                if pos > 0:
-                    couponLink = 'http://coupon.m.jd.com/coupons/show.action{}'.format(couponLink[pos:])
-
-        self.data['couponLink'] = couponLink
-
         if 'validBeginTime' in self.data.keys():
             self.data['startTime'] = seconds2Datetime(self.data.pop('validBeginTime') / 1000L)
 
@@ -332,11 +322,25 @@ class SkuInformation(BaseDict):
         if comments is not None:
             self.setComments(comments)
 
+    def updateCouponLink(self):
+
+        couponLink = None
+        if 'couponLink' in self.data.keys():
+            url = self.data.pop('couponLink')
+            if url is not None:
+                pos = url.find('?')
+                if pos > 0:
+                    url = 'http://coupon.m.jd.com/coupons/show.action{}'.format(url[pos:])
+                    couponLink = UrlUtils.toShortUrl(url)
+
+        self.data['couponLink'] = couponLink
+
     def update(self):
 
         self.updatePrices()
         self.updateSlogan()
         self.updateComments()
+        self.updateCouponLink()
 
 class Special(SkuBase):
 

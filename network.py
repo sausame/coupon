@@ -21,6 +21,27 @@ class Network:
         Network._instance.isLocal = isLocal
 
     @staticmethod
+    def getUrl(url, params=None, headers=None):
+
+        if Network._instance is None:
+            Network._instance = Network()
+
+        content = Network._instance.getUrlImpl(url, params, headers)
+
+        # Sleep for a while
+        if content is not None:
+            time.sleep(random.random())
+
+        return content
+
+    def getUrlImpl(self, url, params, headers):
+
+        r = requests.get(url, params=params, headers=headers)
+
+        # TODO: add other judgement for http response
+        return r.text
+
+    @staticmethod
     def saveGetUrl(pathname, url):
 
         if Network._instance is None:

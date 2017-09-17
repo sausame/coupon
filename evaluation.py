@@ -7,7 +7,7 @@ import time
 from base import SkuInformation, Special
 from datetime import timedelta, datetime
 from qwd import QWD
-from utils import getchar
+from utils import getchar, UrlUtils
 
 class Evaluation:
 
@@ -42,6 +42,8 @@ class Evaluation:
 
         self.qwd = QWD(configFile)
         self.qwd.login()
+
+        UrlUtils.init(configFile)
 
     def update(self):
 
