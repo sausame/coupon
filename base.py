@@ -69,7 +69,6 @@ class Coupon(SkuBase):
         self.data['usedNum'] = int(self.data.pop('usedNum'))
         self.data['couponNum'] = int(self.data.pop('couponNum'))
         self.data['specialPrice'] = self.data['quota'] - self.data['denomination']
-        self.data['link'] = u'http:{}'.format(self.data.pop('link'))
         self.data['validBeginTime'] = int(self.data.pop('validBeginTime'))
         self.data['validEndTime'] = int(self.data.pop('validEndTime'))
         self.data['couponValid'] = int(self.data.pop('couponValid'))
@@ -176,11 +175,21 @@ class SkuInformation(BaseDict):
         self.data['version'] = version
         self.data['list'] = json.loads(self.data.pop('list'))
 
-        keys = ['couponLink', 'startTime', 'endTime']
+        keys = ['startTime', 'endTime']
 
         for key in keys:
             if key not in self.data.keys():
                 self.data[key] = None
+
+        couponLink = None
+        if 'couponLink' in self.data.keys():
+            couponLink = self.data.pop('couponLink')
+            if couponLink is not None:
+                pos = couponLink.find('?')
+                if pos > 0:
+                    couponLink = 'http://coupon.m.jd.com/coupons/show.action{}'.format(couponLink[pos:])
+
+        self.data['couponLink'] = couponLink
 
         if 'validBeginTime' in self.data.keys():
             self.data['startTime'] = seconds2Datetime(self.data.pop('validBeginTime') / 1000L)
