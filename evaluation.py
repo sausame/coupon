@@ -13,16 +13,16 @@ class Evaluation:
 
     VERSION = 1.0
 
-    COUPON_SQL = ''' SELECT CouponTable.skuid, CouponTable.specialPrice, CouponTable.link as couponLink,
+    COUPON_SQL = ''' SELECT CouponTable.skuid, CouponTable.specialPrice, CouponTable.link AS couponLink,
                           CouponTable.validBeginTime, CouponTable.validEndTime,
-                         SkuTable.price, SkuTable.comRate, HistoryTable.list 
+                         SkuTable.price, SkuTable.comRate, HistoryTable.list AS historyList
                      FROM `CouponTable` 
                      INNER JOIN SkuTable ON SkuTable.skuid = CouponTable.skuid
                      INNER JOIN HistoryTable ON HistoryTable.skuid = CouponTable.skuid
                      WHERE CouponTable.couponValid = 1'''
 
     DISCOUNT_SQL = ''' SELECT DiscountTable.skuid, DiscountTable.specialPrice,
-                           SkuTable.price, SkuTable.comRate, HistoryTable.list 
+                           SkuTable.price, SkuTable.comRate, HistoryTable.list AS historyList
                        FROM `DiscountTable` 
                        INNER JOIN SkuTable ON SkuTable.skuid = DiscountTable.skuid
                        INNER JOIN HistoryTable ON HistoryTable.skuid = DiscountTable.skuid
@@ -30,7 +30,7 @@ class Evaluation:
 
     SECKILL_SQL = ''' SELECT SeckillTable.skuid, SeckillTable.specialPrice,
                           SeckillTable.startTime, SeckillTable.endTime,
-                          SkuTable.price, SkuTable.comRate, HistoryTable.list
+                          SkuTable.price, SkuTable.comRate, HistoryTable.list AS historyList
                       FROM `SeckillTable` 
                       INNER JOIN SkuTable ON SkuTable.skuid = SeckillTable.skuid
                       INNER JOIN HistoryTable ON HistoryTable.skuid = SeckillTable.skuid'''
@@ -119,7 +119,7 @@ class Evaluation:
                       SkuTable.salecount, InformationTable.comRate,
                       InformationTable.totalDays, InformationTable.weight,
                       SkuTable.title, InformationTable.slogan,
-                      InformationTable.couponLink, InformationTable.list,
+                      InformationTable.couponLink, InformationTable.commentList,
                       InformationTable.startTime, InformationTable.endTime
                   FROM InformationTable 
                   LEFT OUTER JOIN SkuTable ON SkuTable.skuid = InformationTable.skuid 

@@ -173,7 +173,7 @@ class SkuInformation(BaseDict):
 
         self.data['skuid'] = int(self.data.pop('skuid'))
         self.data['version'] = version
-        self.data['list'] = json.loads(self.data.pop('list'))
+        self.data['historyList'] = json.loads(self.data.pop('historyList'))
 
         keys = ['startTime', 'endTime']
 
@@ -217,11 +217,11 @@ class SkuInformation(BaseDict):
 
             commentInfoList.append(commentInfo)
 
-        self.data['list'] = json.dumps(commentInfoList, ensure_ascii=False,
+        self.data['commentList'] = json.dumps(commentInfoList, ensure_ascii=False,
                 indent=4, sort_keys=True)
 
     def getAlterKeys(self):
-        return ['skuid', 'slogan', 'list']
+        return ['skuid', 'slogan', 'commentList']
 
     def updatePrices(self):
 
@@ -232,7 +232,7 @@ class SkuInformation(BaseDict):
 
         self.histories.append(PriceHistory(price=float(nowPrice), time=datetime.now().strftime('%Y-%m-%d')))
 
-        for history in self.data.pop('list'):
+        for history in self.data.pop('historyList'):
             self.histories.append(PriceHistory(price=float(history['price']), time=history['time']))
 
         # Sort histories
@@ -347,10 +347,10 @@ class Special(SkuBase):
     def __init__(self, data):
         SkuBase.__init__(self, data)
 
-        self.data['list'] = json.loads(self.data.pop('list'))
+        self.data['commentList'] = json.loads(self.data.pop('commentList'))
 
-        for i in range(len(self.data['list'])):
-            self.data['list'][i]['commentData'] = unhexlifyUtf8(self.data['list'][i].pop('commentData'))
+        for i in range(len(self.data['commentList'])):
+            self.data['commentList'][i]['commentData'] = unhexlifyUtf8(self.data['commentList'][i].pop('commentData'))
 
     def updateDb(self, db, tableName):
 
@@ -380,7 +380,7 @@ class Special(SkuBase):
             self.period = ''
 
         self.comments = ''
-        for comment in self.data['list']:
+        for comment in self.data['commentList']:
 
             if '' == self.comments:
                 self.comments = u'用户评价：\n'
