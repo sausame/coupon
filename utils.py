@@ -46,7 +46,7 @@ def hexlifyUtf8(src):
     return binascii.hexlify(src.encode('utf-8', 'ignore'))
 
 def unhexlifyUtf8(src):
-    return binascii.unhexlify(src.decode('utf-8', 'ignore'))
+    return binascii.unhexlify(src).decode('utf-8', 'ignore')
 
 def runProcess(cmd, onlyFirstLine=True):
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
