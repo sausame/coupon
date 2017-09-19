@@ -8,6 +8,7 @@ from base import SkuInformation, Special
 from datetime import timedelta, datetime
 from qwd import QWD
 from utils import getchar, UrlUtils
+from validation import Validation
 
 class Evaluation:
 
@@ -44,6 +45,7 @@ class Evaluation:
         self.qwd.login()
 
         UrlUtils.init(configFile)
+        Validation.init(configFile)
 
     def update(self):
 

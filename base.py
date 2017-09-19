@@ -8,6 +8,7 @@ from datetime import tzinfo, timedelta, datetime
 from infor import getSlogan, getComments
 from operator import attrgetter
 from utils import seconds2Datetime, hexlifyUtf8, unhexlifyUtf8, UrlUtils
+from validation import Validation
 
 class BaseDict:
 
@@ -378,10 +379,17 @@ class Special(SkuBase):
         self.comments = ''
         for comment in self.data['commentList']:
 
+            commentData = comment['commentData']
+
+            if Validation.isCommentBad(commentData):
+                continue
+
             if '' == self.comments:
                 self.comments = u'用户评价：\n'
 
-            self.comments += u'{}：{}\n'.format(comment['userNickName'], comment['commentData'])
+            commentData = commentData.replace('\n', '')
+
+            self.comments += u'{}：{}\n'.format(comment['userNickName'], commentData)
 
         if self.data['couponLink'] is not None:
             self.couponLink = u'领券：{}'.format(self.data['couponLink'])
