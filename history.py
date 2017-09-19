@@ -127,8 +127,6 @@ class PriceHistoryManager:
             priceHistoryData.updatePromotion(promotionHistoryList)
 
             priceHistoryData.data['skuid'] = sku.data['skuid']
-            priceHistoryData.update(sku)
-
             priceHistoryData.data['list'] = json.dumps(priceHistoryData.data.pop('list'),
                     ensure_ascii=False, indent=4, sort_keys=True)
 

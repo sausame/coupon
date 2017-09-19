@@ -153,10 +153,6 @@ class PriceHistoryData(BaseDict):
         # TODO: Update history price by the promotion history
         pass
 
-    def update(self, sku):
-        # XXX: Do nothing
-        pass
-
     def __repr__(self):
         fields = ['    {}={}'.format(k, v)
             for k, v in self.__dict__.items()
