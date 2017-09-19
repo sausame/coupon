@@ -276,6 +276,11 @@ class SkuInformation(BaseDict):
 
         avgPrice = float(int(100 * avgPrice)) / 100
 
+        # XXX: Assume the price should be larger than average price
+        if self.data['price'] < avgPrice:
+            print self.data['price'], avgPrice
+            avgPrice = self.data['price']
+
         # Calculate discounts
         discount = int(100 * float(nowPrice) / float(avgPrice))
         if 0 == discount:
