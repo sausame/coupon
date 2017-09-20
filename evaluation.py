@@ -34,7 +34,8 @@ class Evaluation:
                           SkuTable.price, SkuTable.comRate, HistoryTable.list AS historyList
                       FROM `SeckillTable` 
                       INNER JOIN SkuTable ON SkuTable.skuid = SeckillTable.skuid
-                      INNER JOIN HistoryTable ON HistoryTable.skuid = SeckillTable.skuid'''
+                      INNER JOIN HistoryTable ON HistoryTable.skuid = SeckillTable.skuid
+                      WHERE 1'''
 
     def __init__(self, configFile, db):
 
