@@ -69,7 +69,7 @@ class Coupon(SkuBase):
         self.data['denomination'] = float(self.data.pop('denomination'))
         self.data['usedNum'] = int(self.data.pop('usedNum'))
         self.data['couponNum'] = int(self.data.pop('couponNum'))
-        self.data['specialPrice'] = self.data['quota'] - self.data['denomination']
+        self.data['cutPrice'] = self.data['quota'] - self.data['denomination']
         self.data['validBeginTime'] = int(self.data.pop('validBeginTime'))
         self.data['validEndTime'] = int(self.data.pop('validEndTime'))
         self.data['couponValid'] = int(self.data.pop('couponValid'))
@@ -83,7 +83,7 @@ class Discount(SkuBase):
         SkuBase.__init__(self, data)
 
         self.data['skuid'] = int(self.data.pop('skuid'))
-        self.data['specialPrice'] = float(self.data.pop('promoPrice'))
+        self.data['cutPrice'] = float(self.data.pop('promoPrice'))
 
     def getAlterKeys(self):
         return ['skuid']
@@ -99,7 +99,7 @@ class Seckill(BaseDict):
         BaseDict.__init__(self, data)
 
         self.data['skuid'] = int(self.data.pop('wareId'))
-        self.data['specialPrice'] = float(self.data.pop('miaoShaPrice'))
+        self.data['cutPrice'] = float(self.data.pop('miaoShaPrice'))
 
     def setPeriod(self, startTime, endTime):
 
@@ -222,7 +222,7 @@ class SkuInformation(BaseDict):
 
     def updatePrices(self):
 
-        cutPrice = self.data['specialPrice']
+        cutPrice = self.data['cutPrice']
 
         # Correct cut-price if not right
         if cutPrice > self.data['price']:
@@ -373,7 +373,7 @@ class Special(SkuBase):
 
         self.price = self.data['price']
         self.avgPrice = self.data['avgPrice']
-        self.specialPrice = self.data['specialPrice']
+        self.cutPrice = self.data['cutPrice']
         self.totalDays = self.data['totalDays']
 
         self.percentOfGoodComments = self.data['percentOfGoodComments']

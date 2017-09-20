@@ -14,7 +14,7 @@ class Evaluation:
 
     VERSION = 1.0
 
-    COUPON_SQL = ''' SELECT CouponTable.skuid, CouponTable.specialPrice, CouponTable.link AS couponLink,
+    COUPON_SQL = ''' SELECT CouponTable.skuid, CouponTable.cutPrice, CouponTable.link AS couponLink,
                           CouponTable.validBeginTime, CouponTable.validEndTime,
                          SkuTable.price, SkuTable.comRate, HistoryTable.list AS historyList
                      FROM `CouponTable` 
@@ -22,14 +22,14 @@ class Evaluation:
                      INNER JOIN HistoryTable ON HistoryTable.skuid = CouponTable.skuid
                      WHERE CouponTable.couponValid = 1'''
 
-    DISCOUNT_SQL = ''' SELECT DiscountTable.skuid, DiscountTable.specialPrice,
+    DISCOUNT_SQL = ''' SELECT DiscountTable.skuid, DiscountTable.cutPrice,
                            SkuTable.price, SkuTable.comRate, HistoryTable.list AS historyList
                        FROM `DiscountTable` 
                        INNER JOIN SkuTable ON SkuTable.skuid = DiscountTable.skuid
                        INNER JOIN HistoryTable ON HistoryTable.skuid = DiscountTable.skuid
                        WHERE DiscountTable.haveDiscount = 1'''
 
-    SECKILL_SQL = ''' SELECT SeckillTable.skuid, SeckillTable.specialPrice,
+    SECKILL_SQL = ''' SELECT SeckillTable.skuid, SeckillTable.cutPrice,
                           SeckillTable.startTime, SeckillTable.endTime,
                           SkuTable.price, SkuTable.comRate, HistoryTable.list AS historyList
                       FROM `SeckillTable` 
@@ -109,7 +109,7 @@ class Evaluation:
                     print '   ',
 
                 print '{}'.format(infor.data['lowestPrice']).rjust(12),
-                print '{}'.format(infor.data['specialPrice']).rjust(12),
+                print '{}'.format(infor.data['cutPrice']).rjust(12),
                 print '{}'.format(infor.data['avgPrice']).rjust(12),
                 print '{}'.format(infor.data['price']).rjust(12)
 
@@ -128,7 +128,7 @@ class Evaluation:
                 second=0, microsecond=0).strftime('%Y-%m-%d %H:%M:%S')
 
         sql = ''' SELECT InformationTable.id, SkuTable.skuid,
-                      InformationTable.specialPrice, InformationTable.avgPrice, SkuTable.price, 
+                      InformationTable.cutPrice, InformationTable.avgPrice, SkuTable.price, 
                       InformationTable.goodCnt, InformationTable.allCnt, InformationTable.percentOfGoodComments,
                       SkuTable.salecount, InformationTable.comRate,
                       InformationTable.totalDays, InformationTable.weight,
@@ -138,7 +138,7 @@ class Evaluation:
                   FROM InformationTable 
                   LEFT OUTER JOIN SkuTable ON SkuTable.skuid = InformationTable.skuid 
                   WHERE NOT InformationTable.used
-                      AND InformationTable.specialPrice <= InformationTable.lowestPrice
+                      AND InformationTable.cutPrice <= InformationTable.lowestPrice
                       AND InformationTable.totalDays > 30
                       AND ((InformationTable.startTime <= '{}' AND InformationTable.endTime >= '{}')
                           OR InformationTable.startTime IS NULL OR InformationTable.endTime IS NULL)
