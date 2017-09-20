@@ -371,7 +371,11 @@ class Special(SkuBase):
         self.title = self.data['title']
         self.slogan = self.data['slogan']
 
+        if self.slogan is None:
+            self.slogan = ''
+
         self.price = self.data['price']
+        self.lowestPrice = self.data['lowestPrice']
         self.avgPrice = self.data['avgPrice']
         self.cutPrice = self.data['cutPrice']
         self.totalDays = self.data['totalDays']

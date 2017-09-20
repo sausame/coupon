@@ -1,14 +1,17 @@
 {0.title}
 {0.slogan}
-
 ----------------------------
-商品标价：{0.price}
-平均价格：{0.avgPrice}
-当前价格：{0.specialPrice}
-上架天数：{0.totalDays}
+京东价：￥{0.price}
+当前价格：￥{0.cutPrice}
+----------------------------
+历史价格：
+均  价：￥{0.avgPrice}
+最低价：￥{0.lowestPrice}
+----------------------------
+上架天数：￥{0.totalDays}
 {0.period}
-好评率：{0.percentOfGoodComments}
 ----------------------------
+好评率：{0.percentOfGoodComments}
 {0.comments}
 ----------------------------
 {0.couponLink}

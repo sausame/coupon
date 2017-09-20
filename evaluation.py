@@ -129,7 +129,8 @@ class Evaluation:
                 second=0, microsecond=0).strftime('%Y-%m-%d %H:%M:%S')
 
         sql = ''' SELECT InformationTable.id, SkuTable.skuid,
-                      InformationTable.cutPrice, InformationTable.avgPrice, SkuTable.price, 
+                      InformationTable.lowestPrice, InformationTable.cutPrice,
+                      InformationTable.avgPrice, SkuTable.price, 
                       InformationTable.goodCnt, InformationTable.allCnt, InformationTable.percentOfGoodComments,
                       SkuTable.salecount, InformationTable.comRate,
                       InformationTable.totalDays, InformationTable.weight,
