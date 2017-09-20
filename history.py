@@ -67,7 +67,7 @@ class PriceHistoryManager:
         path = 'data/{}.js'.format(skuid)
 
         ret = Network.saveHttpData(path, url)
-        print 'Update', path, ':', ret, ':', title
+        #print 'Update', path, ':', ret, ':', title
 
         if ret < 0:
             return None

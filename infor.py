@@ -13,7 +13,7 @@ def getSlogan(skuid):
     url = SKU_MAIN_URL_TEMPLATE.format(skuid)
 
     ret = Network.saveGetUrl(path, url)
-    print 'Update', path, ':', ret
+    #print 'Update', path, ':', ret
 
     if ret < 0:
         return None
@@ -39,7 +39,7 @@ def getComments(skuid):
     path = 'data/{}.json'.format(skuid)
 
     ret = Network.saveGetUrl(path, url)
-    print 'Update', path, ':', ret
+    #print 'Update', path, ':', ret
 
     if ret < 0:
         return None
