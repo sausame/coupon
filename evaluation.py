@@ -94,12 +94,24 @@ class Evaluation:
             if result is None:
                 continue
 
+            print '    ', 'Lowest'.rjust(12), 'Cut-Price'.rjust(12), 'Avg-Price'.rjust(12), 'Cata-Price'.rjust(12)
+
             for row in result:
 
                 infor = SkuInformation(row, Evaluation.VERSION)
 
                 infor.data['used'] = False
                 infor.update()
+
+                if infor.priceCorrected:
+                    print '***',
+                else:
+                    print '   ',
+
+                print '{}'.format(infor.data['lowestPrice']).rjust(12),
+                print '{}'.format(infor.data['specialPrice']).rjust(12),
+                print '{}'.format(infor.data['avgPrice']).rjust(12),
+                print '{}'.format(infor.data['price']).rjust(12)
 
                 infor.insert(self.db, 'InformationTable')
 

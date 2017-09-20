@@ -222,12 +222,19 @@ class SkuInformation(BaseDict):
 
     def updatePrices(self):
 
-        nowPrice = self.data['specialPrice']
+        cutPrice = self.data['specialPrice']
+
+        # Correct cut-price if not right
+        if cutPrice > self.data['price']:
+            self.priceCorrected = True
+            cutPrice = self.data['price']
+        else:
+            self.priceCorrected = False
 
         self.prices = list()
         self.histories = list()
 
-        self.histories.append(PriceHistory(price=float(nowPrice), time=datetime.now().strftime('%Y-%m-%d')))
+        self.histories.append(PriceHistory(price=float(cutPrice), time=datetime.now().strftime('%Y-%m-%d')))
 
         for history in self.data.pop('historyList'):
             self.histories.append(PriceHistory(price=float(history['price']), time=history['time']))
@@ -276,13 +283,8 @@ class SkuInformation(BaseDict):
 
         avgPrice = float(int(100 * avgPrice)) / 100
 
-        # XXX: Assume the price should be larger than average price
-        if self.data['price'] < avgPrice:
-            print self.data['price'], avgPrice
-            avgPrice = self.data['price']
-
         # Calculate discounts
-        discount = int(100 * float(nowPrice) / float(avgPrice))
+        discount = int(100 * float(cutPrice) / float(avgPrice))
         if 0 == discount:
             discount = 1
 
@@ -296,7 +298,7 @@ class SkuInformation(BaseDict):
         3, off amount
         4, days
         '''
-        lowestDiscount = float(nowPrice) / float(lowestPrice)
+        lowestDiscount = float(cutPrice) / float(lowestPrice)
 
         lg = math.log(totalDays)
         if 0 == lg: lg = 0.1 # Log(1) is 0.0
@@ -365,6 +367,7 @@ class Special(SkuBase):
 
     def updateOutput(self, qwd):
 
+        self.skuid = self.data['skuid']
         self.title = self.data['title']
         self.slogan = self.data['slogan']
 
