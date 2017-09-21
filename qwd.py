@@ -164,20 +164,43 @@ class QWD:
 
         return skuId
 
-    def getImageUrl(self, skuid):
+    def search(self, key):
 
-        url = self.imageUrl.format(random.randint(1000000000, 9999999999), skuid)
+        url = self.imageUrl.format(random.randint(1000000000, 9999999999), key)
         headers = {'User-Agent': self.userAgent}
 
         r = requests.get(url, headers=headers)
 
         if 200 != r.status_code:
-            print 'Unable to get image URL for "', skuid, '" with an error (', r.status_code, '):\n', r.text
+            print 'Unable to search "', key, '" with an error (', r.status_code, '):\n', r.text
             return None
 
-        img = getMatchString(r.content, r'skuimgurl":"(https://img\S+)",')
+        return r.content
 
-        return img
+    def getImageUrl(self, skuid):
+
+        data = self.search(skuid)
+
+        if data is None:
+            return None
+
+        obj = json.loads(data.decode('utf-8', 'ignore'))
+        errCode = int(obj.pop('errCode'))
+
+        if errCode is not 0:
+            print 'Wrong error code:', errCode
+            return None
+
+        skus = obj.pop('sku')
+        if skus is None:
+            print 'No sku'
+            return None
+
+        for sku in skus:
+            if sku['skuid'] == str(skuid):
+                return sku['skuimgurl']
+
+        return None
 
     def saveImage(self, path, skuid):
 
