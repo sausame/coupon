@@ -40,7 +40,7 @@ class QWD:
         self.tgt = getProperty(self.configFile, 'cps-qwd-tgt')
 
         self.shareUrl = getProperty(self.configFile, 'cps-qwd-share-url')
-        self.imageUrl = getProperty(self.configFile, 'cps-qwd-share-image-url')
+        self.searchItemUrl = getProperty(self.configFile, 'cps-qwd-search-item-url')
 
         self.shareCookie = getProperty(self.configFile, 'cps-qwd-share-cookie')
 
@@ -166,7 +166,7 @@ class QWD:
 
     def search(self, key):
 
-        url = self.imageUrl.format(random.randint(1000000000, 9999999999), key)
+        url = self.searchItemUrl.format(random.randint(1000000000, 9999999999), key)
         headers = {'User-Agent': self.userAgent}
 
         r = requests.get(url, headers=headers)
