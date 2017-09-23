@@ -208,7 +208,7 @@ class QWD:
         if cutType is 1:
             payload.update({'coupon': self.coupon})
         elif cutType is 2:
-            payload.update({'pwprice': self.pwPriceData})
+            payload.update({'pwprice': self.pwprice})
 
         # Delivery
         if deliveryType is 1:
