@@ -34,6 +34,19 @@ class QWD:
         self.qwd_schn = getProperty(self.configFile, 'cps-qwd-qwd_schn')
         self.login_mode = getProperty(self.configFile, 'cps-qwd-login_mode')
 
+        self.pageindex = getProperty(self.configFile, 'cps-qwd-pageindex')
+        self.pagesize = getProperty(self.configFile, 'cps-qwd-pagesize')
+        self.uniquespu = getProperty(self.configFile, 'cps-qwd-uniquespu')
+        self.storestatus = getProperty(self.configFile, 'cps-qwd-storestatus')
+        self.comsrate = getProperty(self.configFile, 'cps-qwd-comsrate')
+
+        self.sortBy = getProperty(self.configFile, 'cps-qwd-sortby').split(';')
+        self.order = getProperty(self.configFile, 'cps-qwd-order').split(';')
+
+        self.coupon = getProperty(self.configFile, 'cps-qwd-coupon')
+        self.pwprice = getProperty(self.configFile, 'cps-qwd-pwprice')
+        self.delivery = getProperty(self.configFile, 'cps-qwd-delivery')
+
         self.uuid = getProperty(self.configFile, 'cps-qwd-uuid')
 
         self.pin = getProperty(self.configFile, 'cps-qwd-pin')
@@ -164,12 +177,60 @@ class QWD:
 
         return skuId
 
-    def search(self, key):
+    # cut-type: 0, none; 1, coupon; 2, discount
+    # prices: lowPrice, highPrice
+    # sort by: 0, none; 1, wechat_price; 2, total_qtty; 3, good_comments
+    # order: 0, asc; 1, desc;
+    # delivery: 0, none; 1, jd delivery
+    def search(self, key, cutType=0, price=None, sortByType=0, orderType=0, deliveryType=0):
 
-        url = self.searchItemUrl.format(random.randint(1000000000, 9999999999), key)
+        def formatPrice(low, high):
+            if high is 0: 
+                return '0-00'
+            return '{}-{}'.format(low, high)
+
+        payload = {'g_tk': random.randint(1000000000, 9999999999),
+                'pageindex': self.pageindex,
+                'pagesize': self.pagesize,
+                'uniquespu': self.uniquespu,
+                'storestatus': self.storestatus,
+                'ie': self.ie,
+                '_': int(time.time() * 1000)}
+
+        # Commission Rate
+        commissionRateData = {'comsrate': self.comsrate}
+        payload.update(commissionRateData)
+
+        # Key
+        payload.update({'key': key, 'text': key})
+
+        # Cut type
+        if cutType is 1:
+            payload.update({'coupon': self.coupon})
+        elif cutType is 2:
+            payload.update({'pwprice': self.pwPriceData})
+
+        # Delivery
+        if deliveryType is 1:
+            payload.update({'delivery': self.delivery})
+
+        # Price
+        if price is not None and isinstance(price, tuple):
+            payload.update({'wprice': formatPrice(price[0], price[1])})
+
+        # Sort by
+        if sortByType is not 0:
+
+            sortByType -= 1
+
+            payload.update({'sortby': self.sortBy[sortByType]})
+            # Order
+            payload.update({'order': self.order[orderType]})
+
+        # Headers
         headers = {'User-Agent': self.userAgent}
 
-        r = requests.get(url, headers=headers)
+        r = requests.get(self.searchItemUrl, params=payload, headers=headers)
 
         if 200 != r.status_code:
             print 'Unable to search "', key, '" with an error (', r.status_code, '):\n', r.text
