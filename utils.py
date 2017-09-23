@@ -163,6 +163,9 @@ def dump(obj):
     else:
         print dumpObj(obj)
 
+def reprDict(data):
+    return json.dumps(data, ensure_ascii=False, indent=4, sort_keys=True)
+
 def printDict(obj):
     UniPrinter().pprint(obj)
 
