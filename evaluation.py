@@ -120,6 +120,35 @@ class Evaluation:
 
         print len(self.inforList)
 
+    def search(self, key):
+
+        sql = ''' SELECT InformationTable.id, SkuTable.skuid,
+                      InformationTable.lowestPrice, InformationTable.cutPrice,
+                      InformationTable.avgPrice, SkuTable.price, 
+                      InformationTable.goodCnt, InformationTable.allCnt, InformationTable.percentOfGoodComments,
+                      SkuTable.salecount, InformationTable.comRate,
+                      InformationTable.totalDays, InformationTable.weight,
+                      SkuTable.title, InformationTable.slogan,
+                      InformationTable.couponLink, InformationTable.commentList,
+                      InformationTable.startTime, InformationTable.endTime
+                  FROM InformationTable 
+                  LEFT OUTER JOIN SkuTable ON SkuTable.skuid = InformationTable.skuid 
+                  WHERE SkuTable.title LIKE \'%{}%\' '''.format(key)
+
+        result = self.db.query(sql)
+
+        if result is None:
+            return None
+
+        specialList = list()
+
+        for row in result:
+            special = Special(row)
+            special.update(self.qwd)
+            specialList.append(special)
+
+        return specialList
+
     def output(self):
 
         now = datetime.now()
