@@ -7,7 +7,7 @@ import re
 import requests
 import time
 
-from utils import getMatchString, getProperty
+from utils import getMatchString, getProperty, reprDict
 
 class CPS:
 
@@ -59,11 +59,22 @@ class QWD:
 
         self.userAgent = getProperty(self.configFile, 'cps-qwd-http-user-agent')
 
+        self.reset()
+
+    def reset(self):
+
+        self.apptoken = None
+        self.pinType = None
+        self.jxjpin = None
+
         #XXX: Can NOT use session to store cookie because these fields are not
         #     valid http cookie.
         self.cookies = dict()
 
     def login(self):
+
+        if self.apptoken is not None:
+            return True
 
         # Url
         url = getProperty(self.configFile, 'cps-qwd-login-url')
@@ -143,7 +154,9 @@ class QWD:
             print 'Unable to get sharing URL for "', skuid, '" with an error (', r.status_code, '):\n', r.text
 
             # XXX: Relogin, but let this message failed because of less complicated logistic
+            self.reset()
             self.login()
+
             return None
 
         return obj.pop('skuurl')
