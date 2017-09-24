@@ -8,7 +8,7 @@
 均  价：￥{0.avgPrice}
 最低价：￥{0.lowestPrice}
 ----------------------------
-上架天数：￥{0.totalDays}
+上架天数：{0.totalDays}
 {0.period}
 ----------------------------
 好评率：{0.percentOfGoodComments}
