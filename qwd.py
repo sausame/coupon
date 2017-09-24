@@ -249,23 +249,19 @@ class QWD:
             print 'Unable to search "', key, '" with an error (', r.status_code, '):\n', r.text
             return None
 
-        return r.content
-
-    def getImageUrl(self, skuid):
-
-        data = self.search(skuid)
-
-        if data is None:
-            return None
-
-        obj = json.loads(data.decode('utf-8', 'ignore'))
+        obj = json.loads(r.content.decode('utf-8', 'ignore'))
         errCode = int(obj.pop('errCode'))
 
         if errCode is not 0:
             print 'Wrong error code:', errCode
             return None
 
-        skus = obj.pop('sku')
+        return obj.pop('sku')
+
+    def getImageUrl(self, skuid):
+
+        skus = self.search(skuid)
+
         if skus is None:
             print 'No sku'
             return None
