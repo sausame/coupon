@@ -8,7 +8,7 @@ from db import Database
 from evaluation import Evaluation
 from utils import getchar
 
-def run(configfile, key):
+def run(configfile, key, price=None):
 
     try:
 
@@ -17,7 +17,9 @@ def run(configfile, key):
 
         evaluation = Evaluation(configFile, db)
 
-        specialList = evaluation.search(key)
+        specialList = evaluation.search(key, price)
+
+        print 'Found', len(specialList)
 
         for special in specialList:
             print special
@@ -35,15 +37,16 @@ if __name__ == '__main__':
 
     num = len(sys.argv)
     if num < 2:
-        print 'Usage:\n\t', sys.argv[0], 'key [config-file]'
+        print 'Usage:\n\t', sys.argv[0], 'key [lowPrice highPrice]'
         exit()
 
+    configFile = 'config.ini'
+
     key = sys.argv[1]
+    price = None
 
-    if num is 2:
-        configFile = 'config.ini'
-    elif num is 3:
-        configFile = sys.argv[2]
+    if num is 4:
+        price = (sys.argv[2], sys.argv[3])
 
-    run(configFile, key)
+    run(configFile, key, price)
 

@@ -120,7 +120,7 @@ class Evaluation:
 
         print len(self.inforList)
 
-    def search(self, key):
+    def search(self, key, price=None):
 
         sql = ''' SELECT InformationTable.id, SkuTable.skuid,
                       InformationTable.lowestPrice, InformationTable.cutPrice,
@@ -134,6 +134,12 @@ class Evaluation:
                   FROM InformationTable 
                   LEFT OUTER JOIN SkuTable ON SkuTable.skuid = InformationTable.skuid 
                   WHERE SkuTable.title LIKE \'%{}%\' '''.format(key)
+
+        if price is not None and isinstance(price, tuple):
+            sql += ''' AND InformationTable.cutPrice >= {}
+                       AND InformationTable.cutPrice <= {}'''.format(price[0], price[1])
+
+        sql += ' ORDER BY SkuTable.salecount DESC'
 
         result = self.db.query(sql)
 
