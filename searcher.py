@@ -17,7 +17,15 @@ def run(configfile, key, price=None):
 
         evaluation = Evaluation(configFile, db)
 
-        specialList = evaluation.search(key, price)
+        specialList = list()
+
+        localList = evaluation.search(key, price)
+        if localList is not None:
+            specialList.extend(localList)
+
+        remoteList = evaluation.explore(key, price)
+        if remoteList is not None:
+            specialList.extend(remoteList)
 
         print 'Found', len(specialList)
 

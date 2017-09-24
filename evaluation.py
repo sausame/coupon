@@ -4,10 +4,11 @@
 import random
 import time
 
-from base import SkuInformation, Special
+from base import Sku, SkuInformation, Special
 from datetime import timedelta, datetime
+from history import PriceHistoryManager
 from qwd import QWD
-from utils import getchar, UrlUtils
+from utils import getchar, UrlUtils, reprDict
 from validation import Validation
 
 class Evaluation:
@@ -37,7 +38,7 @@ class Evaluation:
                       INNER JOIN HistoryTable ON HistoryTable.skuid = SeckillTable.skuid
                       WHERE 1'''
 
-    def __init__(self, configFile, db):
+    def __init__(self, configFile, db=None):
 
         self.configFile = configFile
         self.db = db
@@ -195,4 +196,40 @@ class Evaluation:
             return True
 
         return False
+
+    def explore(self, key, price=None):
+
+        results = self.qwd.search(key, sortByType=2, orderType=1)
+        if results is None:
+            return None
+
+        priceHistoryManager = PriceHistoryManager()
+        specialList = list()
+
+        for result in results:
+            sku = Sku(result)
+            priceHistoryData = priceHistoryManager.create(sku)
+
+            if priceHistoryData is None:
+                continue
+
+            data = { 'skuid': sku.data['skuid'],
+                    'cutPrice': sku.data['price'],
+                    'price': sku.data['price'],
+                    'comRate': sku.data['comRate'],
+                    'historyList': priceHistoryData.data['list']}
+
+            infor = SkuInformation(data, Evaluation.VERSION)
+            infor.update()
+
+            data = dict()
+            data.update(sku.data)
+            data.update(infor.data)
+
+            special = Special(data)
+            special.update(self.qwd)
+
+            specialList.append(special)
+
+        return specialList
 

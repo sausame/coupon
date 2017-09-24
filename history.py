@@ -6,9 +6,11 @@ from network import Network
 
 class PriceHistoryManager:
 
-    def __init__(self, db):
+    def __init__(self, db=None):
         self.priceHistoryDataList = None
         self.db = db
+
+        self.executor = JsExecutor('js/huihui.js')
 
     def update(self):
 
@@ -26,25 +28,24 @@ class PriceHistoryManager:
         if result is None:
             return
 
-        executor = JsExecutor('js/huihui.js')
         self.priceHistoryDataList = list()
 
         for row in result:
 
-            priceHistoryData = self.create(executor, Sku(row))
+            priceHistoryData = self.create(Sku(row))
             self.priceHistoryDataList.append(priceHistoryData)
 
-    def create(self, executor, sku):
+    def create(self, sku):
 
         skuid = sku.data['skuid']
 
-        if self.db.findOne('HistoryTable', skuid=skuid):
+        if self.db is not None and self.db.findOne('HistoryTable', skuid=skuid):
             # Already exists
             return None
 
         title = sku.data['title']
 
-        priceHistoryData = PriceHistoryManager.getPriceHistoryData(executor, sku)
+        priceHistoryData = PriceHistoryManager.getPriceHistoryData(self.executor, sku)
 
         if priceHistoryData is None:
             return None

@@ -16,6 +16,10 @@ class BaseDict:
         self.data = data
 
     def insert(self, db, tableName):
+
+        if db is None or tableName is None:
+            return
+
         keys = self.getAlterKeys()
 
         for key in keys:
@@ -315,9 +319,7 @@ class SkuInformation(BaseDict):
     def updateSlogan(self):
 
         slogan = getSlogan(self.data['skuid'])
-
-        if slogan is not None:
-            self.setSlogan(slogan)
+        self.setSlogan(slogan)
 
     def updateComments(self):
 
@@ -393,7 +395,6 @@ class Special(SkuBase):
 
         self.comments = ''
         for comment in self.data['commentList']:
-
             commentData = comment['commentData']
 
             if Validation.isCommentBad(commentData):
