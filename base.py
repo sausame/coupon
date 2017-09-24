@@ -358,6 +358,9 @@ class Special(SkuBase):
 
     def updateDb(self, db, tableName):
 
+        if db is None or tableName is None:
+            return
+
         data = dict()
 
         data['id'] = self.data['id']
@@ -410,7 +413,7 @@ class Special(SkuBase):
 
         self.shareUrl = qwd.getShareUrl(self.data['skuid'])
 
-    def update(self, qwd, db, tableName):
+    def update(self, qwd, db=None, tableName=None):
 
         self.updateDb(db, tableName)
         self.updateOutput(qwd)
