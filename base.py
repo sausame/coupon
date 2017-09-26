@@ -103,7 +103,9 @@ class Seckill(BaseDict):
         BaseDict.__init__(self, data)
 
         self.data['skuid'] = int(self.data.pop('wareId'))
+        self.data['title'] = self.data.pop('wname')
         self.data['cutPrice'] = float(self.data.pop('miaoShaPrice'))
+        self.data['jdPrice'] = float(self.data.pop('jdPrice'))
 
     def setPeriod(self, startTime, endTime):
 
@@ -111,7 +113,7 @@ class Seckill(BaseDict):
         self.data['endTime'] = endTime
 
     def getAlterKeys(self):
-        return ['skuid', 'startTimeMills', 'rate', 'wname', 'tagText', 'cName', 'adword']
+        return ['skuid', 'startTimeMills', 'rate', 'title', 'tagText', 'cName', 'adword', 'mTips', 'tips']
 
 class PromotionHistory(BaseDict):
 
