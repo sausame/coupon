@@ -121,6 +121,8 @@ class Evaluation:
 
     def search(self, key, price=None):
 
+        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
         sql = ''' SELECT InformationTable.id, SkuTable.skuid,
                       InformationTable.lowestPrice, InformationTable.cutPrice,
                       InformationTable.avgPrice, SkuTable.price, 
@@ -132,7 +134,9 @@ class Evaluation:
                       InformationTable.startTime, InformationTable.endTime
                   FROM InformationTable 
                   LEFT OUTER JOIN SkuTable ON SkuTable.skuid = InformationTable.skuid 
-                  WHERE SkuTable.title LIKE \'%{}%\' '''.format(key)
+                  WHERE SkuTable.title LIKE \'%{}%\'
+                      AND (InformationTable.endTime IS NULL
+                            OR InformationTable.endTime > '{}')'''.format(key, now)
 
         if price is not None and isinstance(price, tuple):
             sql += ''' AND InformationTable.cutPrice >= {}
