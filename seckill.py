@@ -23,7 +23,7 @@ class SeckillInfo:
 
     def update(self):
 
-        path = 'data/%d.json' % self.gid
+        path = 'data/seckill-%d.json' % self.gid
 
         ret = Network.saveHttpData(path, 'http://coupon.m.jd.com/seckill/seckillList.json?gid=%d' % self.gid)
         if ret < 0:
