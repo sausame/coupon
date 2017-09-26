@@ -101,8 +101,6 @@ class Evaluation:
             for row in result:
 
                 infor = SkuInformation(row, Evaluation.VERSION)
-
-                infor.data['used'] = False
                 infor.update()
 
                 if infor.priceCorrected:
@@ -172,13 +170,13 @@ class Evaluation:
                       InformationTable.totalDays, InformationTable.weight,
                       SkuTable.title, InformationTable.slogan,
                       InformationTable.couponLink, InformationTable.commentList,
-                      InformationTable.startTime, InformationTable.endTime
+                      InformationTable.outputTime, InformationTable.startTime, InformationTable.endTime
                   FROM InformationTable 
                   LEFT OUTER JOIN SkuTable ON SkuTable.skuid = InformationTable.skuid 
-                  WHERE NOT InformationTable.used
+                  WHERE InformationTable.outputTime <= '{0}'
                       AND InformationTable.cutPrice <= InformationTable.lowestPrice
                       AND InformationTable.totalDays > 30
-                      AND ((InformationTable.startTime <= '{}' AND InformationTable.endTime >= '{}')
+                      AND ((InformationTable.startTime <= '{0}' AND InformationTable.endTime >= '{1}')
                           OR InformationTable.startTime IS NULL OR InformationTable.endTime IS NULL)
                   ORDER BY InformationTable.endTime ASC,
                       `InformationTable`.`weight` ASC 

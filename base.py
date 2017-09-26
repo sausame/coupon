@@ -188,6 +188,12 @@ class SkuInformation(BaseDict):
         if 'validEndTime' in self.data.keys():
             self.data['endTime'] = seconds2Datetime(self.data.pop('validEndTime') / 1000L)
 
+        if 'outputTime' not in self.data.keys():
+            if self.data['startTime'] is None:
+                self.data['outputTime'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            else:
+                self.data['outputTime'] = self.data['startTime']
+
     def setSlogan(self, slogan):
         self.data['slogan'] = slogan
 
@@ -363,10 +369,16 @@ class Special(SkuBase):
         if db is None or tableName is None:
             return
 
+        if 'outputTime' not in self.data.keys():
+            return
+
         data = dict()
 
         data['id'] = self.data['id']
-        data['used'] = True
+
+        # XXX: Postpone and set outputTime to that after next three days
+        data['outputTime'] = (datetime.now() + timedelta(days=3)).replace(minute=0,
+                second=0, microsecond=0).strftime('%Y-%m-%d %H:%M:%S')
 
         db.update(tableName, data, ['id'])
 
