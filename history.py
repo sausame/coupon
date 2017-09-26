@@ -14,10 +14,17 @@ class PriceHistoryManager:
 
     def update(self):
 
+        tableNames = ['SkuTable', 'SeckillTable']
+
+        for tableName in tableNames:
+            self.updateHistory(tableName)
+
+    def updateHistory(self, tableName):
+
         sql = 'SELECT id FROM HistoryTable LIMIT 1'
         result = self.db.query(sql)
 
-        sql = 'SELECT * FROM SkuTable'
+        sql = 'SELECT * FROM {}'.format(tableName)
         where = ' WHERE skuid NOT IN (SELECT skuid FROM HistoryTable) '
 
         if result is not None:
@@ -28,24 +35,25 @@ class PriceHistoryManager:
         if result is None:
             return
 
-        self.priceHistoryDataList = list()
-
         for row in result:
 
-            priceHistoryData = self.create(Sku(row))
+            if self.priceHistoryDataList is None:
+                self.priceHistoryDataList = list()
+
+            priceHistoryData = self.create(row)
             self.priceHistoryDataList.append(priceHistoryData)
 
-    def create(self, sku):
+    def create(self, data):
 
-        skuid = sku.data['skuid']
+        skuid = data['skuid']
 
         if self.db is not None and self.db.findOne('HistoryTable', skuid=skuid):
             # Already exists
             return None
 
-        title = sku.data['title']
+        title = data['title']
 
-        priceHistoryData = PriceHistoryManager.getPriceHistoryData(self.executor, sku)
+        priceHistoryData = PriceHistoryManager.getPriceHistoryData(self.executor, data)
 
         if priceHistoryData is None:
             return None
@@ -55,10 +63,10 @@ class PriceHistoryManager:
         return priceHistoryData
 
     @staticmethod
-    def getPriceHistoryData(executor, sku):
+    def getPriceHistoryData(executor, data):
 
-        skuid = sku.data['skuid']
-        title = sku.data['title']
+        skuid = data['skuid']
+        title = data['title']
 
         url = 'http://item.jd.com/{}.html'.format(skuid) # For history searching
         # Get URL for price history
@@ -77,7 +85,7 @@ class PriceHistoryManager:
         if obj is None:
             return None
 
-        return PriceHistoryManager.generatePriceHistoryData(sku, obj)
+        return PriceHistoryManager.generatePriceHistoryData(data, obj)
 
     @staticmethod
     def parse(path):
@@ -107,34 +115,25 @@ class PriceHistoryManager:
         return json.loads(data)
 
     @staticmethod
-    def generatePriceHistoryData(sku, obj):
+    def generatePriceHistoryData(data, obj):
 
         priceHistoryData = None
         promotionHistoryList = None
 
-        try:
-            for data in obj['promotionHistory']:
+        if 'promotionHistory' in obj.keys():
+            for promotionHistory in obj['promotionHistory']:
                 if promotionHistoryList is None:
                     promotionHistoryList = list()
 
-                promotionHistoryList.append(PromotionHistory(data))
-        except AttributeError:
-            pass
-        except KeyError:
-            pass
+                promotionHistoryList.append(PromotionHistory(promotionHistory))
 
-        try:
+        if 'priceHistoryData' in obj.keys():
             priceHistoryData = PriceHistoryData(obj['priceHistoryData'])
             priceHistoryData.updatePromotion(promotionHistoryList)
 
-            priceHistoryData.data['skuid'] = sku.data['skuid']
+            priceHistoryData.data['skuid'] = data['skuid']
             priceHistoryData.data['list'] = json.dumps(priceHistoryData.data.pop('list'),
                     ensure_ascii=False, indent=4, sort_keys=True)
-
-        except AttributeError as e:
-            pass
-        except KeyError as e:
-            pass
 
         return priceHistoryData
 
