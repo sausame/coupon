@@ -55,7 +55,7 @@ class Evaluation:
                   AND skuid NOT IN ( SELECT DiscountTable.skuid FROM DiscountTable )
                   AND skuid NOT IN ( SELECT SeckillTable.skuid FROM SeckillTable )'''
 
-        tableNames = ['SkuTable', 'InformationTable', 'HistoryTable']
+        tableNames = ['SkuTable', 'InformationTable']
 
         for tableName in tableNames:
 
