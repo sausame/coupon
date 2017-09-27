@@ -159,7 +159,7 @@ class SkuManager(SkuManagerBase):
 
         return sku
 
-    def update(self):
+    def updateAllSku(self):
 
         sql = 'SELECT id FROM SkuTable LIMIT 1'
         result = self.db.query(sql)
@@ -191,6 +191,42 @@ class SkuManager(SkuManagerBase):
         print 'Update', len(skuIds), 'SKUs'
 
         self.retrieveSkuList(skuIds)
+
+    def updateLeftSku(self):
+
+        sql = 'SELECT id FROM SkuTable LIMIT 1'
+        result = self.db.query(sql)
+
+        sql = ''' SELECT skuid, title, spuid, jdPrice AS price, imageurl AS skuimgurl
+                  FROM SeckillTable'''
+        where = ' WHERE skuid NOT IN (SELECT skuid FROM SkuTable) '
+
+        if result is not None:
+            sql += where
+
+        result = self.db.query(sql)
+
+        if result is None:
+            return
+
+        count = 0
+
+        for row in result:
+            count += 1
+
+            row['comRate'] = 0.0
+            row['commissionprice'] = 0.0
+            row['goodCom'] = 0
+            row['salecount'] = 0
+
+            sku = self.create(row)
+
+        print 'Update', count, 'SKUs'
+
+    def update(self):
+
+        self.updateAllSku()
+        self.updateLeftSku()
 
 class CouponManager(SkuManagerBase):
 
