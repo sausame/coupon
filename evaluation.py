@@ -210,7 +210,7 @@ class Evaluation:
 
         for result in results:
             sku = Sku(result)
-            priceHistoryData = priceHistoryManager.create(sku)
+            priceHistoryData = priceHistoryManager.create(sku.data)
 
             if priceHistoryData is None:
                 continue
