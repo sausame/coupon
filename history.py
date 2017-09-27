@@ -128,10 +128,13 @@ class PriceHistoryManager:
                 promotionHistoryList.append(PromotionHistory(promotionHistory))
 
         if 'priceHistoryData' in obj.keys():
-            priceHistoryData = PriceHistoryData(obj['priceHistoryData'])
+
+            priceHistory = obj['priceHistoryData']
+            priceHistory['skuid'] = data['skuid']
+
+            priceHistoryData = PriceHistoryData(priceHistory)
             priceHistoryData.updatePromotion(promotionHistoryList)
 
-            priceHistoryData.data['skuid'] = data['skuid']
             priceHistoryData.data['list'] = json.dumps(priceHistoryData.data.pop('list'),
                     ensure_ascii=False, indent=4, sort_keys=True)
 

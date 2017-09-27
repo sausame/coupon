@@ -153,6 +153,8 @@ class PriceHistoryData(BaseDict):
     def __init__(self, data):
         BaseDict.__init__(self, data)
 
+        self.data['skuid'] = int(self.data.pop('skuid'))
+
     def getAlterKeys(self):
         return ['skuid']
 
