@@ -14,7 +14,7 @@ class PriceHistoryManager:
 
     def update(self):
 
-        tableNames = ['SkuTable', 'SeckillTable']
+        tableNames = ['SkuTable']
 
         for tableName in tableNames:
             self.updateHistory(tableName)
@@ -24,7 +24,7 @@ class PriceHistoryManager:
         sql = 'SELECT id FROM HistoryTable LIMIT 1'
         result = self.db.query(sql)
 
-        sql = 'SELECT * FROM {}'.format(tableName)
+        sql = 'SELECT skuid, title FROM {}'.format(tableName)
         where = ' WHERE skuid NOT IN (SELECT skuid FROM HistoryTable) '
 
         if result is not None:
