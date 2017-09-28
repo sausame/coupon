@@ -51,6 +51,7 @@ class Network:
 
         # Sleep for a while
         if ret is 0:
+            print 'Updated', pathname
             time.sleep(random.random())
 
         return ret
@@ -78,6 +79,7 @@ class Network:
 
         # Sleep for a while
         if ret is 0:
+            print 'Updated', pathname
             time.sleep(random.random())
 
         return ret
