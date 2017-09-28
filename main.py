@@ -9,10 +9,17 @@ from db import Database
 from evaluation import Evaluation
 from seckill import SeckillManager
 from history import PriceHistoryManager
+from utils import removeOverdueFiles
+
+def clear():
+    removeOverdueFiles('data/', 47 * 3600, '.js') # Almost two days overdue
+    removeOverdueFiles('data/', 11 * 3600, '.json') # Almost half of one day overdue
+    removeOverdueFiles('data/', 11 * 3600, '.html') # Almost half of one day overdue
 
 def run(configfile):
 
     try:
+        clear()
 
         db = Database(configFile, 'specials')
         db.initialize()

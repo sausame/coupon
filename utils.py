@@ -408,3 +408,19 @@ class UrlUtils:
     def isShortUrl(url):
         return re.match(UrlUtils.HTTP_SHORT_URL_PATTERN, url) is not None
 
+def removeOverdueFiles(pathname, seconds, suffix=None):
+
+    now = time.time()
+
+    for parent, dirnames, filenames in os.walk(pathname):
+
+        for filename in filenames:
+
+            path = parent + filename
+
+            if None != suffix and not filename.endswith(suffix):
+                continue
+
+            if now > os.path.getctime(path) + seconds:
+                # Remove
+                os.remove(path)
