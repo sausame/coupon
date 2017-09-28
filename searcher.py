@@ -29,6 +29,8 @@ def run(configfile, key, price=None):
 
         print 'Found', len(specialList)
 
+        specialList.sort()
+
         for special in specialList:
             print special
             getchar()

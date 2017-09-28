@@ -5,6 +5,7 @@ import json
 import math
 
 from datetime import tzinfo, timedelta, datetime
+from functools import total_ordering
 from infor import getSlogan, getComments
 from operator import attrgetter
 from utils import seconds2Datetime, hexlifyUtf8, unhexlifyUtf8, UrlUtils
@@ -358,6 +359,7 @@ class SkuInformation(BaseDict):
         self.updateComments()
         self.updateCouponLink()
 
+@total_ordering
 class Special(SkuBase):
 
     def __init__(self, data):
@@ -440,4 +442,10 @@ class Special(SkuBase):
             content = fp.read().format(self)
 
         return content
+
+    def __lt__(self, other):
+        return (self.data['weight'] < other.data['weight'])
+
+    def __gt__(self, other):
+        return (self.data['weight'] > other.data['weight'])
 
