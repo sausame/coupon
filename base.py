@@ -399,14 +399,29 @@ class Special(SkuBase):
 
         self.price = self.data['price']
         self.lowestPrice = self.data['lowestPrice']
-        self.avgPrice = self.data['avgPrice']
+
+        avgPrice = self.data['avgPrice']
+
+        if avgPrice < self.price:
+            self.avgPrice = '均　　价：￥{}'.format(avgPrice)
+        else:
+            self.avgPrice = ''
+
         self.cutPrice = self.data['cutPrice']
-        self.totalDays = self.data['totalDays']
+
+        totalDays = self.data['totalDays']
+
+        if totalDays < 30:
+            self.totalDays = '{}天'.format(totalDays)
+        elif totalDays < 360:
+            self.totalDays = '{}个月'.format(totalDays/30)
+        else:
+            self.totalDays = '超过1年'
 
         self.percentOfGoodComments = self.data['percentOfGoodComments']
 
         if self.data['startTime'] is not None and self.data['endTime'] is not None:
-            self.period = u'时间：{}到{}'.format(self.data['startTime'],
+            self.period = u'特价时间：{}到{}'.format(self.data['startTime'],
                     self.data['endTime'])
         else:
             self.period = ''
@@ -417,9 +432,6 @@ class Special(SkuBase):
 
             if Validation.isCommentBad(commentData):
                 continue
-
-            if '' == self.comments:
-                self.comments = u'用户评价：\n'
 
             commentData = commentData.replace('\n', '')
 
@@ -441,7 +453,7 @@ class Special(SkuBase):
         with open('plate/special.txt') as fp:
             content = fp.read().format(self)
 
-        return content
+        return content.replace('\n\n', '\n')
 
     def __lt__(self, other):
         return (self.data['weight'] < other.data['weight'])
