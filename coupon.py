@@ -223,10 +223,25 @@ class SkuManager(SkuManagerBase):
 
         print 'Update', count, 'SKUs'
 
+    def updatePrices(self):
+
+        # Set price in SkuTable with that in SeckillTable
+        sql = ''' UPDATE
+                      SkuTable, SeckillTable
+                  SET 
+                      SkuTable.price = SeckillTable.jdPrice
+                  WHERE
+                      SeckillTable.skuid = SkuTable.skuid
+                      AND
+                      SkuTable.price != SeckillTable.jdPrice'''
+
+        self.db.query(sql)
+
     def update(self):
 
         self.updateAllSku()
         self.updateLeftSku()
+        self.updatePrices()
 
 class CouponManager(SkuManagerBase):
 
