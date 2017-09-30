@@ -7,6 +7,7 @@ import time
 from base import Sku, SkuInformation, Special
 from datetime import timedelta, datetime
 from history import PriceHistoryManager
+from nlp import NLP
 from qwd import QWD
 from utils import getchar, UrlUtils, reprDict
 from validation import Validation
@@ -48,6 +49,8 @@ class Evaluation:
 
         UrlUtils.init(configFile)
         Validation.init(configFile)
+
+        NLP.init(configFile)
 
     def update(self):
 
@@ -121,6 +124,28 @@ class Evaluation:
 
     def search(self, key, price=None):
 
+        def isMatched(title, key):
+
+            keywords = NLP.getKeywords(title)
+
+            if keywords is None:
+                # XXX: Should it return true?
+                return True
+
+            for keyword in keywords:
+
+                if keyword is None:
+                    # XXX: Should it return true?
+                    return True
+
+                if key in keyword['keyword']:
+                    return True
+
+            print '"', title, '" doesn\'t match "', key, '"'
+
+            return False
+
+
         now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         sql = ''' SELECT InformationTable.id, SkuTable.skuid,
@@ -152,6 +177,10 @@ class Evaluation:
         specialList = list()
 
         for row in result:
+
+            if not isMatched(row['title'], key):
+                continue
+
             special = Special(row)
             special.update(self.qwd)
             specialList.append(special)
