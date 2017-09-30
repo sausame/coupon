@@ -264,3 +264,34 @@ class Evaluation:
 
         return specialList
 
+    def smartSearch(self, content):
+
+        def getKey(content):
+
+            tokens = NLP.getMorphology(content)
+
+            for token in tokens:
+
+                if token is None:
+                    break
+
+                if u'名词' == token['wtype']:
+                    return token['word']
+
+            return content
+
+        key = getKey(content)
+        print 'Searching "', key, '"'
+
+        specialList = list()
+
+        localList = self.search(key)
+        if localList is not None:
+            specialList.extend(localList)
+
+        remoteList = self.explore(key)
+        if remoteList is not None:
+            specialList.extend(remoteList)
+
+        return specialList
+

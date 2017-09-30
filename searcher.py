@@ -17,15 +17,18 @@ def run(configfile, key, price=None):
 
         evaluation = Evaluation(configFile, db)
 
-        specialList = list()
+        if price is None:
+            specialList = evaluation.smartSearch(key)
+        else:
+            specialList = list()
 
-        localList = evaluation.search(key, price)
-        if localList is not None:
-            specialList.extend(localList)
+            localList = evaluation.search(key, price)
+            if localList is not None:
+                specialList.extend(localList)
 
-        remoteList = evaluation.explore(key, price)
-        if remoteList is not None:
-            specialList.extend(remoteList)
+            remoteList = evaluation.explore(key, price)
+            if remoteList is not None:
+                specialList.extend(remoteList)
 
         print 'Found', len(specialList)
 
