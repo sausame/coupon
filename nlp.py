@@ -11,7 +11,12 @@ from utils import getProperty
 class NLP:
 
     NLP_URL = ''
+
+    NLP_DATA_SCHEMA_KEYWORDS = ''
     NLP_API_KEYWORDS = ''
+
+    NLP_DATA_SCHEME_MORPHOLOGY = ''
+    NLP_API_MORPHOLOGY = ''
 
     NLP_ORIGIN = ''
     NLP_REFERER = ''
@@ -21,36 +26,78 @@ class NLP:
     def init(configFile):
 
         NLP.NLP_URL = getProperty(configFile, 'nlp-url')
+
+        NLP.NLP_DATA_SCHEMA_KEYWORDS = getProperty(configFile, 'nlp-data-schema-keywords')
         NLP.NLP_API_KEYWORDS = getProperty(configFile, 'nlp-api-keywords')
+
+        NLP.NLP_DATA_SCHEME_MORPHOLOGY = getProperty(configFile, 'nlp-data-scheme-morphology')
+        NLP.NLP_API_MORPHOLOGY = getProperty(configFile, 'nlp-api-morphology')
 
         NLP.NLP_ORIGIN = getProperty(configFile, 'nlp-origin')
         NLP.NLP_REFERER = getProperty(configFile, 'nlp-referer')
         NLP.NLP_USER_AGENT = getProperty(configFile, 'nlp-user-agent')
 
     @staticmethod
-    def getKeywords(content):
+    def invoke(data):
 
-        headers = {
+        NLP_HEADERS = {
             'Origin': NLP.NLP_ORIGIN,
             'Referer': NLP.NLP_REFERER,
             'User-Agent': NLP.NLP_USER_AGENT
         }
 
-        cookies = {
+        NLP_COOKIES = {
             'pgv_pvi': '{}'.format(random.randint(1000000000, 9999999999)),
             'pgv_si': 's{}'.format(random.randint(1000000000, 9999999999))
         }
 
-        data = {'api': 5, 'body_data': '{{"content":"{0}","title":"{0}"}}'.format(content)}
-
-        r = requests.post(NLP.NLP_URL, cookies=cookies, data=data, headers=headers)
+        r = requests.post(NLP.NLP_URL, data=data, cookies=NLP_COOKIES, headers=NLP_HEADERS)
 
         if 200 != r.status_code:
-            print 'Unable to get keywords for "', content, '" with an error (', r.status_code, '):\n', r.text
+            print 'Unable to invoke "', data, '" with an error (', r.status_code, '):\n', r.text
             return None
 
         obj = json.loads(r.content.decode('utf-8', 'ignore'))
+
+        if 'ret_code' not in obj.keys():
+            print 'Error to invoke "', data, '" with an error (', obj, ')'
+            return None
+
         errCode = int(obj.pop('ret_code'))
 
+        if errCode is not 0:
+            print 'Error to invoke "', data, '" with an error code (', errCode, ')'
+            return None
+
+        return obj
+
+    @staticmethod
+    def getKeywords(content):
+
+        data = {
+            'api': NLP.NLP_API_KEYWORDS,
+            'body_data': NLP.NLP_DATA_SCHEMA_KEYWORDS.format(content)
+        }
+
+        obj = NLP.invoke(data)
+
+        if obj is None:
+            return None
+
         return obj.pop('keywords')
+
+    @staticmethod
+    def getMorphology(content):
+
+        data = {
+            'api': NLP.NLP_API_MORPHOLOGY,
+            'body_data': NLP.NLP_DATA_SCHEME_MORPHOLOGY.format(content)
+        }
+
+        obj = NLP.invoke(data)
+
+        if obj is None:
+            return None
+
+        return obj.pop('tokens')
 
