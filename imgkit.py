@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
+# TODO: will use bokeh instead in future
+
 import os
-import sys
 import pdfkit
 
 from wand.image import Image
