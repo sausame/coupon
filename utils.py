@@ -48,16 +48,17 @@ def hexlifyUtf8(src):
 def unhexlifyUtf8(src):
     return binascii.unhexlify(src).decode('utf-8', 'ignore')
 
-def runProcess(cmd, onlyFirstLine=True):
-    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+def runCommand(cmd, shell=False):
 
-    if onlyFirstLine:
-        ret = p.wait()
-        if 0 != ret: raise IndexError, 'Unable to run "{}"'.format(cmd)
-        for line in p.stdout.readlines():
-            return line.rstrip('\r').rstrip('\n')
-    else:
-        return p.stdout.read()
+    process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+    output, unused_err = process.communicate()
+    retcode = process.poll()
+
+    if retcode is not 0:
+        raise subprocess.CalledProcessError(retcode, cmd)
+
+    return retcode
 
 # update property of name to value
 def updateProperty(path, name, value):
