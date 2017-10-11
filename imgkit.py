@@ -18,7 +18,7 @@ class ImageKit:
         pass
 
     @staticmethod
-    def fromHtml(htmlFile, imgFile=None, start=(0,0), size=None, resize=None, resolution=300):
+    def fromHtml(htmlFile, imgFile=None, start=(0,0), size=None, resize=None, resolution=300, pageSize=None):
 
         htmlFile = os.path.realpath(htmlFile)
 
@@ -39,7 +39,17 @@ class ImageKit:
 
         pdfFile = os.path.join(pdfFolder, 'temp.pdf')
 
-        options = {'quiet': '' }
+        options = {'quiet': '',    
+                'margin-top': '0.0in',
+                'margin-right': '0.0in',
+                'margin-bottom': '0.0in',
+                'margin-left': '0.0in'}
+
+        if pageSize is not None:
+
+            options['page-width'] = pageSize[0]
+            options['page-height'] = pageSize[1]
+
         pdfkit.from_file(htmlFile, pdfFile, options=options)
 
         outFile = os.path.join(pdfFolder, 'output.pdf')
