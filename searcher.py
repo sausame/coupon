@@ -4,9 +4,11 @@
 import sys
 import traceback
 
+from base import SpecialFormatter
 from db import Database
 from evaluation import Evaluation
 from utils import getchar
+from qwd import QWD
 
 def run(configfile, key, price=None):
 
@@ -32,10 +34,21 @@ def run(configfile, key, price=None):
 
         print 'Found', len(specialList)
 
+        if len(specialList) is 0:
+            return
+
         specialList.sort()
+        qwd = QWD(configFile)
 
         for special in specialList:
-            print special
+
+            formatter = SpecialFormatter(special)
+
+            formatter.prepare()
+
+            print formatter.getPlate(qwd)
+            print formatter.getImage()
+
             getchar()
 
     except:

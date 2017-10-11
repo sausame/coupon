@@ -2,14 +2,14 @@
 {0.slogan}
 ----------------------------
 京东价　：￥{0.price}
-{0.avgPrice}
+{0.plateAvgPrice}
 最低价　：￥{0.lowestPrice}
 优惠价　：￥{0.cutPrice}
 上架时间：{0.totalDays}
-{0.period}
+{0.platePeriod}
 ----------------------------
 用户评价（{0.percentOfGoodComments} 好评）
-{0.comments}
+{0.plateComments}
 ----------------------------
-{0.couponLink}
-购买：{0.shareUrl}
+{0.plateCouponLink}
+购买：{0.plateShareUrl}

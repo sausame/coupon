@@ -134,6 +134,8 @@ class QWD:
 
     def getShareUrl(self, skuid):
 
+        self.login()
+
         url = self.shareUrl.format(skuid)
 
         headers = {'User-Agent': self.userAgent}
@@ -153,9 +155,9 @@ class QWD:
         if retCode is not 0:
             print 'Unable to get sharing URL for "', skuid, '" with an error (', r.status_code, '):\n', r.text
 
-            # XXX: Relogin, but let this message failed because of less complicated logistic
+            # XXX: Reset but let this message failed because of less complicated logistic. It will re-login
+            #      when call the function again.
             self.reset()
-            self.login()
 
             return None
 

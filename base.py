@@ -6,6 +6,7 @@ import math
 
 from datetime import tzinfo, timedelta, datetime
 from functools import total_ordering
+from imgkit import ImageKit
 from infor import getSlogan, getComments
 from operator import attrgetter
 from utils import seconds2Datetime, hexlifyUtf8, unhexlifyUtf8, UrlUtils
@@ -370,7 +371,7 @@ class Special(SkuBase):
         for i in range(len(self.data['commentList'])):
             self.data['commentList'][i]['commentData'] = unhexlifyUtf8(self.data['commentList'][i].pop('commentData'))
 
-    def updateDb(self, db, tableName):
+    def update(self, db=None, tableName=None):
 
         if db is None or tableName is None:
             return
@@ -388,76 +389,133 @@ class Special(SkuBase):
 
         db.update(tableName, data, ['id'])
 
-    def updateOutput(self, qwd):
-
-        self.skuid = self.data['skuid']
-        self.title = self.data['title']
-        self.slogan = self.data['slogan']
-
-        if self.slogan is None:
-            self.slogan = ''
-
-        self.price = self.data['price']
-        self.lowestPrice = self.data['lowestPrice']
-
-        avgPrice = self.data['avgPrice']
-
-        if avgPrice < self.price:
-            self.avgPrice = '均　　价：￥{}'.format(avgPrice)
-        else:
-            self.avgPrice = ''
-
-        self.cutPrice = self.data['cutPrice']
-
-        totalDays = self.data['totalDays']
-
-        if totalDays < 30:
-            self.totalDays = '{}天'.format(totalDays)
-        elif totalDays < 360:
-            self.totalDays = '{}个月'.format(totalDays/30)
-        else:
-            self.totalDays = '超过1年'
-
-        self.percentOfGoodComments = self.data['percentOfGoodComments']
-
-        if self.data['startTime'] is not None and self.data['endTime'] is not None:
-            self.period = u'特价时间：{}到{}'.format(self.data['startTime'],
-                    self.data['endTime'])
-        else:
-            self.period = ''
-
-        self.comments = ''
-        for comment in self.data['commentList']:
-            commentData = comment['commentData']
-
-            if Validation.isCommentBad(commentData):
-                continue
-
-            commentData = commentData.replace('\n', '')
-
-            self.comments += u'{}：{}\n'.format(comment['userNickName'], commentData)
-
-        if self.data['couponLink'] is not None:
-            self.couponLink = u'领券：{}'.format(self.data['couponLink'])
-        else:
-            self.couponLink = ''
-
-        self.shareUrl = qwd.getShareUrl(self.data['skuid'])
-
-    def update(self, qwd, db=None, tableName=None):
-
-        self.updateDb(db, tableName)
-        self.updateOutput(qwd)
-
-    def __repr__(self):
-        with open('plate/special.txt') as fp:
-            content = fp.read().format(self)
-
-        return content.replace('\n\n', '\n')
-
     def __lt__(self, other):
         return (self.data['weight'] < other.data['weight'])
 
     def __gt__(self, other):
         return (self.data['weight'] > other.data['weight'])
+
+class SpecialFormatter:
+
+    def __init__(self, special):
+        self.special = special
+
+    def prepare(self):
+
+        self.skuid = self.special.data['skuid']
+        self.title = self.special.data['title']
+        self.slogan = self.special.data['slogan']
+
+        if self.slogan is None:
+            self.slogan = ''
+
+        self.skuimgurl = self.special.data['skuimgurl']
+
+        self.price = self.special.data['price']
+        self.lowestPrice = self.special.data['lowestPrice']
+        self.avgPrice = self.special.data['avgPrice']
+        self.cutPrice = self.special.data['cutPrice']
+
+        self.totalDays = self.special.data['totalDays']
+        self.percentOfGoodComments = self.special.data['percentOfGoodComments']
+
+        self.startTime = self.special.data['startTime']
+        self.endTime = self.special.data['endTime']
+
+        self.comments = list()
+
+        for comment in self.special.data['commentList']:
+
+            if Validation.isCommentBad(comment['commentData']):
+                continue
+
+            self.comments.append(comment)
+
+        self.couponLink = self.special.data['couponLink']
+
+    def preparePlate(self, qwd):
+
+        if self.avgPrice < self.price:
+            self.plateAvgPrice = '均　　价：￥{}'.format(self.avgPrice)
+        else:
+            self.plateAvgPrice = ''
+
+        if self.totalDays < 30:
+            self.plateTotalDays = '{}天'.format(self.totalDays)
+        elif self.totalDays < 360:
+            self.plateTotalDays = '{}个月'.format(self.totalDays/30)
+        else:
+            self.plateTotalDays = '超过1年'
+
+        if self.startTime is not None and self.endTime is not None:
+            self.platePeriod = u'特价时间：{}到{}'.format(self.startTime, self.endTime)
+        else:
+            self.platePeriod = ''
+
+        self.plateComments = ''
+
+        for comment in self.comments:
+            commentData = comment['commentData'].replace('\n', '')
+
+            self.plateComments += u'{}：{}\n'.format(comment['userNickName'], commentData)
+
+        if self.couponLink is not None:
+            self.plateCouponLink = u'领券：{}'.format(self.couponLink)
+        else:
+            self.plateCouponLink = ''
+
+        self.plateShareUrl = qwd.getShareUrl(self.skuid)
+
+    def getPlate(self, qwd):
+
+        self.preparePlate(qwd)
+
+        with open('plate/special.txt') as fp:
+            content = fp.read().format(self)
+
+        return content.replace('\n\n', '\n')
+
+    def prepareHtml(self):
+
+        self.discount = int(self.cutPrice * 100 / self.price)
+        self.lowestRatio = int(self.lowestPrice * 100 / self.price)
+        self.avgRatio = int(self.avgPrice * 100 / self.price)
+        self.curRatio = 100
+
+        maxRatio = 80
+
+        self.discountDisplay = int(self.cutPrice * maxRatio / self.price)
+        self.lowestRatioDisplay = int(self.lowestPrice * maxRatio / self.price)
+        self.avgRatioDisplay = int(self.avgPrice * maxRatio / self.price)
+        self.curRatioDisplay = maxRatio
+
+        # Colors
+        if self.totalDays < 30:
+            self.totalDaysColor = 'rgb(255, 57, 31)'
+        elif self.totalDays < 60:
+            self.totalDaysColor = 'rgb(255, 169, 33)'
+        elif self.totalDays < 90:
+            self.totalDaysColor = 'rgb(5, 157, 127)'
+        else:
+            self.totalDaysColor = '#666'
+
+    def getHtml(self):
+
+        self.prepareHtml()
+
+        with open('html/special.html') as fp:
+            content = fp.read().format(self)
+
+        return content
+
+    def getImage(self):
+
+        content = self.getHtml()
+
+        path = '{}.html'.format(self.skuid)
+
+        with open(path, 'w') as fp:
+            fp.write(content)
+
+        return ImageKit.fromHtml(path)
 

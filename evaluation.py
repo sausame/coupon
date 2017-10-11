@@ -45,7 +45,6 @@ class Evaluation:
         self.db = db
 
         self.qwd = QWD(configFile)
-        self.qwd.login()
 
         UrlUtils.init(configFile)
         Validation.init(configFile)
@@ -154,7 +153,7 @@ class Evaluation:
                       InformationTable.goodCnt, InformationTable.allCnt, InformationTable.percentOfGoodComments,
                       SkuTable.salecount, InformationTable.comRate,
                       InformationTable.totalDays, InformationTable.weight,
-                      SkuTable.title, InformationTable.slogan,
+                      SkuTable.title, InformationTable.slogan, SkuTable.skuimgurl,
                       InformationTable.couponLink, InformationTable.commentList,
                       InformationTable.startTime, InformationTable.endTime
                   FROM InformationTable 
@@ -182,7 +181,7 @@ class Evaluation:
                 continue
 
             special = Special(row)
-            special.update(self.qwd)
+            special.update()
             specialList.append(special)
 
         return specialList
@@ -201,7 +200,7 @@ class Evaluation:
                       InformationTable.goodCnt, InformationTable.allCnt, InformationTable.percentOfGoodComments,
                       SkuTable.salecount, InformationTable.comRate,
                       InformationTable.totalDays, InformationTable.weight,
-                      SkuTable.title, InformationTable.slogan,
+                      SkuTable.title, InformationTable.slogan, SkuTable.skuimgurl,
                       InformationTable.couponLink, InformationTable.commentList,
                       InformationTable.outputTime, InformationTable.startTime, InformationTable.endTime
                   FROM InformationTable 
@@ -222,7 +221,8 @@ class Evaluation:
 
         for row in result:
             special = Special(row)
-            special.update(self.qwd, self.db, 'InformationTable')
+            special.update(self.db, 'InformationTable')
+
             print special
             return True
 
@@ -258,7 +258,7 @@ class Evaluation:
             data.update(infor.data)
 
             special = Special(data)
-            special.update(self.qwd)
+            special.update()
 
             specialList.append(special)
 
