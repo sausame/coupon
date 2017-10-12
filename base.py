@@ -477,12 +477,24 @@ class SpecialFormatter:
 
     def prepareHtml(self):
 
+        if self.cutPrice <= self.lowestPrice:
+            icon = 'lowest.png'
+        elif self.cutPrice < self.price:
+            if self.couponLink is not None:
+                icon = 'coupon.png'
+            else:
+                icon = 'discount.png'
+        else:
+            icon = 'good.png'
+
+        self.icon = 'images/{}'.format(icon)
+
         self.discount = int(self.cutPrice * 100 / self.price)
         self.lowestRatio = int(self.lowestPrice * 100 / self.price)
         self.avgRatio = int(self.avgPrice * 100 / self.price)
         self.curRatio = 100
 
-        maxRatio = 80
+        maxRatio = 76
 
         self.discountDisplay = int(self.cutPrice * maxRatio / self.price)
         self.lowestRatioDisplay = int(self.lowestPrice * maxRatio / self.price)
@@ -517,5 +529,5 @@ class SpecialFormatter:
         with open(path, 'w') as fp:
             fp.write(content)
 
-        return ImageKit.fromHtml(path)
+        return ImageKit.fromHtml(path, pageSize=(80, 150))
 
