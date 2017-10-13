@@ -194,6 +194,31 @@ class Evaluation:
         endTime = (now + timedelta(hours=2)).replace(minute=0,
                 second=0, microsecond=0).strftime('%Y-%m-%d %H:%M:%S')
 
+        sql = ''' SELECT COUNT(InformationTable.id) AS num
+                  FROM InformationTable 
+                  LEFT OUTER JOIN SkuTable ON SkuTable.skuid = InformationTable.skuid 
+                  WHERE InformationTable.outputTime <= '{0}'
+                      AND InformationTable.cutPrice <= InformationTable.lowestPrice
+                      AND InformationTable.totalDays > 30
+                      AND ((InformationTable.startTime <= '{0}' AND InformationTable.endTime >= '{1}')
+                          OR InformationTable.startTime IS NULL OR InformationTable.endTime IS NULL)
+                  '''.format(startTime, endTime) #
+
+        result = self.db.query(sql)
+
+        if result is None:
+            return None
+
+        num = 0
+
+        for row in result:
+            num = row['num']
+
+        print 'Found', num, 'SKUs between', startTime, 'and', endTime
+
+        if num is 0:
+            return None
+
         sql = ''' SELECT InformationTable.id, SkuTable.skuid,
                       InformationTable.lowestPrice, InformationTable.cutPrice,
                       InformationTable.avgPrice, SkuTable.price, 
