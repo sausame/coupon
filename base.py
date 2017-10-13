@@ -485,13 +485,12 @@ class SpecialFormatter:
 
     def prepareHtml(self):
 
-        if self.cutPrice <= self.lowestPrice:
+        if self.couponLink is not None:
+            icon = 'coupon.png'
+        elif self.cutPrice <= self.lowestPrice:
             icon = 'lowest.png'
         elif self.cutPrice < self.price:
-            if self.couponLink is not None:
-                icon = 'coupon.png'
-            else:
-                icon = 'discount.png'
+            icon = 'discount.png'
         else:
             icon = 'good.png'
 
