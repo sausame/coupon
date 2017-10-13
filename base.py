@@ -400,6 +400,14 @@ class SpecialFormatter:
     def __init__(self, special):
         self.special = special
 
+    @staticmethod
+    def create(special):
+
+        formatter = SpecialFormatter(special)
+        formatter.prepare()
+
+        return formatter
+
     def prepare(self):
 
         self.skuid = self.special.data['skuid']

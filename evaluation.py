@@ -217,16 +217,15 @@ class Evaluation:
         result = self.db.query(sql)
 
         if result is None:
-            return False
+            return None
 
         for row in result:
             special = Special(row)
             special.update(self.db, 'InformationTable')
 
-            print special
-            return True
+            return special
 
-        return False
+        return None
 
     def explore(self, key, price=None):
 

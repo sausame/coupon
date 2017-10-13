@@ -4,9 +4,11 @@
 import sys
 import traceback
 
+from base import SpecialFormatter
 from db import Database
 from evaluation import Evaluation
-from utils import getchar
+from qwd import QWD
+from utils import getchar, runCommand
 
 def run(configfile):
 
@@ -17,8 +19,20 @@ def run(configfile):
 
         evaluation = Evaluation(configFile, db)
 
-        while evaluation.output():
+        qwd = QWD(configFile)
+
+        special = evaluation.output()
+
+        while (special is not None):
+
+            formatter = SpecialFormatter.create(special)
+
+            print formatter.getPlate(qwd)
+            runCommand('/usr/bin/eog {}'.format(formatter.getImage()))
+
             getchar()
+
+            special = evaluation.output()
 
     except:
         traceback.print_exc(file=sys.stdout)
