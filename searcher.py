@@ -7,8 +7,8 @@ import traceback
 from base import SpecialFormatter
 from db import Database
 from evaluation import Evaluation
-from utils import getchar
 from qwd import QWD
+from utils import getchar, runCommand
 
 def run(configfile, key, price=None):
 
@@ -42,12 +42,10 @@ def run(configfile, key, price=None):
 
         for special in specialList:
 
-            formatter = SpecialFormatter(special)
-
-            formatter.prepare()
+            formatter = SpecialFormatter.create(special)
 
             print formatter.getPlate(qwd)
-            print formatter.getImage()
+            runCommand('/usr/bin/eog {}'.format(formatter.getImage()))
 
             getchar()
 
