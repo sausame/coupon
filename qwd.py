@@ -149,7 +149,11 @@ class QWD:
 
         headers = {'User-Agent': self.userAgent}
 
-        r = requests.get(url, cookies=cookies, headers=headers)
+        try:
+            r = requests.get(url, cookies=cookies, headers=headers)
+        except Exception as e: 
+            print 'Unable to get sharing URL for "', skuid, '" with an error:\n', e
+            return None
 
         if 200 != r.status_code:
             print 'Unable to get sharing URL for "', skuid, '" with an error (', r.status_code, '):\n', r.text
@@ -254,10 +258,14 @@ class QWD:
         # Headers
         headers = {'User-Agent': self.userAgent}
 
-        r = requests.get(self.searchItemUrl, params=payload, headers=headers)
+        try:
+            r = requests.get(self.searchItemUrl, params=payload, headers=headers)
+        except Exception as e: 
+            print 'Unable to search "', key, '" with price', price, ' because of an error:\n', e
+            return None
 
         if 200 != r.status_code:
-            print 'Unable to search "', key, '" with an error (', r.status_code, '):\n', r.text
+            print 'Unable to search "', key, '" with price', price, ' because of an error (', r.status_code, '):\n', r.text
             return None
 
         obj = json.loads(r.content.decode('utf-8', 'ignore'))
