@@ -10,7 +10,7 @@ from evaluation import Evaluation
 from qwd import QWD
 from utils import getchar, runCommand
 
-def run(configfile, key, price=None):
+def run(configfile, content):
 
     try:
 
@@ -19,23 +19,12 @@ def run(configfile, key, price=None):
 
         evaluation = Evaluation(configFile, db)
 
-        if price is None:
-            specialList = evaluation.smartSearch(key)
-        else:
-            specialList = list()
+        specialList = evaluation.search(content)
 
-            localList = evaluation.search(key, price)
-            if localList is not None:
-                specialList.extend(localList)
-
-            remoteList = evaluation.explore(key, price)
-            if remoteList is not None:
-                specialList.extend(remoteList)
+        if specialList is None or len(specialList) is 0:
+            return
 
         print 'Found', len(specialList)
-
-        if len(specialList) is 0:
-            return
 
         specialList.sort()
         qwd = QWD(configFile)
@@ -61,16 +50,13 @@ if __name__ == '__main__':
 
     num = len(sys.argv)
     if num < 2:
-        print 'Usage:\n\t', sys.argv[0], 'key [lowPrice highPrice]'
+        print 'Usage:\n\t', sys.argv[0], 'content'
+        print '\tOr'
+        print '\t', sys.argv[0], '\"#key#[low-price#[high-price#]]\"'
         exit()
 
     configFile = 'config.ini'
+    content = sys.argv[1]
 
-    key = sys.argv[1]
-    price = None
-
-    if num is 4:
-        price = (sys.argv[2], sys.argv[3])
-
-    run(configFile, key, price)
+    run(configFile, content)
 

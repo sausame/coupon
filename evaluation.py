@@ -121,7 +121,7 @@ class Evaluation:
 
         print len(self.inforList)
 
-    def search(self, key, price=None):
+    def searchInDb(self, key, price=None):
 
         def isMatched(title, key):
 
@@ -143,7 +143,6 @@ class Evaluation:
             print '"', title, '" doesn\'t match "', key, '"'
 
             return False
-
 
         now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -254,7 +253,7 @@ class Evaluation:
 
     def explore(self, key, price=None):
 
-        results = self.qwd.search(key, sortByType=2, orderType=1)
+        results = self.qwd.search(key, price=price, sortByType=2, orderType=1)
         if results is None:
             return None
 
@@ -288,7 +287,8 @@ class Evaluation:
 
         return specialList
 
-    def smartSearch(self, content):
+    # Format: #key#[low-price#[high-price#]]
+    def search(self, content):
 
         def getKey(content):
 
@@ -304,16 +304,49 @@ class Evaluation:
 
             return content
 
-        key = getKey(content)
-        print 'Searching "', key, '"'
+        price = None
+        if '#' in content:
+            segments = content.split('#')
+            num = len(segments)
+
+            if num < 3:
+                print 'Invalid search key:', content
+                return None
+
+            key = segments[1].strip()
+
+            lowPrice = None
+            highPrice = None
+
+            if num > 3:
+                try:
+                    lowPrice = float(segments[2])
+                except:
+                    lowPrice = 0
+
+                highPrice = 100 * lowPrice
+
+            if num > 4:
+                try:
+                    highPrice = float(segments[3])
+                except:
+                    pass
+
+            if lowPrice is not None and highPrice is not None:
+                price = (lowPrice, highPrice)
+
+        else:
+            key = getKey(content)
+
+        print 'Searching "', key, '" with price', price
 
         specialList = list()
 
-        localList = self.search(key)
+        localList = self.searchInDb(key, price)
         if localList is not None:
             specialList.extend(localList)
 
-        remoteList = self.explore(key)
+        remoteList = self.explore(key, price)
         if remoteList is not None:
             specialList.extend(remoteList)
 
