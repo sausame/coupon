@@ -21,7 +21,7 @@ def seconds2Datetime(seconds):
     return datetime.fromtimestamp(seconds).strftime('%Y-%m-%d %H:%M:%S')
 
 def randomSleep(minS, maxS):
-    time.sleep((maxS - minS) * random.random() + minS)
+    time.sleep(random.uniform(minS, maxS))
 
 def getchar():
     print 'Please press return key to continue'
