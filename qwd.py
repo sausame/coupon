@@ -319,38 +319,42 @@ class QWD:
         # https://chromedriver.storage.googleapis.com/index.html
         browser = webdriver.Chrome()
 
-        # Plogin
-        ploginUrl = getProperty(self.configFile, 'cps-qwd-plogin-url')
-        browser.get(ploginUrl)
+        try:
 
-        # Login by username and password
+            # Plogin
+            ploginUrl = getProperty(self.configFile, 'cps-qwd-plogin-url')
+            browser.get(ploginUrl)
 
-        # Username and password
-        randomSleep(1, 2)
-        inputElement(browser.find_element_by_id('username'), self.pin)
+            # Login by username and password
 
-        randomSleep(1, 3)
-        inputElement(browser.find_element_by_id('password'), self.password)
+            # Username and password
+            randomSleep(1, 2)
+            inputElement(browser.find_element_by_id('username'), self.pin)
 
-        # Submit, wait for a long time
-        randomSleep(5, 10)
-        browser.find_element_by_id('loginBtn').click()
+            randomSleep(1, 3)
+            inputElement(browser.find_element_by_id('password'), self.password)
 
-        # Redirect to wqs
-        time.sleep(10)
-        qwsUrl = getProperty(self.configFile, 'cps-qwd-wqs-url')
+            # Submit, wait for a long time
+            randomSleep(5, 10)
+            browser.find_element_by_id('loginBtn').click()
 
-        browser.get(qwsUrl)
-        time.sleep(10)
+            # Redirect to wqs
+            time.sleep(10)
+            qwsUrl = getProperty(self.configFile, 'cps-qwd-wqs-url')
 
-        # Save as type of cookie for requests
-        self.pCookies = dict()
-        for cookie in browser.get_cookies():
+            browser.get(qwsUrl)
+            time.sleep(10)
 
-            k = cookie['name']
-            v = cookie['value']
+            # Save as type of cookie for requests
+            self.pCookies = dict()
+            for cookie in browser.get_cookies():
 
-            self.pCookies[k] = v
+                k = cookie['name']
+                v = cookie['value']
 
-        browser.quit()
+                self.pCookies[k] = v
+        except Exception as e:
+            print e
+        finally:
+            browser.quit()
 
