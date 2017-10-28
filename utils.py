@@ -7,6 +7,7 @@ import pprint
 import random
 import re
 import requests
+import string
 import sys
 import subprocess
 import threading
@@ -15,6 +16,7 @@ import traceback
 
 from datetime import tzinfo, timedelta, datetime
 from network import Network
+from selenium.webdriver.common.keys import Keys
 
 def seconds2Datetime(seconds):
     #return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(seconds))
@@ -26,6 +28,66 @@ def randomSleep(minS, maxS):
 def getchar():
     print 'Please press return key to continue'
     sys.stdin.read(1)
+
+def inputElement(element, content, normalSpeed=(0.2, 0.5), slowSpeed=(0.5, 1)):
+
+    def randomChar():
+        return random.choice(string.ascii_lowercase + string.digits)
+
+    def sendChar(element, ch):
+        element.send_keys(ch)
+
+    def removeChar(element):
+        element.send_keys(Keys.BACK_SPACE)
+
+    # Type: 0, digit; 1, alpha; 2, space; 3, other
+    cLastType = 0
+
+    # Simulation of human input, sometime typo.
+    for c in content:
+
+        if c.isdigit():
+            cType = 0
+        elif c.isalpha():
+            cType = 1
+        elif c.isspace():
+            cType = 2
+        else:
+            cType = 3
+
+        if cType is not cLastType:
+
+            num = random.randint(0, 2)
+            isDelay = (num < 2)
+
+            speed = slowSpeed
+            typoThresholdValue = 3
+
+        else:
+            speed = normalSpeed
+            typoThresholdValue = 1
+
+        randomSleep(speed[0], speed[1])
+
+        # Three times typo at most
+        for i in range(0, 3):
+
+            num = random.randint(0, 4)
+            isTypo = (num < typoThresholdValue)
+
+            if isTypo:
+                break
+
+            # Typo
+            ch = randomChar()
+            sendChar(element, ch)
+            randomSleep(normalSpeed[0], normalSpeed[1])
+
+            # Remove
+            removeChar(element)
+            randomSleep(speed[0], speed[1])
+
+        sendChar(element, c)
 
 def toVisibleAscll(src):
 
