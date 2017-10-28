@@ -7,7 +7,8 @@ import re
 import requests
 import time
 
-from utils import getMatchString, getProperty, reprDict
+from selenium import webdriver
+from utils import getMatchString, getProperty, randomSleep, reprDict
 
 class CPS:
 
@@ -25,6 +26,8 @@ class QWD:
     def __init__(self, configFile):
 
         self.configFile = configFile
+
+        self.loginMethod = int(getProperty(self.configFile, 'cps-qwd-login-method'))
 
         self.appid = getProperty(self.configFile, 'cps-qwd-appid')
         self.ctype = getProperty(self.configFile, 'cps-qwd-ctype')
@@ -50,12 +53,11 @@ class QWD:
         self.uuid = getProperty(self.configFile, 'cps-qwd-uuid')
 
         self.pin = getProperty(self.configFile, 'cps-qwd-pin')
+        self.password = getProperty(self.configFile, 'cps-qwd-password')
         self.tgt = getProperty(self.configFile, 'cps-qwd-tgt')
 
         self.shareUrl = getProperty(self.configFile, 'cps-qwd-share-url')
         self.searchItemUrl = getProperty(self.configFile, 'cps-qwd-search-item-url')
-
-        self.shareCookie = getProperty(self.configFile, 'cps-qwd-share-cookie')
 
         self.userAgent = getProperty(self.configFile, 'cps-qwd-http-user-agent')
 
@@ -70,6 +72,8 @@ class QWD:
         #XXX: Can NOT use session to store cookie because these fields are not
         #     valid http cookie.
         self.cookies = dict()
+
+        self.pCookies = None
 
     def login(self):
 
@@ -134,13 +138,18 @@ class QWD:
 
     def getShareUrl(self, skuid):
 
-        self.login()
+        if self.loginMethod is 1:
+            self.plogin()
+            cookies = self.pCookies
+        else:
+            self.login()
+            cookies = self.cookies
 
         url = self.shareUrl.format(skuid)
 
         headers = {'User-Agent': self.userAgent}
 
-        r = requests.get(url, cookies=self.cookies, headers=headers)
+        r = requests.get(url, cookies=cookies, headers=headers)
 
         if 200 != r.status_code:
             print 'Unable to get sharing URL for "', skuid, '" with an error (', r.status_code, '):\n', r.text
@@ -290,4 +299,45 @@ class QWD:
             fp.write(r.content)
 
         return True
+
+    def plogin(self):
+
+        if self.pCookies is not None:
+            return True
+
+        # browser = webdriver.Chrome()
+        browser = webdriver.Firefox()
+
+        # Plogin
+        ploginUrl = getProperty(self.configFile, 'cps-qwd-plogin-url')
+        browser.get(ploginUrl)
+
+        # Login by username and password
+
+        # Username and password
+        randomSleep(1, 2)
+        browser.find_element_by_id('username').send_keys(self.pin)
+
+        randomSleep(1, 3)
+        browser.find_element_by_id('password').send_keys(self.password)
+
+        # Submit, wait for a long time
+        randomSleep(5, 10)
+        browser.find_element_by_id('loginBtn').click()
+
+        # Redirect to wqs
+        randomSleep(3, 5)
+        qwsUrl = getProperty(self.configFile, 'cps-qwd-wqs-url')
+
+        browser.get(qwsUrl)
+        randomSleep(5, 10)
+
+        # Save as type of cookie for requests
+        self.pCookies = dict()
+        for cookie in browser.get_cookies():
+
+            k = cookie['name']
+            v = cookie['value']
+
+            self.pCookies[k] = v
 

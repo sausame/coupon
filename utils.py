@@ -4,6 +4,7 @@ import cStringIO
 import json
 import os
 import pprint
+import random
 import re
 import requests
 import sys
@@ -18,6 +19,9 @@ from network import Network
 def seconds2Datetime(seconds):
     #return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(seconds))
     return datetime.fromtimestamp(seconds).strftime('%Y-%m-%d %H:%M:%S')
+
+def randomSleep(minS, maxS):
+    time.sleep((maxS - minS) * random.random() + minS)
 
 def getchar():
     print 'Please press return key to continue'
