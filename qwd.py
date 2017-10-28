@@ -8,7 +8,7 @@ import requests
 import time
 
 from selenium import webdriver
-from utils import getMatchString, getProperty, randomSleep, reprDict
+from utils import getMatchString, getProperty, inputElement, randomSleep, reprDict
 
 class CPS:
 
@@ -305,8 +305,11 @@ class QWD:
         if self.pCookies is not None:
             return True
 
-        # browser = webdriver.Chrome()
-        browser = webdriver.Firefox()
+        # https://github.com/mozilla/geckodriver/releases
+        # browser = webdriver.Firefox()
+
+        # https://chromedriver.storage.googleapis.com/index.html
+        browser = webdriver.Chrome()
 
         # Plogin
         ploginUrl = getProperty(self.configFile, 'cps-qwd-plogin-url')
@@ -316,21 +319,21 @@ class QWD:
 
         # Username and password
         randomSleep(1, 2)
-        browser.find_element_by_id('username').send_keys(self.pin)
+        inputElement(browser.find_element_by_id('username'), self.pin)
 
         randomSleep(1, 3)
-        browser.find_element_by_id('password').send_keys(self.password)
+        inputElement(browser.find_element_by_id('password'), self.password)
 
         # Submit, wait for a long time
         randomSleep(5, 10)
         browser.find_element_by_id('loginBtn').click()
 
         # Redirect to wqs
-        randomSleep(3, 5)
+        time.sleep(10)
         qwsUrl = getProperty(self.configFile, 'cps-qwd-wqs-url')
 
         browser.get(qwsUrl)
-        randomSleep(5, 10)
+        time.sleep(10)
 
         # Save as type of cookie for requests
         self.pCookies = dict()
@@ -340,4 +343,6 @@ class QWD:
             v = cookie['value']
 
             self.pCookies[k] = v
+
+        browser.quit()
 
