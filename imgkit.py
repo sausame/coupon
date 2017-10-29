@@ -5,11 +5,17 @@
 
 import os
 import pdfkit
+import pytesseract
 import shutil
 
 from wand.image import Image
 from wand.color import Color
 from utils import runCommand
+
+try:
+    import Image
+except ImportError:
+    from PIL import Image
 
 class ImageKit:
 
@@ -78,4 +84,11 @@ class ImageKit:
             shutil.rmtree(pdfFolder)
 
         return imgFile
+
+    @staticmethod
+    def getText(path, lang='eng', config='-c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz -psm 6'):
+
+        image = Image.open(path)
+        text = pytesseract.image_to_string(image, lang=lang, config=config)
+        return text
 
