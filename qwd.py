@@ -2,12 +2,15 @@
 
 import codecs
 import json
+import os
 import random
 import re
 import requests
 import time
 
+from imgkit import ImageKit
 from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
 from utils import getMatchString, getProperty, inputElement, randomSleep, reprDict
 
 class CPS:
@@ -310,6 +313,24 @@ class QWD:
 
     def plogin(self):
 
+        def isValidAuthCode(code):
+
+            if code is None or len(code) < 4:
+                return False
+
+            for c in code:
+
+                if c.isdigit():
+                    continue
+
+                if c.isalpha():
+                    continue
+
+                # Wrong word
+                return False
+
+            return True
+
         if self.pCookies is not None:
             return True
 
@@ -334,12 +355,61 @@ class QWD:
             randomSleep(1, 3)
             inputElement(browser.find_element_by_id('password'), self.password)
 
-            # Submit, wait for a long time
-            randomSleep(5, 10)
-            browser.find_element_by_id('loginBtn').click()
+            # Submit
+            buttonElement = browser.find_element_by_id('loginBtn')
+
+            # Code
+            codeElement = browser.find_element_by_id('code')
+            imageElement = browser.find_element_by_id('imgCode')
+
+            times = 10
+
+            while codeElement.is_displayed() and times > 0:
+
+                times -= 1
+
+                # Image to text
+                path = 'authcode.png'
+                ImageKit.saveCapture(browser, imageElement, path)
+
+                path = os.path.realpath(path)
+                code = ImageKit.getText(path)
+
+                print 'Get "', code, '" in', path
+
+                if not isValidAuthCode(code):
+
+                    # Refresh auth code
+                    randomSleep(1, 2)
+                    imageElement.click()
+
+                    continue
+
+                randomSleep(1, 2)
+                codeElement.send_keys(code)
+
+                # Submit
+                randomSleep(2, 3)
+                buttonElement.click()
+
+                wait = WebDriverWait(browser, 10)
+              
+                try:
+                    page_loaded = wait.until_not(lambda browser: browser.current_url == ploginUrl)
+                except Exception as e:
+                    print e
+
+                if browser.current_url.startswith('https://m.jd.com/?sid='):
+                    print 'Loginned for', self.pin
+                    break
+
+                randomSleep(1, 2)
+                codeElement.clear()
+
+                randomSleep(1, 2)
+                imageElement.click()
 
             # Redirect to wqs
-            time.sleep(10)
             qwsUrl = getProperty(self.configFile, 'cps-qwd-wqs-url')
 
             browser.get(qwsUrl)
