@@ -7,6 +7,7 @@ import os
 import pdfkit
 import pytesseract
 import shutil
+import time
 
 from wand.image import Image
 from wand.color import Color
@@ -94,6 +95,14 @@ class ImageKit:
 
     @staticmethod
     def saveCapture(driver, element, path):
+
+        # XXX: MAKE SURE THE ELEMENT IS UPDATED
+        try:
+            # If it supports the API of screenshot.
+            element.screenshot(path)
+            return
+        except Exception as e:
+            pass
 
         # now that we have the preliminary stuff out of the way time to get that image :D
         location = element.location
