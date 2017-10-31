@@ -374,13 +374,13 @@ class QWD:
             codeElement = browser.find_element_by_id('code')
             imageElement = browser.find_element_by_id('imgCode')
 
-            times = 10
+            times = 0
 
             if codeElement.is_displayed():
 
-                while codeElement.is_displayed() and times > 0:
+                while codeElement.is_displayed() and times < 50:
 
-                    times -= 1
+                    times += 1
 
                     # Image to text
                     path = 'authcode.png'
@@ -389,13 +389,12 @@ class QWD:
                     path = os.path.realpath(path)
                     code = ImageKit.getText(path)
 
-                    randomSleep(1, 2)
                     codeElement.send_keys(code)
 
                     if not isValidAuthCode(code):
 
                         # Refresh auth code
-                        randomSleep(1, 2)
+                        randomSleep(0.5, 1)
                         imageElement.click()
 
                         # Wait for updating auth code 
@@ -409,6 +408,7 @@ class QWD:
                     buttonElement.click()
 
                     if self.isSuccessful(browser):
+                        print 'Succeed after', times, 'tries.'
                         break
 
                     randomSleep(1, 2)
