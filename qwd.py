@@ -314,16 +314,18 @@ class QWD:
 
         return True
 
-    def isSuccessful(self, browser):
+    def getBrowserError(self, browser):
 
         wait = WebDriverWait(browser, 3)
       
         try:
             page_loaded = wait.until_not(lambda browser: browser.current_url == self.ploginUrl)
+            return None
         except Exception as e:
-            return False
+            pass
 
-        return browser.current_url.startswith(self.ploginSeccessfulUrl)
+        noticeElement = browser.find_element_by_xpath('//div[@class="notice"]')
+        return browser.execute_script("return arguments[0].innerHTML", noticeElement)
 
     def plogin(self):
 
@@ -407,9 +409,14 @@ class QWD:
                     randomSleep(1, 2)
                     buttonElement.click()
 
-                    if self.isSuccessful(browser):
+                    error = self.getBrowserError(browser)
+
+                    if error is None:
                         print 'Succeed after', times, 'tries.'
                         break
+
+                    if u'验证码' not in error:
+                        raise Exception('Unable to login for "{}": {}'.format(self.pin, error))
 
                     randomSleep(1, 2)
                     codeElement.clear()
@@ -425,8 +432,10 @@ class QWD:
 
                 wait = WebDriverWait(browser, 3)
               
-                if not self.isSuccessful(browser):
-                    raise Exception('Unable to login for "{}"'.format(self.pin))
+                error = self.getBrowserError(browser)
+
+                if error is not None:
+                    raise Exception('Unable to login for "{}": {}'.format(self.pin, error))
 
             print 'Loginned for', self.pin
 
