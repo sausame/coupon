@@ -32,6 +32,9 @@ class QWD:
 
         self.loginMethod = int(getProperty(self.configFile, 'cps-qwd-login-method'))
 
+        self.ploginUrl = getProperty(self.configFile, 'cps-qwd-plogin-url')
+        self.ploginSeccessfulUrl = getProperty(self.configFile, 'cps-qwd-plogin-seccessful-url')
+
         self.appid = getProperty(self.configFile, 'cps-qwd-appid')
         self.ctype = getProperty(self.configFile, 'cps-qwd-ctype')
         self.ie = getProperty(self.configFile, 'cps-qwd-ie')
@@ -311,11 +314,22 @@ class QWD:
 
         return True
 
+    def isSuccessful(self, browser):
+
+        wait = WebDriverWait(browser, 3)
+      
+        try:
+            page_loaded = wait.until_not(lambda browser: browser.current_url == self.ploginUrl)
+        except Exception as e:
+            return False
+
+        return browser.current_url.startswith(self.ploginSeccessfulUrl)
+
     def plogin(self):
 
         def isValidAuthCode(code):
 
-            if code is None or len(code) < 4:
+            if code is None or len(code) != 4:
                 return False
 
             for c in code:
@@ -341,10 +355,8 @@ class QWD:
         browser = webdriver.Chrome()
 
         try:
-
             # Plogin
-            ploginUrl = getProperty(self.configFile, 'cps-qwd-plogin-url')
-            browser.get(ploginUrl)
+            browser.get(self.ploginUrl)
 
             # Login by username and password
 
@@ -352,7 +364,7 @@ class QWD:
             randomSleep(1, 2)
             inputElement(browser.find_element_by_id('username'), self.pin)
 
-            randomSleep(1, 3)
+            randomSleep(1, 2)
             inputElement(browser.find_element_by_id('password'), self.password)
 
             # Submit
@@ -364,54 +376,59 @@ class QWD:
 
             times = 10
 
-            while codeElement.is_displayed() and times > 0:
+            if codeElement.is_displayed():
 
-                times -= 1
+                while codeElement.is_displayed() and times > 0:
 
-                # Image to text
-                path = 'authcode.png'
-                ImageKit.saveCapture(browser, imageElement, path)
+                    times -= 1
 
-                path = os.path.realpath(path)
-                code = ImageKit.getText(path)
+                    # Image to text
+                    path = 'authcode.png'
+                    ImageKit.saveCapture(browser, imageElement, path)
 
-                print 'Get "', code, '" in', path
+                    path = os.path.realpath(path)
+                    code = ImageKit.getText(path)
 
-                if not isValidAuthCode(code):
-
-                    # Refresh auth code
                     randomSleep(1, 2)
-                    imageElement.click()
+                    codeElement.send_keys(code)
 
-                    # Wait for updating auth code 
+                    if not isValidAuthCode(code):
+
+                        # Refresh auth code
+                        randomSleep(1, 2)
+                        imageElement.click()
+
+                        # Wait for updating auth code 
+                        randomSleep(1, 2)
+                        codeElement.clear()
+
+                        continue
+
+                    # Submit
+                    randomSleep(1, 2)
+                    buttonElement.click()
+
+                    if self.isSuccessful(browser):
+                        break
+
+                    randomSleep(1, 2)
+                    codeElement.clear()
                     randomSleep(1, 2)
 
-                    continue
+                else:
+                    raise Exception('Unable to login for "{}"'.format(self.pin))
 
-                randomSleep(1, 2)
-                codeElement.send_keys(code)
-
+            else:
                 # Submit
-                randomSleep(2, 3)
+                randomSleep(1, 2)
                 buttonElement.click()
 
-                wait = WebDriverWait(browser, 10)
+                wait = WebDriverWait(browser, 3)
               
-                try:
-                    page_loaded = wait.until_not(lambda browser: browser.current_url == ploginUrl)
-                except Exception as e:
-                    print e
+                if not self.isSuccessful(browser):
+                    raise Exception('Unable to login for "{}"'.format(self.pin))
 
-                if browser.current_url.startswith('https://m.jd.com/?sid='):
-                    print 'Loginned for', self.pin
-                    break
-
-                randomSleep(1, 2)
-                codeElement.clear()
-
-                randomSleep(1, 2)
-                imageElement.click()
-                randomSleep(1, 2)
+            print 'Loginned for', self.pin
 
             # Redirect to wqs
             qwsUrl = getProperty(self.configFile, 'cps-qwd-wqs-url')
@@ -427,6 +444,7 @@ class QWD:
                 v = cookie['value']
 
                 self.pCookies[k] = v
+
         except Exception as e:
             print e
         finally:
