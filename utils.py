@@ -29,7 +29,7 @@ def getchar():
     print 'Please press return key to continue'
     sys.stdin.read(1)
 
-def inputElement(element, content, normalSpeed=(0.2, 0.5), slowSpeed=(0.5, 1)):
+def inputElement(element, content, normalSpeed=(0.1, 0.2), slowSpeed=(0.2, 0.4)):
 
     def randomChar():
         return random.choice(string.ascii_lowercase + string.digits)
@@ -41,7 +41,7 @@ def inputElement(element, content, normalSpeed=(0.2, 0.5), slowSpeed=(0.5, 1)):
         element.send_keys(Keys.BACK_SPACE)
 
     # Type: 0, digit; 1, alpha; 2, space; 3, other
-    cLastType = 0
+    cLastType = 1
 
     # Simulation of human input, sometime typo.
     for c in content:
@@ -72,10 +72,10 @@ def inputElement(element, content, normalSpeed=(0.2, 0.5), slowSpeed=(0.5, 1)):
         # Three times typo at most
         for i in range(0, 3):
 
-            num = random.randint(0, 4)
+            num = random.randint(0, 9)
             isTypo = (num < typoThresholdValue)
 
-            if isTypo:
+            if not isTypo:
                 break
 
             # Typo
