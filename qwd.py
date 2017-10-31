@@ -383,6 +383,9 @@ class QWD:
                     randomSleep(1, 2)
                     imageElement.click()
 
+                    # Wait for updating auth code 
+                    randomSleep(1, 2)
+
                     continue
 
                 randomSleep(1, 2)
@@ -408,6 +411,7 @@ class QWD:
 
                 randomSleep(1, 2)
                 imageElement.click()
+                randomSleep(1, 2)
 
             # Redirect to wqs
             qwsUrl = getProperty(self.configFile, 'cps-qwd-wqs-url')
