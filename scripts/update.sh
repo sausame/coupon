@@ -16,8 +16,20 @@
 #    sudo /sbin/service crond status
 #    sudo cat /var/spool/cron/USERNAME
 
-CODE_PATH=""
-LOG_FILE=""
+CONFIG_FILE=""
+
+get_property()
+{
+    local prop_key=$1
+    local prop_value=`cat ${CONFIG_FILE} | grep ${prop_key} | cut -d'=' -f2`
+
+	echo $prop_value
+}
+
+NAME='update'
+CODE_PATH=$(get_property 'code-path')
+OUTPUT_PATH=$(get_property 'output-path')
+LOG_FILE="$OUTPUT_PATH/logs/$NAME.log"
 
 function err_exit() {
     local now=`TZ='Asia/Shanghai' date`
@@ -32,7 +44,7 @@ echo "Updating at $startDate ..." >> $LOG_FILE
 # Update
 cd $CODE_PATH \
 && source env/bin/activate \
-&& python main.py 1>> $LOG_FILE 2>> $LOG_FILE || err_exit
+&& python main.py $CONFIG_FILE $NAME 1>> $LOG_FILE 2>> $LOG_FILE || err_exit
 
 # End
 endDate=`TZ='Asia/Shanghai' date`

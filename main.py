@@ -70,8 +70,12 @@ if __name__ == '__main__':
     reload(sys)
     sys.setdefaultencoding('utf-8')
 
-    configFile = 'config.ini'
-    name = 'update'
+    if len(sys.argv) < 3:
+        print 'Usage:\n\t', sys.argv[0], 'config-file name\n'
+        exit()
+
+    configFile = sys.argv[1]
+    name = sys.argv[2]
 
     run(configFile, name)
 
