@@ -9,7 +9,7 @@ from functools import total_ordering
 from imgkit import ImageKit
 from infor import getSlogan, getComments
 from operator import attrgetter
-from utils import seconds2Datetime, hexlifyUtf8, unhexlifyUtf8, UrlUtils
+from utils import seconds2Datetime, hexlifyUtf8, unhexlifyUtf8, OutputPath, UrlUtils
 from validation import Validation
 
 class BaseDict:
@@ -531,7 +531,7 @@ class SpecialFormatter:
 
         content = self.getHtml()
 
-        path = '{}.html'.format(self.skuid)
+        path = OutputPath.getDataPath('sku-{}'.format(skuid), 'html')
 
         with open(path, 'w') as fp:
             fp.write(content)

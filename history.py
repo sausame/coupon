@@ -3,6 +3,7 @@ import json
 from base import Sku, PromotionHistory, PriceHistoryData
 from js import JsExecutor
 from network import Network
+from utils import OutputPath
 
 class PriceHistoryManager:
 
@@ -73,7 +74,7 @@ class PriceHistoryManager:
         url = executor.context.requestPriceInfo(title, url)
 
         # Get price histories
-        path = 'data/{}.js'.format(skuid)
+        path = OutputPath.getDataPath(skuid, 'js')
 
         ret = Network.saveHttpData(path, url)
         #print 'Update', path, ':', ret, ':', title

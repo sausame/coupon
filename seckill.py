@@ -6,6 +6,7 @@ import os
 
 from base import MatchesItem, Seckill
 from network import Network
+from utils import OutputPath
 
 class SeckillInfo:
 
@@ -23,7 +24,7 @@ class SeckillInfo:
 
     def update(self):
 
-        path = 'data/seckill-%d.json' % self.gid
+        path = OutputPath.getDataPath('seckill-{}'.format(self.gid), 'json')
 
         ret = Network.saveHttpData(path, 'http://coupon.m.jd.com/seckill/seckillList.json?gid=%d' % self.gid)
         if ret < 0:

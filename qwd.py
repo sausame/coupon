@@ -11,7 +11,7 @@ import time
 from imgkit import ImageKit
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
-from utils import getMatchString, getProperty, inputElement, randomSleep, reprDict
+from utils import getMatchString, getProperty, inputElement, randomSleep, reprDict, OutputPath
 
 class CPS:
 
@@ -385,10 +385,10 @@ class QWD:
                     times += 1
 
                     # Image to text
-                    path = 'authcode.png'
+                    path = OutputPath.getAuthPath(self.pin)
+
                     ImageKit.saveCapture(browser, imageElement, path)
 
-                    path = os.path.realpath(path)
                     code = ImageKit.getText(path)
 
                     codeElement.send_keys(code)

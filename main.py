@@ -5,21 +5,25 @@ import sys
 import traceback
 
 from coupon import SkuManager, CouponManager, DiscountManager
+from datetime import datetime
 from db import Database
 from evaluation import Evaluation
 from seckill import SeckillManager
 from history import PriceHistoryManager
-from utils import removeOverdueFiles
+from utils import OutputPath, ThreadWritableObject
 
-def clear():
-    removeOverdueFiles('data/', 47 * 3600, '.js') # Almost two days overdue
-    removeOverdueFiles('data/', 11 * 3600, '.json') # Almost half of one day overdue
-    removeOverdueFiles('data/', 11 * 3600, '.html') # Almost half of one day overdue
+def run(configFile):
 
-def run(configfile):
+    OutputPath.init(configFile)
+    OutputPath.clear()
+
+    thread = ThreadWritableObject(configFile)
+    thread.start()
+
+    sys.stdout = thread
+    sys.errout = thread # XXX: Actually, it does NOT work
 
     try:
-        clear()
 
         db = Database(configFile, 'specials')
         db.initialize()
@@ -44,11 +48,24 @@ def run(configfile):
 
         evaluation.evaluate()
 
-    except:
+    except KeyboardInterrupt:
+        pass
+    except Exception, e:
+        print 'Error occurs at', datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         traceback.print_exc(file=sys.stdout)
     finally:
-        db.quit()
+        try:
+            db.quit()
+        except:
+            pass
 
+    thread.quit()
+
+    thread.join()
+
+'''
+Main Entry
+'''
 if __name__ == '__main__':
 
     reload(sys)

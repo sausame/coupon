@@ -3,11 +3,11 @@
 import json
 
 from network import Network
-from utils import getMatchString
+from utils import getMatchString, OutputPath
 
 def getSlogan(skuid):
 
-    path = 'data/{}.html'.format(skuid)
+    path = OutputPath.getDataPath(skuid, 'html')
 
     SKU_MAIN_URL_TEMPLATE = 'http://item.m.jd.com/product/{}.html'
     url = SKU_MAIN_URL_TEMPLATE.format(skuid)
@@ -36,7 +36,7 @@ def getComments(skuid):
     COMMENT_URL_TEMPLATE = 'http://item.m.jd.com/ware/getDetailCommentList.json?wareId={}'
     url = COMMENT_URL_TEMPLATE.format(skuid)
 
-    path = 'data/{}.json'.format(skuid)
+    path = OutputPath.getDataPath(skuid, 'json')
 
     ret = Network.saveGetUrl(path, url)
     #print 'Update', path, ':', ret

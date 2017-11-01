@@ -340,6 +340,51 @@ class AutoReleaseThread(threading.Thread):
         print 'Stopping ...'
         self.running = False
 
+class OutputPath:
+
+    LOG_OUTPUT_PATH = None
+    DATA_OUTPUT_PATH = None
+    AUTH_OUTPUT_PATH = None
+
+    @staticmethod
+    def init(configFile):
+
+        def mkdir(path):
+            if not os.path.exists(path):
+                os.mkdir(path, 0755)
+
+        outputPath = getProperty(configFile, 'output-path')
+        outputPath = os.path.realpath(outputPath)
+
+        OutputPath.LOG_OUTPUT_PATH = os.path.join(outputPath, 'logs')
+        mkdir(OutputPath.LOG_OUTPUT_PATH)
+
+        OutputPath.DATA_OUTPUT_PATH = os.path.join(outputPath, 'datas')
+        mkdir(OutputPath.DATA_OUTPUT_PATH)
+
+        OutputPath.AUTH_OUTPUT_PATH = os.path.join(outputPath, 'auths')
+        mkdir(OutputPath.AUTH_OUTPUT_PATH)
+
+    @staticmethod
+    def getDataPath(key, suffix):
+        return '{}/{}.{}'.format(OutputPath.DATA_OUTPUT_PATH, key, suffix)
+
+    @staticmethod
+    def getAuthPath(name):
+        return '{}/{}.png'.format(OutputPath.AUTH_OUTPUT_PATH, name)
+
+    @staticmethod
+    def clear():
+
+        # Data
+        removeOverdueFiles(OutputPath.DATA_OUTPUT_PATH, 47 * 3600, '.js') # Almost two days overdue
+        removeOverdueFiles(OutputPath.DATA_OUTPUT_PATH, 11 * 3600, '.json') # Almost half of one day overdue
+        removeOverdueFiles(OutputPath.DATA_OUTPUT_PATH, 11 * 3600, '.html') # Almost half of one day overdue
+        removeOverdueFiles(OutputPath.DATA_OUTPUT_PATH, 11 * 3600, '.png') # Almost half of one day overdue
+
+        # Auth
+        removeOverdueFiles(OutputPath.AUTH_OUTPUT_PATH, 11 * 3600, '.png') # Almost half of one day overdue
+
 class ThreadWritableObject(threading.Thread):
 
     def __init__(self, configFile):
@@ -348,14 +393,7 @@ class ThreadWritableObject(threading.Thread):
 
         self.running = True
 
-        outputPath = getProperty(configFile, 'output-path')
-        outputPath = os.path.realpath(outputPath)
-        outputPath = os.path.join(outputPath, 'logs')
-
-        if not os.path.exists(outputPath):
-            os.mkdir(outputPath, 0755)
-
-        self.path = os.path.join(outputPath, 'sys.log')
+        self.path = os.path.join(OutputPath.LOG_OUTPUT_PATH, 'sys.log')
         self.contents = []
 
         self.mutex = threading.Lock()
@@ -483,7 +521,7 @@ def removeOverdueFiles(pathname, seconds, suffix=None):
 
         for filename in filenames:
 
-            path = parent + filename
+            path = os.path.join(parent, filename)
 
             if None != suffix and not filename.endswith(suffix):
                 continue
