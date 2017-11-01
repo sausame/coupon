@@ -12,19 +12,18 @@ from seckill import SeckillManager
 from history import PriceHistoryManager
 from utils import OutputPath, ThreadWritableObject
 
-def run(configFile):
+def run(configFile, name):
 
     OutputPath.init(configFile)
     OutputPath.clear()
 
-    thread = ThreadWritableObject(configFile)
+    thread = ThreadWritableObject(configFile, name)
     thread.start()
 
     sys.stdout = thread
     sys.errout = thread # XXX: Actually, it does NOT work
 
     try:
-
         db = Database(configFile, 'specials')
         db.initialize()
 
@@ -72,6 +71,7 @@ if __name__ == '__main__':
     sys.setdefaultencoding('utf-8')
 
     configFile = 'config.ini'
+    name = 'update'
 
-    run(configFile)
+    run(configFile, name)
 

@@ -387,13 +387,13 @@ class OutputPath:
 
 class ThreadWritableObject(threading.Thread):
 
-    def __init__(self, configFile):
+    def __init__(self, configFile, name):
 
         threading.Thread.__init__(self)
 
         self.running = True
 
-        self.path = os.path.join(OutputPath.LOG_OUTPUT_PATH, 'sys.log')
+        self.path = os.path.join(OutputPath.LOG_OUTPUT_PATH, '{}.log'.format(name))
         self.contents = []
 
         self.mutex = threading.Lock()
