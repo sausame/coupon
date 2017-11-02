@@ -368,10 +368,17 @@ class Special(SkuBase):
     def __init__(self, data):
         SkuBase.__init__(self, data)
 
-        self.data['commentList'] = json.loads(self.data.pop('commentList'))
+        comments = json.loads(self.data.pop('commentList'))
 
-        for i in range(len(self.data['commentList'])):
-            self.data['commentList'][i]['commentData'] = unhexlifyUtf8(self.data['commentList'][i].pop('commentData'))
+        self.data['commentList'] = list()
+
+        for comment in comments:
+
+            comment['commentData'] = unhexlifyUtf8(comment.pop('commentData'))
+            if Validation.isCommentBad(comment['commentData']):
+                continue
+
+            self.data['commentList'].append(comment)
 
     def update(self, db=None, tableName=None):
 
@@ -432,14 +439,7 @@ class SpecialFormatter:
         self.startTime = self.special.data['startTime']
         self.endTime = self.special.data['endTime']
 
-        self.comments = list()
-
-        for comment in self.special.data['commentList']:
-
-            if Validation.isCommentBad(comment['commentData']):
-                continue
-
-            self.comments.append(comment)
+        self.comments = self.special.data['commentList']
 
         self.couponLink = self.special.data['couponLink']
 
