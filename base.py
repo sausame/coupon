@@ -3,6 +3,8 @@
 
 import json
 import math
+import os
+import pathlib
 
 from datetime import tzinfo, timedelta, datetime
 from functools import total_ordering
@@ -494,7 +496,11 @@ class SpecialFormatter:
         else:
             icon = 'good.png'
 
-        self.icon = 'images/{}'.format(icon)
+        path = os.path.dirname(os.path.realpath(__file__))
+        path = os.path.join(path, 'images')
+        path = os.path.join(path, icon)
+
+        self.icon = pathlib.Path(path).as_uri()
 
         self.discount = int(self.cutPrice * 100 / self.price)
         self.lowestRatio = int(self.lowestPrice * 100 / self.price)
@@ -531,7 +537,7 @@ class SpecialFormatter:
 
         content = self.getHtml()
 
-        path = OutputPath.getDataPath('sku-{}'.format(skuid), 'html')
+        path = OutputPath.getDataPath('sku-{}'.format(self.skuid), 'html')
 
         with open(path, 'w') as fp:
             fp.write(content)
