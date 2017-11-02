@@ -8,11 +8,17 @@ from base import SpecialFormatter
 from db import Database
 from evaluation import Evaluation
 from qwd import QWD
-from utils import getchar, getProperty, reprDict, runCommand, OutputPath
+from utils import getchar, getProperty, reprDict, runCommand, OutputPath, ThreadWritableObject
 
-def run(configfile):
+def run(configfile, name):
 
     OutputPath.init(configFile)
+
+    thread = ThreadWritableObject(configFile, name)
+    thread.start()
+
+    sys.stdout = thread
+    sys.errout = thread # XXX: Actually, it does NOT work
 
     try:
 
@@ -30,17 +36,32 @@ def run(configfile):
         with open(path, 'w') as fp:
             fp.write(reprDict(data))
 
-    except:
+    except KeyboardInterrupt:
+        pass
+    except Exception, e:
+        print 'Error occurs at', datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         traceback.print_exc(file=sys.stdout)
     finally:
-        db.quit()
+        try:
+            db.quit()
+        except:
+            pass
+
+    thread.quit()
+
+    thread.join()
 
 if __name__ == '__main__':
 
     reload(sys)
     sys.setdefaultencoding('utf-8')
 
-    configFile = 'config.ini'
+    if len(sys.argv) < 3:
+        print 'Usage:\n\t', sys.argv[0], 'config-file name\n'
+        exit()
 
-    run(configFile)
+    configFile = sys.argv[1]
+    name = sys.argv[2]
+
+    run(configFile, name)
 
