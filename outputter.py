@@ -8,9 +8,11 @@ from base import SpecialFormatter
 from db import Database
 from evaluation import Evaluation
 from qwd import QWD
-from utils import getchar, runCommand
+from utils import getchar, runCommand, OutputPath
 
 def run(configfile):
+
+    OutputPath.init(configFile)
 
     try:
 
