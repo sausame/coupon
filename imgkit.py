@@ -9,7 +9,7 @@ import pytesseract
 import shutil
 import time
 
-from wand.image import Image
+from wand.image import Image as WandImage
 from wand.color import Color
 from utils import runCommand
 
@@ -65,12 +65,12 @@ class ImageKit:
             # Only parse first page
             ret = runCommand('/usr/bin/pdftk {} cat 1 output {}'.format(pdfFile, outFile))
 
-            with Image(filename=outFile, resolution=resolution) as img:
+            with WandImage(filename=outFile, resolution=resolution) as img:
 
                 if size is None:
                     size = (img.width - start[0], img.height - start[1])
 
-                with Image(width=size[0], height=size[1], background=Color('white')) as bg:
+                with WandImage(width=size[0], height=size[1], background=Color('white')) as bg:
 
                     bg.composite(img, start[0], start[1])
                     if resize is not None:
