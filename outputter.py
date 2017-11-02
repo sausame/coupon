@@ -8,7 +8,7 @@ from base import SpecialFormatter
 from db import Database
 from evaluation import Evaluation
 from qwd import QWD
-from utils import getchar, runCommand, OutputPath
+from utils import getchar, getProperty, reprDict, runCommand, OutputPath
 
 def run(configfile):
 
@@ -23,18 +23,12 @@ def run(configfile):
 
         qwd = QWD(configFile)
 
-        special = evaluation.output()
+        path = getProperty(configFile, 'output-share-file')
 
-        while (special is not None):
+        data = evaluation.output()
 
-            formatter = SpecialFormatter.create(special)
-
-            print formatter.getPlate(qwd)
-            runCommand('/usr/bin/eog {}'.format(formatter.getImage()))
-
-            getchar()
-
-            special = evaluation.output()
+        with open(path, 'w') as fp:
+            fp.write(reprDict(data))
 
     except:
         traceback.print_exc(file=sys.stdout)

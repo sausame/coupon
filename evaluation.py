@@ -193,30 +193,19 @@ class Evaluation:
         endTime = (now + timedelta(hours=2)).replace(minute=0,
                 second=0, microsecond=0).strftime('%Y-%m-%d %H:%M:%S')
 
-        sql = ''' SELECT COUNT(InformationTable.id) AS num
-                  FROM InformationTable 
-                  LEFT OUTER JOIN SkuTable ON SkuTable.skuid = InformationTable.skuid 
-                  WHERE InformationTable.outputTime <= '{0}'
+        data = dict()
+
+        data['startTime'] = startTime
+        data['endTime'] = endTime
+        data['num'] = 0
+        data['list'] = list()
+
+        where = ''' InformationTable.outputTime <= '{0}'
                       AND InformationTable.cutPrice <= InformationTable.lowestPrice
                       AND InformationTable.totalDays > 30
                       AND ((InformationTable.startTime <= '{0}' AND InformationTable.endTime >= '{1}')
                           OR InformationTable.startTime IS NULL OR InformationTable.endTime IS NULL)
-                  '''.format(startTime, endTime) #
-
-        result = self.db.query(sql)
-
-        if result is None:
-            return None
-
-        num = 0
-
-        for row in result:
-            num = row['num']
-
-        print 'Found', num, 'SKUs between', startTime, 'and', endTime
-
-        if num is 0:
-            return None
+                  '''.format(startTime, endTime)
 
         sql = ''' SELECT InformationTable.id, SkuTable.skuid,
                       InformationTable.lowestPrice, InformationTable.cutPrice,
@@ -229,27 +218,26 @@ class Evaluation:
                       InformationTable.outputTime, InformationTable.startTime, InformationTable.endTime
                   FROM InformationTable 
                   LEFT OUTER JOIN SkuTable ON SkuTable.skuid = InformationTable.skuid 
-                  WHERE InformationTable.outputTime <= '{0}'
-                      AND InformationTable.cutPrice <= InformationTable.lowestPrice
-                      AND InformationTable.totalDays > 30
-                      AND ((InformationTable.startTime <= '{0}' AND InformationTable.endTime >= '{1}')
-                          OR InformationTable.startTime IS NULL OR InformationTable.endTime IS NULL)
+                  WHERE {}
                   ORDER BY InformationTable.endTime ASC,
-                      `InformationTable`.`weight` ASC 
-                  LIMIT 1 '''.format(startTime, endTime) #
+                      `InformationTable`.`weight` ASC '''.format(where)
 
         result = self.db.query(sql)
 
         if result is None:
-            return None
+            print 'Found 0 SKU between', startTime, 'and', endTime
+            return data
 
         for row in result:
+
             special = Special(row)
             special.update(self.db, 'InformationTable')
 
-            return special
+            data['list'].append(special.data)
 
-        return None
+        print 'Found', len(data['list']), 'SKU between', startTime, 'and', endTime
+
+        return data
 
     def explore(self, key, price=None):
 
