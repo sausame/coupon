@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
+import os
 import sys
 import traceback
 
@@ -70,12 +71,13 @@ if __name__ == '__main__':
     reload(sys)
     sys.setdefaultencoding('utf-8')
 
-    if len(sys.argv) < 3:
-        print 'Usage:\n\t', sys.argv[0], 'config-file name\n'
+    if len(sys.argv) < 2:
+        print 'Usage:\n\t', sys.argv[0], 'config-file\n'
         exit()
 
+    name = os.path.basename(sys.argv[0])[:-3] # Remove ".py"
+
     configFile = sys.argv[1]
-    name = sys.argv[2]
 
     run(configFile, name)
 
