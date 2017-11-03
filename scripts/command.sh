@@ -35,8 +35,12 @@ get_property() {
 
 run() {
 	local app=$1
-	local name=$2
-	local config_file=$3
+	local config_file=$2
+
+	local num="${#app}"
+	# Remove '.py'
+	local pos=$(($num - 3))
+	local name=`echo $APP | cut -c1-$pos`
 
 	local code_path=$(get_property $config_file 'code-path')
 	local output_path=$(get_property $config_file 'output-path')
@@ -47,10 +51,10 @@ run() {
 	local startDate=`TZ='Asia/Shanghai' date`
 	echo "Updating at $startDate ..." >> $log_file
 
-	# Update
+	# Running
 	cd $code_path \
 	&& source env/bin/activate \
-	&& python $app $config_file $name 1>> $log_file 2>> $log_file || err_exit $log_file
+	&& python $@ 1>> $log_file 2>> $log_file || err_exit $log_file
 
 	# End
 	endDate=`TZ='Asia/Shanghai' date`
@@ -64,10 +68,8 @@ run() {
 # # APP is a relative path to code path
 # APP="xxx.py"
 #
-# NAME="xxx"
-#
 # # CONFIG_FILE should be an absolute path
 # CONFIG_FILE="/.../config.ini"
 #
-# run $APP $NAME $CONFIG_FILE
+# run $APP $CONFIG_FILE
 
