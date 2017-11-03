@@ -5,7 +5,7 @@
 {0.plateAvgPrice}
 最低价　：￥{0.lowestPrice}
 优惠价　：￥{0.cutPrice}
-上架时间：{0.totalDays}
+上架时间：{0.plateTotalDays}
 {0.platePeriod}
 ----------------------------
 用户评价（{0.percentOfGoodComments} 好评）
