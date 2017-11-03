@@ -235,7 +235,9 @@ class Evaluation:
 
             data['list'].append(special.data)
 
-        print 'Found', len(data['list']), 'SKU between', startTime, 'and', endTime
+        data['num'] = len(data['list'])
+
+        print 'Found', data['num'], 'SKU between', startTime, 'and', endTime
 
         return data
 
