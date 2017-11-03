@@ -22,6 +22,10 @@ def seconds2Datetime(seconds):
     #return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(seconds))
     return datetime.fromtimestamp(seconds).strftime('%Y-%m-%d %H:%M:%S')
 
+def datetime2Seconds(dt):
+    return time.mktime(datetime.strptime(dt, '%Y-%m-%d %H:%M:%S').timetuple())
+    # return (datetime.strptime(dt, '%Y-%m-%d %H:%M:%S') - datetime(1970, 1, 1)).total_seconds() # XXX CTS
+
 def randomSleep(minS, maxS):
     time.sleep(random.uniform(minS, maxS))
 
