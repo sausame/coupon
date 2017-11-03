@@ -340,5 +340,17 @@ class Evaluation:
         if remoteList is not None:
             specialList.extend(remoteList)
 
-        return specialList
+        specialList.sort()
+
+        data = dict()
+
+        data['num'] = len(specialList)
+        data['list'] = list()
+
+        for special in specialList:
+            data['list'].append(special.data)
+
+        print 'Found', data['num'], 'SKU with', key, '" with price', price
+
+        return data
 

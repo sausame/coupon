@@ -1,16 +1,26 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
+import os
 import sys
 import traceback
 
 from base import SpecialFormatter
+from datetime import datetime
 from db import Database
 from evaluation import Evaluation
 from qwd import QWD
-from utils import getchar, runCommand
+from utils import getchar, reprDict, runCommand, OutputPath, ThreadWritableObject
 
-def run(configfile, content):
+def run(configfile, name, content, savefile):
+
+    OutputPath.init(configFile)
+
+    thread = ThreadWritableObject(configFile, name)
+    thread.start()
+
+    sys.stdout = thread
+    sys.errout = thread # XXX: Actually, it does NOT work
 
     try:
 
@@ -19,44 +29,48 @@ def run(configfile, content):
 
         evaluation = Evaluation(configFile, db)
 
-        specialList = evaluation.search(content)
+        data = evaluation.search(content)
 
-        if specialList is None or len(specialList) is 0:
-            return
+        if savefile is not None:
+            with open(savefile, 'w') as fp:
+                fp.write(reprDict(data))
+        else:
+            print reprDict(data)
 
-        print 'Found', len(specialList)
-
-        specialList.sort()
-        qwd = QWD(configFile)
-
-        for special in specialList:
-
-            formatter = SpecialFormatter.create(special)
-
-            print formatter.getPlate(qwd)
-            runCommand('/usr/bin/eog {}'.format(formatter.getImage()))
-
-            getchar()
-
-    except:
+    except KeyboardInterrupt:
+        pass
+    except Exception, e:
+        print 'Error occurs at', datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         traceback.print_exc(file=sys.stdout)
     finally:
-        db.quit()
+        try:
+            db.quit()
+        except:
+            pass
+
+    thread.quit()
+
+    thread.join()
 
 if __name__ == '__main__':
 
     reload(sys)
     sys.setdefaultencoding('utf-8')
 
-    num = len(sys.argv)
-    if num < 2:
-        print 'Usage:\n\t', sys.argv[0], 'content'
-        print '\tOr'
-        print '\t', sys.argv[0], '\"#key#[low-price#[high-price#]]\"'
+    if len(sys.argv) < 3:
+        print 'Usage:\n\t', sys.argv[0], 'config-file content [savefile]\n' \
+            '  Or:\n\t', sys.argv[0], 'config-file \"#key#[low-price#[high-price#]] [savefile]\"\n'
         exit()
 
-    configFile = 'config.ini'
-    content = sys.argv[1]
+    name = os.path.basename(sys.argv[0])[:-3] # Remove ".py"
 
-    run(configFile, content)
+    configFile = sys.argv[1]
+    content = sys.argv[2]
+
+    if len(sys.argv) > 3:
+        savefile = sys.argv[3]
+    else:
+        savefile = None
+
+    run(configFile, name, content, savefile)
 
