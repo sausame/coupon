@@ -406,42 +406,42 @@ class Special(SkuBase):
 
 class SpecialFormatter:
 
-    def __init__(self, special):
-        self.special = special
+    def __init__(self, data):
+        self.data = data
 
     @staticmethod
-    def create(special):
+    def create(data):
 
-        formatter = SpecialFormatter(special)
+        formatter = SpecialFormatter(data)
         formatter.prepare()
 
         return formatter
 
     def prepare(self):
 
-        self.skuid = self.special.data['skuid']
-        self.title = self.special.data['title']
-        self.slogan = self.special.data['slogan']
+        self.skuid = self.data['skuid']
+        self.title = self.data['title']
+        self.slogan = self.data['slogan']
 
         if self.slogan is None:
             self.slogan = ''
 
-        self.skuimgurl = self.special.data['skuimgurl']
+        self.skuimgurl = self.data['skuimgurl']
 
-        self.price = self.special.data['price']
-        self.lowestPrice = self.special.data['lowestPrice']
-        self.avgPrice = self.special.data['avgPrice']
-        self.cutPrice = self.special.data['cutPrice']
+        self.price = self.data['price']
+        self.lowestPrice = self.data['lowestPrice']
+        self.avgPrice = self.data['avgPrice']
+        self.cutPrice = self.data['cutPrice']
 
-        self.totalDays = self.special.data['totalDays']
-        self.percentOfGoodComments = self.special.data['percentOfGoodComments']
+        self.totalDays = self.data['totalDays']
+        self.percentOfGoodComments = self.data['percentOfGoodComments']
 
-        self.startTime = self.special.data['startTime']
-        self.endTime = self.special.data['endTime']
+        self.startTime = self.data['startTime']
+        self.endTime = self.data['endTime']
 
-        self.comments = self.special.data['commentList']
+        self.comments = self.data['commentList']
 
-        self.couponLink = self.special.data['couponLink']
+        self.couponLink = self.data['couponLink']
 
     def preparePlate(self, qwd):
 
