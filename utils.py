@@ -279,6 +279,40 @@ class UniPrinter(pprint.PrettyPrinter):
         return pprint.PrettyPrinter.format(self, obj,
             context, maxlevels, level)
 
+# XXX: Gentlemen should not force ladies to quit but ask them to quit.
+class LadyThread(threading.Thread):
+
+    def __init__(self):
+
+        self.isInitialized = False
+
+        self.running = True
+        threading.Thread.__init__(self)
+
+        self.mutex = threading.Lock()
+
+    def run(self):
+
+        threadname = threading.currentThread().getName()
+
+        while self.running:
+
+            self.mutex.acquire()
+
+            self.runOnce()
+
+            self.mutex.release()
+
+        print 'Quit'
+
+    def runOnce(self):
+        raise TypeError('No implement')
+
+    def quit(self):
+
+        print 'Stopping ...'
+        self.running = False
+
 class AutoReleaseThread(threading.Thread):
 
     def __init__(self):
