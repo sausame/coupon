@@ -5,7 +5,7 @@ import itchat
 import time
 
 from schedule import Schedule
-from utils import getProperty
+from utils import getProperty, reprDict
 
 class WX(Schedule):
 
@@ -37,8 +37,8 @@ class WX(Schedule):
             groups = itchat.search_chatrooms(name=name)
             self.watchGroups.extend(groups)
 
-        # XXX After that it will go into a loop and never quit.
-        # itchat.run()
+        # XXX Image will fail to send images if it starts autoplay
+        #itchat.run()
 
         shareUrl = getProperty(self.configFile, 'share-url')
         self.setUrl(shareUrl)
@@ -71,10 +71,14 @@ class WX(Schedule):
 
     def text(self, msg):
 
-        user = itchat.search_friends(userName=msg['ActualUserName'])
+        for friend in self.watchFriends:
+            if msg['FromUserName'] == friend['UserName']:
+                break
+        else:
+            return
 
         print '================================================================'
-        print user['NickName'], 'sends a message:'
+        print msg['User']['NickName'], 'sends a message:'
         print '----------------------------------------------------------------'
         print msg['Content']
         print '================================================================'
