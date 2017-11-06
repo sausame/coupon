@@ -14,7 +14,7 @@ def run(configFile, name):
 
     wx = None
 
-    @itchat.msg_register(itchat.content.TEXT, isGroupChat = False)
+    @itchat.msg_register(itchat.content.TEXT)
     def text(msg):
         wx.text(msg)
 
