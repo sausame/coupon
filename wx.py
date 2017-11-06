@@ -37,8 +37,7 @@ class WX(Schedule):
             groups = itchat.search_chatrooms(name=name)
             self.watchGroups.extend(groups)
 
-        # XXX Image will fail to send images if it starts autoplay
-        #itchat.run()
+        itchat.run(blockThread=False) # Run in a new thread
 
         shareUrl = getProperty(self.configFile, 'share-url')
         self.setUrl(shareUrl)
