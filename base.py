@@ -177,7 +177,7 @@ class PriceHistoryData(BaseDict):
 
 class SkuInformation(BaseDict):
 
-    def __init__(self, data, version):
+    def __init__(self, data, version, clock=None):
         BaseDict.__init__(self, data)
 
         self.data['skuid'] = int(self.data.pop('skuid'))
@@ -197,7 +197,11 @@ class SkuInformation(BaseDict):
             self.data['endTime'] = seconds2Datetime(self.data.pop('validEndTime') / 1000L)
 
         if 'outputTime' not in self.data.keys():
-            if self.data['startTime'] is None:
+
+            if clock is not None:
+                self.data['outputTime'] = clock.randomTime(self.data['startTime'],
+                        self.data['endTime'])
+            elif self.data['startTime'] is None:
                 self.data['outputTime'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             else:
                 self.data['outputTime'] = self.data['startTime']

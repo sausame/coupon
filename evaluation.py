@@ -5,6 +5,7 @@ import random
 import time
 
 from base import Sku, SkuInformation, Special
+from clock import Clock
 from datetime import timedelta, datetime
 from history import PriceHistoryManager
 from nlp import NLP
@@ -86,6 +87,8 @@ class Evaluation:
 
         for tableName in sqlDict.keys():
 
+            clock = Clock() # Reset clock
+
             result = self.db.query('SELECT id FROM InformationTable LIMIT 1')
 
             sql = sqlDict[tableName]
@@ -102,7 +105,7 @@ class Evaluation:
 
             for row in result:
 
-                infor = SkuInformation(row, Evaluation.VERSION)
+                infor = SkuInformation(row, Evaluation.VERSION, clock)
                 infor.update()
 
                 if infor.priceCorrected:
