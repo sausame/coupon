@@ -6,7 +6,7 @@ import sys
 import math
 
 from datetime import timedelta, datetime
-from utils import reprDict
+from utils import datetime2Seconds, reprDict
 
 class Clock:
 
@@ -33,22 +33,30 @@ class Clock:
         self.size = len(self.times)
         self.count = 0
 
-    def randomTime(self, tillTime=None):
+    def randomTime(self, startTime=None, endTime=None):
 
         self.count += 1
 
         actualSize = self.size
         avgCount = math.ceil(float(self.count) / self.size)
 
-        if tillTime is not None:
+        if startTime is not None and endTime is not None:
 
-            if tillTime <= self.times[0]['time']:
-                return tillTime
+            start = datetime2Seconds(startTime)
+            end = datetime2Seconds(endTime)
 
-            tillTime = datetime.strptime(tillTime, '%Y-%m-%d %H:%M:%S').replace(minute=0,
+            if start + (24 * 3600) > end:
+                return startTime
+
+            # TODO: Assume it's valid and has a long period more than 3 days
+
+            if endTime <= self.times[0]['time']:
+                return endTime
+
+            endTime = datetime.strptime(endTime, '%Y-%m-%d %H:%M:%S').replace(minute=0,
                     second=0, microsecond=0).strftime('%Y-%m-%d %H:%M:%S')
 
-            if tillTime < self.times[self.size - 1]['time']:
+            if endTime < self.times[self.size - 1]['time']:
 
                 minCount = sys.maxint
                 maxCount = 0
@@ -57,7 +65,7 @@ class Clock:
 
                 for data in self.times:
 
-                    if data['time'] >= tillTime:
+                    if data['time'] >= endTime:
                         break
 
                     count = data['count']
@@ -71,7 +79,7 @@ class Clock:
                     actualSize += 1
 
                 if actualSize is 0:
-                    return tillTime # Invalid
+                    return endTime # Invalid
 
                 if minCount == maxCount:
                     avgCount = maxCount + 1
@@ -92,7 +100,7 @@ class Clock:
                     return self.times[i]['time']
 
         # XXX: Should not be here
-        raise Exception('Error: random {}, till {}'.format(num, tillTime))
+        raise Exception('Error: random {} from {} to {}'.format(num, startTime, endTime))
 
     def __repr__(self):
         return reprDict(self.times)
