@@ -21,6 +21,26 @@ class Network:
         Network._instance.isLocal = isLocal
 
     @staticmethod
+    def get(url, params=None, **kwargs):
+
+        try:
+            return requests.get(url, params=params, **kwargs)
+        except Exception as e:
+            print 'Error to get', url, ':', e
+
+        return None
+
+    @staticmethod
+    def post(url, data=None, json=None, **kwargs):
+
+        try:
+            return request.post(url, data=data, json=json, **kwargs)
+        except Exception as e:
+            print 'Error to post', url, ':', e
+
+        return None
+
+    @staticmethod
     def getUrl(url, params=None, headers=None):
 
         if Network._instance is None:
@@ -36,7 +56,10 @@ class Network:
 
     def getUrlImpl(self, url, params, headers):
 
-        r = requests.get(url, params=params, headers=headers)
+        r = Network.get(url, params=params, headers=headers)
+
+        if r is None:
+            return ''
 
         # TODO: add other judgement for http response
         return r.text
@@ -61,7 +84,10 @@ class Network:
         if not force and self.isLocal and os.path.exists(pathname):
             return 1
 
-        r = requests.get(url)
+        r = Network.get(url)
+        if r is None:
+            return -1
+
         # TODO: add other judgement for http response
 
         with open(pathname, 'w') as fp:
