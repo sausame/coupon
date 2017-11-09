@@ -3,6 +3,7 @@ import sqlalchemy
 
 import MySQLdb
 
+from urllib import quote_plus as urlquote
 from utils import getProperty, AutoReleaseThread
 
 def toDbText(src):
@@ -40,8 +41,9 @@ class Database(AutoReleaseThread):
         if self.db is not None:
             return
 
-        if self.connectDb():
-            return 
+        # XXX: Higher version would NOT raise an exception if database doesn't exist
+        #if self.connectDb():
+        #    return 
 
         self.createDb()
         self.connectDb()
@@ -78,9 +80,11 @@ class Database(AutoReleaseThread):
     def connectDb(self):
 
         try:
+            url = 'mysql://{}:{}@{}/{}?charset=utf8'.format(self.username,
+                urlquote(self.password), self.host, self.dbName)
+
             print 'Connecting', self.dbName, 'in', self.host
-            self.db = dataset.connect('mysql://{}:{}@{}/{}?charset=utf8'.format(self.username,
-                self.password, self.host, self.dbName))
+            self.db = dataset.connect(url)
             print 'Connected', self.dbName, 'in', self.host
             return True
 
@@ -98,7 +102,9 @@ class Database(AutoReleaseThread):
 
         try:
             table = self.db.load_table(tableName)
+            table._auto_create = True
         except sqlalchemy.exc.NoSuchTableError as e:
+            primary_type = self.db.types.integer
             table = self.db.create_table(tableName, primary_id=primary_id, primary_type=primary_type)
 
         if self.tableDict is None:
