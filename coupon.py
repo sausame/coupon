@@ -3,10 +3,10 @@
 
 import json
 import random
-import requests
 import time
 
 from base import Sku, Coupon, Discount
+from network import Network
 
 class SkuManagerBase:
 
@@ -53,10 +53,13 @@ class SkuManagerBase:
 
         # Referer is needed
         headers = {'User-Agent': USER_AGENT, 'Referer': REFERER}
+
         url = templateUrl.format(G_TK, ids)
-        r = requests.get(url, headers=headers)
+        r = Network.get(url, headers=headers)
 
         # TODO: add other judgement for http response
+        if r is None:
+            return []
 
         # Error code
         obj = json.loads(r.text)
@@ -261,7 +264,10 @@ class CouponManager(SkuManagerBase):
         G_TK = 1915885660
         actid = 10473
 
-        r = requests.get(COUPON_PROMOTION_URL.format(G_TK, actid))
+        r = Network.get(COUPON_PROMOTION_URL.format(G_TK, actid))
+
+        if r is None:
+            return []
 
         obj = json.loads(r.text)
         objs = obj.pop('oItemList')
@@ -337,7 +343,10 @@ class DiscountManager(SkuManagerBase):
         G_TK = 1915885660
         env = 3
 
-        r = requests.get(HOME_COUPON_PROMOTION_URL.format(G_TK, env))
+        r = Network.get(HOME_COUPON_PROMOTION_URL.format(G_TK, env))
+
+        if r is None:
+            return []
 
         obj = json.loads(r.text)
         objs = obj.pop('act')
