@@ -42,12 +42,12 @@ class Network:
         return r.text
 
     @staticmethod
-    def saveGetUrl(pathname, url):
+    def saveGetUrl(pathname, url, force=False):
 
         if Network._instance is None:
             Network._instance = Network()
 
-        ret = Network._instance.saveGetUrlImpl(pathname, url)
+        ret = Network._instance.saveGetUrlImpl(pathname, url, force)
 
         # Sleep for a while
         if ret is 0:
@@ -56,9 +56,9 @@ class Network:
 
         return ret
 
-    def saveGetUrlImpl(self, pathname, url):
+    def saveGetUrlImpl(self, pathname, url, force=False):
 
-        if self.isLocal and os.path.exists(pathname):
+        if not force and self.isLocal and os.path.exists(pathname):
             return 1
 
         r = requests.get(url)
@@ -70,12 +70,12 @@ class Network:
         return 0
  
     @staticmethod
-    def saveHttpData(pathname, url, host=None):
+    def saveHttpData(pathname, url, host=None, force=False):
 
         if Network._instance is None:
             Network._instance = Network()
 
-        ret = Network._instance.saveHttpDataImpl(pathname, url, host)
+        ret = Network._instance.saveHttpDataImpl(pathname, url, host, force)
 
         # Sleep for a while
         if ret is 0:
@@ -84,9 +84,9 @@ class Network:
 
         return ret
 
-    def saveHttpDataImpl(self, pathname, url, host):
+    def saveHttpDataImpl(self, pathname, url, host, force=False):
 
-        if self.isLocal and os.path.exists(pathname):
+        if not force and self.isLocal and os.path.exists(pathname):
             return 1
 
         if None == host:
