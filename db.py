@@ -42,8 +42,8 @@ class Database(AutoReleaseThread):
             return
 
         # XXX: Higher version would NOT raise an exception if database doesn't exist
-        #if self.connectDb():
-        #    return 
+        if self.connectDb():
+            return
 
         self.createDb()
         self.connectDb()
@@ -85,13 +85,16 @@ class Database(AutoReleaseThread):
 
             print 'Connecting', self.dbName, 'in', self.host
             self.db = dataset.connect(url)
+
+            # XXX: Workaround to post an error because current design of dataset
+            executable = self.db.executable
             print 'Connected', self.dbName, 'in', self.host
             return True
 
         except sqlalchemy.exc.OperationalError as e:
             return False
 
-    def getTable(self, tableName, primary_id='id', primary_type='Integer'):
+    def getTable(self, tableName):
 
         if not self.enabled: return True
 
@@ -100,15 +103,11 @@ class Database(AutoReleaseThread):
         if self.tableDict is not None and self.tableDict.has_key(tableName):
             return self.tableDict[tableName]
 
-        try:
-            table = self.db.load_table(tableName)
-            table._auto_create = True
-        except sqlalchemy.exc.NoSuchTableError as e:
-            primary_type = self.db.types.integer
-            table = self.db.create_table(tableName, primary_id=primary_id, primary_type=primary_type)
-
         if self.tableDict is None:
             self.tableDict = dict()
+
+        # XXX: get_table will auto create if not exists however load_table won't.
+        table = self.db.get_table(tableName)
 
         self.tableDict[tableName] = table
 
