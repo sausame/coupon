@@ -22,15 +22,19 @@ class SeckillInfo:
 
         self.db = db
 
-    def update(self):
+    def update(self, page=1, force=False):
 
-        path = OutputPath.getDataPath('seckill-{}'.format(self.gid), 'json')
+        path = OutputPath.getDataPath('seckill-{}-{}'.format(self.gid, page), 'json')
 
-        ret = Network.saveHttpData(path, 'http://coupon.m.jd.com/seckill/seckillList.json?gid=%d' % self.gid)
+        if page is 1:
+            url = 'https://ms.m.jd.com/seckill/seckillList.json?gid={}'.format(self.gid)
+        else:
+            url = 'https://ms.m.jd.com/seckill/seckillListPage.json?isPagination=true&gid={}&page={}'.format(self.gid,
+                    page)
+
+        ret = Network.saveHttpData(path, url, force=force)
         if ret < 0:
             return False
-
-        print 'Retrieve', path
 
         return self.parse(path)
 
@@ -140,7 +144,7 @@ class SeckillManager:
 
         seckillInfo = SeckillInfo(ENTRANCE_GID, self.db)
 
-        if not seckillInfo.update():
+        if not seckillInfo.update(force=True):
             return None
 
         matchesList = seckillInfo.getMatchesList()
@@ -160,12 +164,20 @@ class SeckillManager:
 
         for gid in gids:
 
-            seckillInfo = SeckillInfo(gid, self.db)
+            page = 1
+            totalPage = 1
 
-            if not seckillInfo.update():
-                continue
+            while page is 1 or page < totalPage:
 
-            self.seckillInfoList.append(seckillInfo)
+                seckillInfo = SeckillInfo(gid, self.db)
+
+                if not seckillInfo.update(page):
+                    continue
+
+                page = seckillInfo.seckillInfo['page'] + 1
+                totalPage = seckillInfo.seckillInfo['totalPage']
+
+                self.seckillInfoList.append(seckillInfo)
 
     def updateSkuIdList(self):
 
