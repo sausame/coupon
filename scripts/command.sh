@@ -65,10 +65,15 @@ run() {
 
 # Sample:
 #
-# source command.sh
+# # Include command.sh
+#
+# DIR=$(dirname "$0")
+# source "$DIR/command.sh"
 #
 # # APP is a relative path to code path
-# APP="xxx.py"
+#
+# APP=$(basename "$0")
+# APP=${APP//\.sh/.py}
 #
 # # CONFIG_FILE should be an absolute path
 # CONFIG_FILE="/.../config.ini"
