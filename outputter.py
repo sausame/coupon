@@ -32,6 +32,8 @@ def run(configfile, name):
 
         qwd = QWD(configFile)
 
+        evaluation.updateOverdue()
+
         path = OutputPath.getSharePath()
         sharePath = getProperty(configFile, 'output-share-file')
 

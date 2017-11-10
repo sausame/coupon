@@ -5,13 +5,14 @@ import json
 import math
 import os
 import pathlib
+import time
 
 from datetime import tzinfo, timedelta, datetime
 from functools import total_ordering
 from imgkit import ImageKit
 from infor import getSlogan, getComments
 from operator import attrgetter
-from utils import seconds2Datetime, hexlifyUtf8, unhexlifyUtf8, OutputPath, UrlUtils
+from utils import seconds2Datetime, datetime2Seconds, hexlifyUtf8, unhexlifyUtf8, OutputPath, UrlUtils
 from validation import Validation
 
 class BaseDict:
@@ -372,17 +373,19 @@ class Special(SkuBase):
     def __init__(self, data):
         SkuBase.__init__(self, data)
 
-        comments = json.loads(self.data.pop('commentList'))
+        if 'commentList' in self.data.keys():
 
-        self.data['commentList'] = list()
+            comments = json.loads(self.data.pop('commentList'))
 
-        for comment in comments:
+            self.data['commentList'] = list()
 
-            comment['commentData'] = unhexlifyUtf8(comment.pop('commentData'))
-            if Validation.isCommentBad(comment['commentData']):
-                continue
+            for comment in comments:
 
-            self.data['commentList'].append(comment)
+                comment['commentData'] = unhexlifyUtf8(comment.pop('commentData'))
+                if Validation.isCommentBad(comment['commentData']):
+                    continue
+
+                self.data['commentList'].append(comment)
 
     def update(self, db=None, tableName=None):
 
@@ -397,8 +400,13 @@ class Special(SkuBase):
         data['id'] = self.data['id']
 
         # XXX: Postpone and set outputTime to that after next three days
-        data['outputTime'] = (datetime.now() + timedelta(days=3)).replace(minute=0,
-                second=0, microsecond=0).strftime('%Y-%m-%d %H:%M:%S')
+        THREE_DAYS_TICKS = 3 * 24 * 3600
+
+        now = time.time()
+        outputTs = datetime2Seconds(self.data['outputTime'])
+        outputTs += math.ceil((now - outputTs) / THREE_DAYS_TICKS) * THREE_DAYS_TICKS
+
+        data['outputTime'] = seconds2Datetime(outputTs)
 
         db.update(tableName, data, ['id'])
 

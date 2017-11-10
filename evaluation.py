@@ -188,6 +188,31 @@ class Evaluation:
 
         return specialList
 
+    def updateOverdue(self):
+
+        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        sql = ''' SELECT id, outputTime
+                  FROM InformationTable 
+                  WHERE outputTime < '{0}' AND endTime > '{0}' '''.format(now)
+
+        result = self.db.query(sql)
+
+        if result is None:
+            print 'Found 0 SKU before', now
+            return
+
+        count = 0
+
+        for row in result:
+
+            special = Special(row)
+            special.update(self.db, 'InformationTable')
+
+            count += 1
+
+        print 'Found', count, 'SKUs that their output time is earlier than', now
+
     def output(self):
 
         now = datetime.now()
