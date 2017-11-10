@@ -3,6 +3,7 @@
 
 import os
 import sys
+import time
 import traceback
 
 from base import SpecialFormatter
@@ -61,6 +62,9 @@ if __name__ == '__main__':
         print 'Usage:\n\t', sys.argv[0], 'config-file content [savefile]\n' \
             '  Or:\n\t', sys.argv[0], 'config-file \"#key#[low-price#[high-price#]] [savefile]\"\n'
         exit()
+
+    os.environ['TZ'] = 'Asia/Shanghai'
+    time.tzset()
 
     name = os.path.basename(sys.argv[0])[:-3] # Remove ".py"
 

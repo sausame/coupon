@@ -4,6 +4,7 @@
 import itchat
 import os
 import sys
+import time
 import traceback
 
 from datetime import datetime
@@ -51,6 +52,9 @@ if __name__ == '__main__':
     if len(sys.argv) < 2:
         print 'Usage:\n\t', sys.argv[0], 'config-file\n'
         exit()
+
+    os.environ['TZ'] = 'Asia/Shanghai'
+    time.tzset()
 
     name = os.path.basename(sys.argv[0])[:-3] # Remove ".py"
     configFile = sys.argv[1]
