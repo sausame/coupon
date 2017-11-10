@@ -228,7 +228,7 @@ class Evaluation:
         data['num'] = 0
         data['list'] = list()
 
-        where = ''' InformationTable.outputTime <= '{0}'
+        where = ''' InformationTable.outputTime >= '{0}' AND InformationTable.outputTime <= '{1}'
                       AND InformationTable.cutPrice <= InformationTable.lowestPrice
                       AND InformationTable.totalDays > 30
                       AND ((InformationTable.startTime <= '{0}' AND InformationTable.endTime >= '{1}')
