@@ -403,6 +403,9 @@ class OutputPath:
         OutputPath.AUTH_OUTPUT_PATH = os.path.join(outputPath, 'auths')
         mkdir(OutputPath.AUTH_OUTPUT_PATH)
 
+        OutputPath.SHARE_OUTPUT_PATH = os.path.join(outputPath, 'shares')
+        mkdir(OutputPath.SHARE_OUTPUT_PATH)
+
     @staticmethod
     def getDataPath(key, suffix):
         return '{}/{}.{}'.format(OutputPath.DATA_OUTPUT_PATH, key, suffix)
@@ -410,6 +413,10 @@ class OutputPath:
     @staticmethod
     def getAuthPath(name):
         return '{}/{}.png'.format(OutputPath.AUTH_OUTPUT_PATH, name)
+
+    @staticmethod
+    def getSharePath():
+        return '{}/{}.json'.format(OutputPath.SHARE_OUTPUT_PATH, datetime.now().strftime('%Y_%m_%d_%H'))
 
     @staticmethod
     def clear():

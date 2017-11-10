@@ -31,7 +31,11 @@ def run(configfile, name):
 
         qwd = QWD(configFile)
 
-        path = getProperty(configFile, 'output-share-file')
+        path = OutputPath.getSharePath()
+        sharePath = getProperty(configFile, 'output-share-file')
+
+        cmd = '/bin/rm -f {1} && /bin/ln -s {0} {1}'.format(path, sharePath)
+        runCommand(cmd)
 
         data = evaluation.output()
 
