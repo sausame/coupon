@@ -62,7 +62,12 @@ class SkuManagerBase:
             return []
 
         # Error code
-        obj = json.loads(r.text)
+        try:
+            obj = json.loads(r.text)
+        except ValueError as e:
+            print 'Error (', e, ') of json: "', r.text, '"'
+            return []
+
         errCode = int(obj.pop('errCode'))
 
         if errCode is not 0:
