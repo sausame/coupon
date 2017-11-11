@@ -404,9 +404,19 @@ class Special(SkuBase):
 
         now = time.time()
         outputTs = datetime2Seconds(self.data['outputTime'])
-        outputTs += math.ceil((now - outputTs) / THREE_DAYS_TICKS) * THREE_DAYS_TICKS
+
+        diff = now - outputTs
+
+        if diff < 0:
+            diff = 1.0 # Set as positive
+
+        outputTs += math.ceil(diff / THREE_DAYS_TICKS) * THREE_DAYS_TICKS
 
         data['outputTime'] = seconds2Datetime(outputTs)
+
+        print 'Update', '{}'.format(self.data['skuid']).ljust(16), ':',
+        print self.data['outputTime'], '-->', data['outputTime'],
+        print 'in (', self.data['startTime'], ',', self.data['endTime'], ')'
 
         db.update(tableName, data, ['id'])
 

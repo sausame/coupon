@@ -190,16 +190,20 @@ class Evaluation:
 
     def updateOverdue(self):
 
-        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        now = datetime.now()
 
-        sql = ''' SELECT id, outputTime
+        startTime = now.strftime('%Y-%m-%d %H:%M:%S')
+        endTime = (now + timedelta(hours=2)).replace(minute=0,
+                second=0, microsecond=0).strftime('%Y-%m-%d %H:%M:%S')
+
+        sql = ''' SELECT id, skuid, outputTime, startTime, endTime
                   FROM InformationTable 
-                  WHERE outputTime < '{0}' AND endTime > '{0}' '''.format(now)
+                  WHERE outputTime < '{}' AND endTime > '{}' '''.format(startTime, endTime)
 
         result = self.db.query(sql)
 
         if result is None:
-            print 'Found 0 SKU before', now
+            print 'Found 0 SKU at', startTime, 'and', endTime
             return
 
         count = 0
@@ -211,7 +215,7 @@ class Evaluation:
 
             count += 1
 
-        print 'Found', count, 'SKUs that their output time is earlier than', now
+        print 'Found', count, 'SKUs that their output time is earlier than', startTime
 
     def output(self):
 
