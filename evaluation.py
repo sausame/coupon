@@ -101,7 +101,8 @@ class Evaluation:
             if result is None:
                 continue
 
-            print '    ', 'Lowest'.rjust(12), 'Cut-Price'.rjust(12), 'Avg-Price'.rjust(12), 'Cata-Price'.rjust(12)
+            print '    ', 'ID'.rjust(12), 'Start'.rjust(20), 'End'.rjust(20),
+            print 'Lowest'.rjust(12), 'Cut-Price'.rjust(12), 'Avg-Price'.rjust(12), 'Price'.rjust(12)
 
             for row in result:
 
@@ -113,6 +114,9 @@ class Evaluation:
                 else:
                     print '   ',
 
+                print '{}'.format(infor.data['skuid']).rjust(12),
+                print '{}'.format(infor.data['startTime']).rjust(20),
+                print '{}'.format(infor.data['endTime']).rjust(20),
                 print '{}'.format(infor.data['lowestPrice']).rjust(12),
                 print '{}'.format(infor.data['cutPrice']).rjust(12),
                 print '{}'.format(infor.data['avgPrice']).rjust(12),
