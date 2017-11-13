@@ -423,12 +423,12 @@ class OutputPath:
 
         # Data
         removeOverdueFiles(OutputPath.DATA_OUTPUT_PATH, 47 * 3600, '.js') # Almost two days overdue
-        removeOverdueFiles(OutputPath.DATA_OUTPUT_PATH, 11 * 3600, '.json') # Almost half of one day overdue
-        removeOverdueFiles(OutputPath.DATA_OUTPUT_PATH, 11 * 3600, '.html') # Almost half of one day overdue
-        removeOverdueFiles(OutputPath.DATA_OUTPUT_PATH, 11 * 3600, '.png') # Almost half of one day overdue
+        removeOverdueFiles(OutputPath.DATA_OUTPUT_PATH, 23 * 3600, '.json') # Almost one day overdue
+        removeOverdueFiles(OutputPath.DATA_OUTPUT_PATH, 23 * 3600, '.html') # Almost one day overdue
+        removeOverdueFiles(OutputPath.DATA_OUTPUT_PATH, 23 * 3600, '.png') # Almost one day overdue
 
         # Auth
-        removeOverdueFiles(OutputPath.AUTH_OUTPUT_PATH, 11 * 3600, '.png') # Almost half of one day overdue
+        removeOverdueFiles(OutputPath.AUTH_OUTPUT_PATH, 23 * 3600, '.png') # Almost one day overdue
 
 class ThreadWritableObject(threading.Thread):
 
