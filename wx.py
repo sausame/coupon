@@ -39,9 +39,6 @@ class WX(Schedule):
 
         itchat.run(blockThread=False) # Run in a new thread
 
-        shareUrl = getProperty(self.configFile, 'share-url')
-        self.setUrl(shareUrl)
-
         self.run()
 
     @staticmethod

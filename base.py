@@ -11,6 +11,7 @@ from datetime import tzinfo, timedelta, datetime
 from functools import total_ordering
 from imgkit import ImageKit
 from infor import getSlogan, getComments
+from network import Network
 from operator import attrgetter
 from utils import seconds2Datetime, datetime2Seconds, hexlifyUtf8, unhexlifyUtf8, OutputPath, UrlUtils
 from validation import Validation
@@ -555,14 +556,36 @@ class SpecialFormatter:
 
         return content
 
-    def getImage(self):
+    def getPlateImage(self):
+
+        if self.skuimgurl is None:
+            return None
+
+        path = OutputPath.getDataPath('sku-{}-plate'.format(self.skuid), 'jpeg')
+
+        ret = Network.saveGetUrl(path, self.skuimgurl)
+
+        if ret < 0:
+            return None
+
+        return path
+
+    def getComplexImage(self):
 
         content = self.getHtml()
 
-        path = OutputPath.getDataPath('sku-{}'.format(self.skuid), 'html')
+        path = OutputPath.getDataPath('sku-{}-complex'.format(self.skuid), 'html')
 
         with open(path, 'w') as fp:
             fp.write(content)
 
         return ImageKit.fromHtml(path, pageSize=(80, 150))
+
+    def getImage(self, imageType):
+
+        if imageType is 0: # 0, Plate
+            return self.getPlateImage()
+
+        # 1, Complex
+        return self.getComplexImage()
 

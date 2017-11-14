@@ -7,7 +7,7 @@ import requests
 
 from qwd import QWD
 from base import SpecialFormatter
-from utils import datetime2Seconds, LadyThread
+from utils import datetime2Seconds, getProperty, LadyThread
 
 class Schedule(LadyThread):
 
@@ -17,9 +17,9 @@ class Schedule(LadyThread):
 
         self.qwd = QWD(configFile)
 
-    def setUrl(self, url):
+        self.url = getProperty(configFile, 'share-url')
+        self.imageType = int(getProperty(configFile, 'share-image-type'))
 
-        self.url = url
         self.isUpdateNeeded = True
 
     def update(self):
@@ -67,7 +67,7 @@ class Schedule(LadyThread):
         formatter = SpecialFormatter.create(data)
 
         plate = formatter.getPlate(self.qwd)
-        image = formatter.getImage()
+        image = formatter.getImage(self.imageType)
 
         self.send(plate, image)
 

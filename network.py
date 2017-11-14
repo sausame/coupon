@@ -90,8 +90,8 @@ class Network:
 
         # TODO: add other judgement for http response
 
-        with open(pathname, 'w') as fp:
-            fp.write(r.text)
+        with open(pathname, 'wb') as fp:
+            fp.write(r.content)
 
         return 0
  
