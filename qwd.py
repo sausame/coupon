@@ -101,10 +101,6 @@ class QWD:
         # Request
         r = requests.post(url, data=data)
         response = r.content
-        #print url, data, r.cookies, response
-
-        with open('a.json', 'w+') as fp:
-            fp.write(response)
 
         obj = json.loads(response.decode('utf-8', 'ignore'))
 
