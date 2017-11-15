@@ -264,6 +264,8 @@ class QWD:
         # Headers
         headers = {'User-Agent': self.userAgent}
 
+        print 'Searching remotely with:', payload
+
         try:
             r = requests.get(self.searchItemUrl, params=payload, headers=headers)
         except Exception as e: 
