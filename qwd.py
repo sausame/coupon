@@ -11,7 +11,7 @@ import time
 from imgkit import ImageKit
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
-from utils import getMatchString, getProperty, inputElement, randomSleep, reprDict, OutputPath
+from utils import chmod, getMatchString, getProperty, inputElement, randomSleep, reprDict, OutputPath
 
 class CPS:
 
@@ -309,6 +309,8 @@ class QWD:
 
         with codecs.open(path, 'wb') as fp:
             fp.write(r.content)
+
+        chmod(path)
 
         return True
 

@@ -13,7 +13,8 @@ from imgkit import ImageKit
 from infor import getSlogan, getComments
 from network import Network
 from operator import attrgetter
-from utils import atoi, seconds2Datetime, datetime2Seconds, hexlifyUtf8, unhexlifyUtf8, OutputPath, UrlUtils
+from urlutils import UrlUtils
+from utils import atoi, chmod, seconds2Datetime, datetime2Seconds, hexlifyUtf8, unhexlifyUtf8, OutputPath
 from validation import Validation
 
 class BaseDict:
@@ -578,6 +579,8 @@ class SpecialFormatter:
 
         with open(path, 'w') as fp:
             fp.write(content)
+
+        chmod(path)
 
         return ImageKit.fromHtml(path, pageSize=(80, 150))
 

@@ -5,6 +5,8 @@ import requests
 import socket
 import time
 
+from utils import chmod
+
 class Network:
 
     _instance = None
@@ -93,6 +95,8 @@ class Network:
         with open(pathname, 'wb') as fp:
             fp.write(r.content)
 
+        chmod(pathname)
+
         return 0
  
     @staticmethod
@@ -148,6 +152,8 @@ class Network:
             fp = open(pathname, 'w')
             fp.write(data)
             fp.close()
+
+            chmod(pathname)
 
             return 0
 

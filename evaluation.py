@@ -10,7 +10,8 @@ from datetime import timedelta, datetime
 from history import PriceHistoryManager
 from nlp import NLP
 from qwd import QWD
-from utils import getchar, UrlUtils, reprDict
+from urlutils import UrlUtils
+from utils import getchar, reprDict
 from validation import Validation
 
 class Evaluation:
