@@ -45,7 +45,7 @@ run() {
 	local code_path=$(get_property $config_file 'code-path')
 	local output_path=$(get_property $config_file 'output-path')
 
-	mkdir -p "$output_path/logs"
+	mkdir -p "$output_path/logs" -m 775
 
 	local log_file="$output_path/logs/$name.log"
 
