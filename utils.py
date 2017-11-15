@@ -7,6 +7,7 @@ import pprint
 import random
 import re
 import requests
+import stat
 import string
 import sys
 import subprocess
@@ -399,7 +400,10 @@ class OutputPath:
 
         def mkdir(path):
             if not os.path.exists(path):
-                os.mkdir(path, 0755)
+                mode = stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR \
+                        | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP \
+                        | stat.S_IROTH | stat.S_IXOTH 
+                os.mkdir(path, mode)
 
         outputPath = getProperty(configFile, 'output-path')
         outputPath = os.path.realpath(outputPath)
