@@ -128,6 +128,45 @@ class Evaluation:
 
         print len(self.inforList)
 
+    def searchSkuInDb(self, skuid):
+
+        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        sql = ''' SELECT InformationTable.id, SkuTable.skuid,
+                      InformationTable.lowestPrice, InformationTable.cutPrice,
+                      InformationTable.avgPrice, SkuTable.price, 
+                      InformationTable.goodCnt, InformationTable.allCnt, InformationTable.percentOfGoodComments,
+                      SkuTable.salecount, InformationTable.comRate,
+                      InformationTable.totalDays, InformationTable.weight,
+                      SkuTable.title, InformationTable.slogan, SkuTable.skuimgurl,
+                      InformationTable.couponLink, InformationTable.commentList,
+                      InformationTable.startTime, InformationTable.endTime
+                  FROM InformationTable 
+                  LEFT OUTER JOIN SkuTable ON SkuTable.skuid = InformationTable.skuid 
+                  WHERE SkuTable.skuid = {}
+                      AND (InformationTable.endTime IS NULL
+                            OR InformationTable.endTime > '{}')'''.format(skuid, now)
+
+        sql += ' ORDER BY SkuTable.salecount DESC'
+
+        result = self.db.query(sql)
+
+        if result is None:
+            return None
+
+        specialList = list()
+
+        for row in result:
+
+            special = Special(row)
+            special.update()
+            specialList.append(special)
+
+        if len(specialList) is 0:
+            return None
+
+        return specialList
+
     def searchInDb(self, key, price=None):
 
         def isMatched(title, key):
@@ -189,6 +228,9 @@ class Evaluation:
             special = Special(row)
             special.update()
             specialList.append(special)
+
+        if len(specialList) is 0:
+            return None
 
         return specialList
 
@@ -362,19 +404,27 @@ class Evaluation:
                 price = (lowPrice, highPrice)
 
         else:
-            key = getKey(content)
+            try:
+                key = int(content)
+            except ValueError:
+                key = getKey(content)
 
         print 'Searching "', key, '" with price', price
 
         specialList = list()
 
-        localList = self.searchInDb(key, price)
+        if isinstance(key, int):
+            localList = self.searchSkuInDb(key)
+        else:
+            localList = self.searchInDb(key, price)
+
         if localList is not None:
             specialList.extend(localList)
 
-        remoteList = self.explore(key, price)
-        if remoteList is not None:
-            specialList.extend(remoteList)
+        if isinstance(key, int) and localList is None:
+            remoteList = self.explore(key, price)
+            if remoteList is not None:
+                specialList.extend(remoteList)
 
         specialList.sort()
 
@@ -386,7 +436,7 @@ class Evaluation:
         for special in specialList:
             data['list'].append(special.data)
 
-        print 'Found', data['num'], 'SKU with', key, '" with price', price
+        print 'Found', data['num'], 'SKU with "', key, '" with price', price
 
         return data
 
