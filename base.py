@@ -13,7 +13,7 @@ from imgkit import ImageKit
 from infor import getSlogan, getComments
 from network import Network
 from operator import attrgetter
-from utils import seconds2Datetime, datetime2Seconds, hexlifyUtf8, unhexlifyUtf8, OutputPath, UrlUtils
+from utils import atoi, seconds2Datetime, datetime2Seconds, hexlifyUtf8, unhexlifyUtf8, OutputPath, UrlUtils
 from validation import Validation
 
 class BaseDict:
@@ -59,7 +59,7 @@ class Sku(SkuBase):
 
         # TODO: Commission price can be calculate by price and comRate
         self.data['commissionprice'] = float(self.data.pop('commissionprice'))
-        self.data['goodCom'] = int(self.data.pop('goodCom'))
+        self.data['goodCom'] = atoi(self.data.pop('goodCom'))
         self.data['salecount'] = int(self.data.pop('salecount'))
 
     def getAlterKeys(self):
