@@ -411,6 +411,8 @@ class OutputPath:
         outputPath = getProperty(configFile, 'output-path')
         outputPath = os.path.realpath(outputPath)
 
+        mkdir(outputPath)
+
         OutputPath.LOG_OUTPUT_PATH = os.path.join(outputPath, 'logs')
         mkdir(OutputPath.LOG_OUTPUT_PATH)
 
