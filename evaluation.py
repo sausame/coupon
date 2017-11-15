@@ -421,7 +421,7 @@ class Evaluation:
         if localList is not None:
             specialList.extend(localList)
 
-        if isinstance(key, int) and localList is None:
+        if not isinstance(key, int) or (isinstance(key, int) and localList is None):
             remoteList = self.explore(key, price)
             if remoteList is not None:
                 specialList.extend(remoteList)
