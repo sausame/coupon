@@ -11,17 +11,11 @@ from datetime import datetime
 from db import Database
 from evaluation import Evaluation
 from qwd import QWD
-from utils import getchar, reprDict, runCommand, OutputPath, ThreadWritableObject
+from utils import getchar, reprDict, runCommand, OutputPath
 
 def run(configfile, name, content, savefile):
 
     OutputPath.init(configFile)
-
-    thread = ThreadWritableObject(configFile, name)
-    thread.start()
-
-    sys.stdout = thread
-    sys.errout = thread # XXX: Actually, it does NOT work
 
     try:
 
@@ -48,10 +42,6 @@ def run(configfile, name, content, savefile):
             db.quit()
         except:
             pass
-
-    thread.quit()
-
-    thread.join()
 
 if __name__ == '__main__':
 
