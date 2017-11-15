@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ $# -lt 2 ]; then
-    echo -e "usages: \n\t$0 content [savefile]\n"
+    echo -e "usages: \n\t$0 config-file content [savefile]\n"
     exit 1
 fi
 
@@ -11,7 +11,5 @@ source "$DIR/command.sh"
 APP=$(basename "$0")
 APP=${APP//\.sh/.py}
 
-CONFIG_FILE="/xxx/config.ini"
-
-run $APP $CONFIG_FILE $@
+run $APP $@
 
