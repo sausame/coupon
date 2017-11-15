@@ -32,6 +32,8 @@ def run(configfile, name, content, savefile):
         else:
             print reprDict(data)
 
+        return 0
+
     except KeyboardInterrupt:
         pass
     except Exception, e:
@@ -42,6 +44,8 @@ def run(configfile, name, content, savefile):
             db.quit()
         except:
             pass
+
+    return -1
 
 if __name__ == '__main__':
 
@@ -66,5 +70,7 @@ if __name__ == '__main__':
     else:
         savefile = None
 
-    run(configFile, name, content, savefile)
+    ret = run(configFile, name, content, savefile)
+
+    exit(ret)
 
