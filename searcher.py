@@ -11,6 +11,7 @@ from datetime import datetime
 from db import Database
 from evaluation import Evaluation
 from qwd import QWD
+from urlutils import unquote
 from utils import getchar, reprDict, runCommand, OutputPath
 
 def run(configfile, name, content, savefile):
@@ -63,7 +64,7 @@ if __name__ == '__main__':
     name = os.path.basename(sys.argv[0])[:-3] # Remove ".py"
 
     configFile = sys.argv[1]
-    content = sys.argv[2].decode('utf-8', 'ignore')
+    content = unquote(sys.argv[2])
 
     if len(sys.argv) > 3:
         savefile = sys.argv[3]

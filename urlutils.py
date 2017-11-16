@@ -7,7 +7,20 @@ import re
 import requests
 
 from network import Network
+from urllib import unquote_plus as urlunquote
 from utils import getProperty
+
+def unquote(src):
+
+    if not isinstance(src, str):
+        return src
+
+    try:
+        return urlunquote(src).decode('utf-8', 'ignore')
+    except:
+        pass
+
+    return src
 
 class UrlUtils:
 
