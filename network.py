@@ -36,7 +36,7 @@ class Network:
     def post(url, data=None, json=None, **kwargs):
 
         try:
-            return request.post(url, data=data, json=json, **kwargs)
+            return requests.post(url, data=data, json=json, **kwargs)
         except Exception as e:
             print 'Error to post', url, ':', e
 
