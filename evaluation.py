@@ -363,6 +363,9 @@ class Evaluation:
 
             tokens = NLP.getMorphology(content)
 
+            if tokens is None:
+                return content
+
             for token in tokens:
 
                 if token is None:

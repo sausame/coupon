@@ -54,19 +54,23 @@ class NLP:
         r = requests.post(NLP.NLP_URL, data=data, cookies=NLP_COOKIES, headers=NLP_HEADERS)
 
         if 200 != r.status_code:
-            print 'Unable to invoke "', data, '" with an error (', r.status_code, '):\n', r.text
+            print 'Error status: (', r.status_code, '):\n', r.text
             return None
 
-        obj = json.loads(r.content.decode('utf-8', 'ignore'))
+        try:
+            obj = json.loads(r.content.decode('utf-8', 'ignore'))
+        except ValueError as e:
+            print 'Wrong content: "', r.content, '"'
+            return None
 
         if 'ret_code' not in obj.keys():
-            print 'Error to invoke "', data, '" with an error (', obj, ')'
+            print 'No code: (', obj, ')'
             return None
 
         errCode = int(obj.pop('ret_code'))
 
         if errCode is not 0:
-            print 'Error to invoke "', data, '" with an error code (', errCode, ')'
+            print 'Error code: (', errCode, ')'
             return None
 
         return obj
@@ -82,6 +86,7 @@ class NLP:
         obj = NLP.invoke(data)
 
         if obj is None:
+            print 'No keyword for "', content, '"'
             return None
 
         return obj.pop('keywords')
@@ -97,6 +102,7 @@ class NLP:
         obj = NLP.invoke(data)
 
         if obj is None:
+            print 'No morphology for "', content, '"'
             return None
 
         return obj.pop('tokens')
