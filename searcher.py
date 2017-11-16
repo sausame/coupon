@@ -63,7 +63,7 @@ if __name__ == '__main__':
     name = os.path.basename(sys.argv[0])[:-3] # Remove ".py"
 
     configFile = sys.argv[1]
-    content = sys.argv[2]
+    content = sys.argv[2].decode('utf-8', 'ignore')
 
     if len(sys.argv) > 3:
         savefile = sys.argv[3]
