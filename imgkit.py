@@ -122,3 +122,57 @@ class ImageKit:
         image = image.crop((left, top, right, bottom))  # defines crop points
         image.save(path, 'png')  # saves new cropped image
 
+    @staticmethod
+    def concatTo(dstPath, srcPathes, direction='vertical', bgColor=(255,255,255), aligment='center'):
+        """
+        Appends images in horizontal/vertical direction.
+
+        Args:
+            dstPath:   Destination path
+            srcPathes: List of image file pathes
+            direction: Direction of concatenation, 'horizontal' or 'vertical'
+            bgColor:   Background color (default: white)
+            aligment:  Alignment mode if images need padding;
+                       'left', 'right', 'top', 'bottom', or 'center'
+
+        Returns:
+            Concatenated image as a new PIL image object.
+        """
+        images = map(Image.open, srcPathes)
+
+        widths, heights = zip(*(i.size for i in images))
+
+        if direction == 'horizontal':
+            totalWidth = sum(widths)
+            totalHeight = max(heights)
+        elif direction == 'vertical':
+            totalWidth = max(widths)
+            totalHeight = sum(heights)
+        else:
+            return dstPath
+
+        image = Image.new('RGB', (totalWidth, totalHeight), color=bgColor)
+
+        offset = 0
+        for im in images:
+            if direction == 'horizontal':
+                y = 0
+                if aligment == 'center':
+                    y = int((totalHeight - im.size[1])/2)
+                elif aligment == 'bottom':
+                    y = totalHeight - im.size[1]
+                image.paste(im, (offset, y))
+                offset += im.size[0]
+            elif direction == 'vertical':
+                x = 0
+                if aligment == 'center':
+                    x = int((totalWidth - im.size[0])/2)
+                elif aligment == 'right':
+                    x = totalWidth - im.size[0]
+                image.paste(im, (x, offset))
+                offset += im.size[1]
+
+        image.save(dstPath)
+
+        return dstPath
+
