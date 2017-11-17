@@ -5,6 +5,7 @@ import itchat
 import time
 
 from schedule import Schedule
+from special import Searcher
 from utils import getProperty, reprDict
 
 class WX(Schedule):
@@ -12,6 +13,8 @@ class WX(Schedule):
     def __init__(self, configFile):
 
         Schedule.__init__(self, configFile)
+
+        self.searcher = Searcher(configFile)
 
         self.configFile = configFile
 
@@ -83,4 +86,12 @@ class WX(Schedule):
 
         for friend in self.watchFriends:
             WX.sendTo(friend, plate, image)
+
+    def search(self, friends, content):
+
+        if not searcher.search(content):
+            return
+
+        for friend in friends:
+            WX.sendTo(friend, searcher.plate, searcher.image)
 
