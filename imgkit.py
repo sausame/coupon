@@ -6,12 +6,19 @@
 import os
 import pdfkit
 import pytesseract
+import random
 import shutil
 import time
 
+from network import Network
 from wand.image import Image as WandImage
 from wand.color import Color
 from utils import runCommand
+
+try:
+    from cStringIO import StringIO as BytesIO
+except ImportError:
+    from io import BytesIO
 
 try:
     import Image
@@ -123,13 +130,12 @@ class ImageKit:
         image.save(path, 'png')  # saves new cropped image
 
     @staticmethod
-    def concatTo(dstPath, srcPathes, direction='vertical', bgColor=(255,255,255), aligment='center'):
+    def concat(images, direction='vertical', bgColor=(255,255,255), aligment='center'):
         """
         Appends images in horizontal/vertical direction.
 
         Args:
-            dstPath:   Destination path
-            srcPathes: List of image file pathes
+            images:    List of images
             direction: Direction of concatenation, 'horizontal' or 'vertical'
             bgColor:   Background color (default: white)
             aligment:  Alignment mode if images need padding;
@@ -138,8 +144,6 @@ class ImageKit:
         Returns:
             Concatenated image as a new PIL image object.
         """
-        images = map(Image.open, srcPathes)
-
         widths, heights = zip(*(i.size for i in images))
 
         if direction == 'horizontal':
@@ -171,6 +175,38 @@ class ImageKit:
                     x = totalWidth - im.size[0]
                 image.paste(im, (x, offset))
                 offset += im.size[1]
+
+        return image
+
+    @staticmethod
+    def concatTo(dstPath, srcPathes, **kwargs):
+
+        images = map(Image.open, srcPathes)
+
+        image = ImageKit.concat(images, **kwargs)
+
+        image.save(dstPath)
+
+        return dstPath
+
+    @staticmethod
+    def concatUrlsTo(dstPath, urls, **kwargs):
+
+        images = list()
+
+        for url in urls:
+
+            if url is None or len(url) is 0:
+                continue
+
+            response = Network.get(url)
+            if response is None:
+                continue
+
+            images.append(Image.open(BytesIO(response.content)))
+            time.sleep(random.random())
+
+        image = ImageKit.concat(images, **kwargs)
 
         image.save(dstPath)
 
