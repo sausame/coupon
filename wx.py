@@ -18,11 +18,11 @@ class WX(Schedule):
 
         self.configFile = configFile
 
-    def login(self):
+    def login(self, picDir=None):
 
         statusFile = getProperty(self.configFile, 'wechat-status-file')
 
-        itchat.auto_login(hotReload=True, statusStorageDir=statusFile)
+        itchat.auto_login(hotReload=True, statusStorageDir=statusFile, picDir=picDir)
 
         self.me = itchat.search_friends()
 

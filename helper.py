@@ -11,7 +11,7 @@ from datetime import datetime
 from wx import WX
 from utils import OutputPath, ThreadWritableObject
 
-def run(configFile, name):
+def run(configFile, name, qrPath):
 
     wx = None
 
@@ -29,7 +29,7 @@ def run(configFile, name):
 
     try:
         wx = WX(configFile)
-        wx.login()
+        wx.login(qrPath)
     except KeyboardInterrupt:
         pass
     except Exception, e:
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     sys.setdefaultencoding('utf8')
 
     if len(sys.argv) < 2:
-        print 'Usage:\n\t', sys.argv[0], 'config-file\n'
+        print 'Usage:\n\t', sys.argv[0], 'config-file [qr-path]\n'
         exit()
 
     os.environ['TZ'] = 'Asia/Shanghai'
@@ -58,6 +58,7 @@ if __name__ == '__main__':
 
     name = os.path.basename(sys.argv[0])[:-3] # Remove ".py"
     configFile = sys.argv[1]
+    qrPath = sys.argv[2]
 
-    run(configFile, name)
+    run(configFile, name, qrPath)
 
