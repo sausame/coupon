@@ -329,6 +329,12 @@ class LadyThread(threading.Thread):
     def runOnce(self):
         raise TypeError('No implement')
 
+    def sleep(self, seconds):
+
+        while self.running and seconds > 0:
+            seconds -= 1
+            time.sleep(1)
+
     def quit(self):
 
         print 'Stopping ...'

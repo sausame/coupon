@@ -52,7 +52,7 @@ class Schedule(LadyThread):
             updated = self.update()
 
             if not updated:
-                time.sleep(1800) # Half an hour
+                self.sleep(1800) # Half an hour
                 return
 
         if self.index == self.num:
@@ -76,7 +76,7 @@ class Schedule(LadyThread):
         interval = self.interval - endTs + startTs
 
         if interval > 0:
-            time.sleep(interval)
+            self.sleep(interval)
 
     def send(self, plate, image):
         raise TypeError('No implement')
