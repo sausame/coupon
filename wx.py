@@ -6,7 +6,7 @@ import time
 
 from schedule import Schedule
 from special import Searcher
-from utils import getProperty, reprDict
+from utils import getProperty, randomSleep, reprDict
 
 class WX(Schedule):
 
@@ -18,11 +18,43 @@ class WX(Schedule):
 
         self.configFile = configFile
 
-    def login(self, picDir=None):
+    def login(self, exitCallback, uuid=None):
 
-        statusFile = getProperty(self.configFile, 'wechat-status-file')
+        def isLoginned(uuid):
 
-        itchat.auto_login(hotReload=True, statusStorageDir=statusFile, picDir=picDir)
+            for count in range(10):
+
+                status = int(itchat.check_login(uuid))
+
+                if status is 200:
+                    return True
+
+                if status is 201:
+                    print 'Wait for confirm in mobile #', count
+                    randomSleep(1, 2)
+                    continue
+
+                print 'Error status:', status
+                return False
+
+            return False
+
+        if uuid is None:
+
+            statusFile = getProperty(self.configFile, 'wechat-status-file')
+            itchat.auto_login(hotReload=True, statusStorageDir=statusFile)
+
+        else:
+
+            if not isLoginned(uuid):
+                raise Exception('Failed to login with {}'.format(uuid))
+
+            userInfo = itchat.web_init()
+
+            itchat.show_mobile_login()
+            itchat.get_friends(True)
+
+            itchat.start_receiving(exitCallback)
 
         self.me = itchat.search_friends()
 
