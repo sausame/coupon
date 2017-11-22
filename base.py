@@ -470,7 +470,7 @@ class SpecialFormatter:
     def preparePlate(self, qwd):
 
         if self.avgPrice < self.price:
-            self.plateAvgPrice = '均　　价：￥{}'.format(self.avgPrice)
+            self.plateAvgPrice = '历史平均价：￥{}'.format(self.avgPrice)
         else:
             self.plateAvgPrice = ''
 
