@@ -5,6 +5,7 @@ import itchat
 import time
 
 from schedule import Schedule
+from search import SearchingKeyRegex
 from special import Searcher
 from utils import getProperty, randomSleep, reprDict
 
@@ -114,16 +115,24 @@ class WX(Schedule):
         print msg['Content']
         print '================================================================'
 
+        self.search(friend, msg['Content'])
+
     def send(self, plate, image):
 
         for friend in self.watchFriends:
             WX.sendTo(friend, plate, image)
 
-    def search(self, friends, content):
+    def search(self, friend, content):
 
-        if not searcher.search(content):
+        content = SearchingKeyRegex.parse(content)
+
+        if content is None:
             return
 
-        for friend in friends:
-            WX.sendTo(friend, searcher.plate, searcher.image)
+        print 'Searching', content
+
+        if not self.searcher.search(content):
+            return
+
+        WX.sendTo(friend, self.searcher.plate, self.searcher.image)
 
