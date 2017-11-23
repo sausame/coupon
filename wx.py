@@ -73,33 +73,39 @@ class WX(Schedule):
             groups = itchat.search_chatrooms(name=name)
             self.watchGroups.extend(groups)
 
+        self.searchReplyPlate = getProperty(self.configFile, 'search-reply-plate')
+
         itchat.run(blockThread=False) # Run in a new thread
 
         self.run()
 
     @staticmethod
-    def sendTo(obj, plate, image):
+    def sendTo(obj, plate=None, image=None):
 
         print '================================================================'
         print 'Send a message to', obj['NickName']
 
-        interval = random.random() * 10
-        time.sleep(interval)
+        if plate is not None:
 
-        ret = obj.send(plate)
+            interval = random.random() * 10
+            time.sleep(interval)
 
-        print 'Result of text message:', ret['BaseResponse']['ErrMsg']
-        print '----------------------------------------------------------------'
-        print plate
-        print '----------------------------------------------------------------'
+            ret = obj.send(plate)
 
-        interval = random.random() * 10
-        time.sleep(interval)
+            print 'Result of text message:', ret['BaseResponse']['ErrMsg']
+            print '----------------------------------------------------------------'
+            print plate
+            print '----------------------------------------------------------------'
 
-        ret = obj.send_image(image)
-        print 'Result of', image, ':', ret['BaseResponse']['ErrMsg']
+        if image is not None:
 
-        print '================================================================'
+            interval = random.random() * 10
+            time.sleep(interval)
+
+            ret = obj.send_image(image)
+            print 'Result of', image, ':', ret['BaseResponse']['ErrMsg']
+
+            print '================================================================'
 
     def text(self, msg):
 
@@ -130,6 +136,8 @@ class WX(Schedule):
             return
 
         print 'Searching', content
+
+        WX.sendTo(friend, self.searchReplyPlate.format(content.replace('#', ' ')))
 
         if not self.searcher.search(content):
             return
