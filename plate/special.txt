@@ -1,13 +1,12 @@
 {0.title}
 {0.slogan}
 --------------------
-京东价　：￥{0.price}
-优惠价　：￥{0.cutPrice}
---
-历史最低价　：￥{0.lowestPrice}
+上架天数：{0.plateTotalDays}
 {0.plateAvgPrice}
+历史最低价：￥{0.lowestPrice}
 --
-上架时间：{0.plateTotalDays}
+京东价：￥{0.price}
+特惠价：￥{0.cutPrice}
 {0.platePeriod}
 --
 用户评价（{0.percentOfGoodComments} 好评）
