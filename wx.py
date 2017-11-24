@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
 import random
@@ -61,11 +62,25 @@ class WX(Schedule):
 
         print self.me['NickName'], 'is working'
 
+        self.updateWatchers()
+
+        self.searchReplyPlate = getProperty(self.configFile, 'search-reply-plate')
+        self.searchNotFoundReplyPlate = getProperty(self.configFile, 'search-not-found-reply-plate')
+        self.searchFoundReplyPlate = getProperty(self.configFile, 'search-found-reply-plate')
+
+        itchat.run(blockThread=False) # Run in a new thread
+
+        self.run()
+
+    def updateWatchers(self):
+
         self.watchFriends = list()
         names = getProperty(self.configFile, 'wechat-watch-friends').split(';')
         for name in names:
             friends = itchat.search_friends(name=name) 
             self.watchFriends.extend(friends)
+
+        self.friendsActions = getProperty(self.configFile, 'wechat-friends-actions').split('|')
 
         self.watchGroups = list()
         names = getProperty(self.configFile, 'wechat-watch-groups').split(';')
@@ -73,11 +88,7 @@ class WX(Schedule):
             groups = itchat.search_chatrooms(name=name)
             self.watchGroups.extend(groups)
 
-        self.searchReplyPlate = getProperty(self.configFile, 'search-reply-plate')
-
-        itchat.run(blockThread=False) # Run in a new thread
-
-        self.run()
+        self.groupsActions = getProperty(self.configFile, 'wechat-groups-actions').split('|')
 
     @staticmethod
     def sendTo(obj, plate=None, image=None):
@@ -109,6 +120,9 @@ class WX(Schedule):
 
     def text(self, msg):
 
+        if 'search' not in self.friendsActions:
+            return
+
         for friend in self.watchFriends:
             if msg['FromUserName'] == friend['UserName']:
                 break
@@ -123,12 +137,38 @@ class WX(Schedule):
 
         self.search(friend, msg['Content'])
 
+    def textInGroup(self, msg):
+
+        if 'search' not in self.groupsActions:
+            return
+
+        for group in self.watchGroups:
+            if msg['FromUserName'] == group['UserName']:
+                break
+        else:
+            return
+
+        print '================================================================'
+        print msg['User']['NickName'], 'sends a message:'
+        print '----------------------------------------------------------------'
+        print msg['Content']
+        print '================================================================'
+
+        self.search(group, msg['Content'])
+
     def send(self, plate, image):
 
-        for friend in self.watchFriends:
-            WX.sendTo(friend, plate, image)
+        if 'schedule' in self.friendsActions:
 
-    def search(self, friend, content):
+            for friend in self.watchFriends:
+                WX.sendTo(friend, plate, image)
+
+        if 'schedule' in self.groupsActions:
+
+            for group in self.watchGroups:
+                WX.sendTo(group, plate, image)
+
+    def search(self, obj, content):
 
         content = SearchingKeyRegex.parse(content)
 
@@ -137,10 +177,16 @@ class WX(Schedule):
 
         print 'Searching', content
 
-        WX.sendTo(friend, self.searchReplyPlate.format(content.replace('#', ' ')))
+        WX.sendTo(obj, self.searchReplyPlate.format(content.replace('#', ' ')))
 
-        if not self.searcher.search(content):
-            return
+        template = self.searchNotFoundReplyPlate
 
-        WX.sendTo(friend, self.searcher.plate, self.searcher.image)
+        if self.searcher.search(content):
+            template = self.searchFoundReplyPlate
+        else:
+            template = self.searchNotFoundReplyPlate
+
+        WX.sendTo(obj, template.format(content.replace('#', ' ')))
+
+        WX.sendTo(obj, self.searcher.plate, self.searcher.image)
 

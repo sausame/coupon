@@ -19,6 +19,10 @@ def run(configFile, name, uuid):
     def text(msg):
         wx.text(msg)
 
+    @itchat.msg_register(itchat.content.TEXT, isGroupChat = True)
+    def textInGroup(msg):
+        wx.textInGroup(msg)
+
     def quit():
         try:
             wx.quit()
