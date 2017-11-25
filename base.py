@@ -120,7 +120,7 @@ class Seckill(BaseDict):
         self.data['endTime'] = endTime
 
     def getAlterKeys(self):
-        return ['skuid', 'startTimeMills', 'rate', 'title', 'tagText', 'cName', 'adword', 'mTips', 'tips']
+        return ['skuid', 'startTimeMills', 'rate', 'title', 'tagText', 'cName', 'adword', 'mTips', 'tips', 'operateWord']
 
 class PromotionHistory(BaseDict):
 
