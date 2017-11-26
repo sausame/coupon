@@ -45,14 +45,18 @@ def getchar():
     sys.stdin.read(1)
 
 def atoi(src):
-    n = 0
-    for c in src.lstrip():
-        if c.isdigit():
-            n *= 10
-            n += int(c)
-        else:
-            break
-    return n
+    if isinstance(src, int):
+        return src
+    if isinstance(src, str) or isinstance(src, unicode):
+        n = 0
+        for c in src.lstrip():
+            if c.isdigit():
+                n *= 10
+                n += int(c)
+            else:
+                break
+        return n
+    return 0
 
 def inputElement(element, content, normalSpeed=(0.1, 0.2), slowSpeed=(0.2, 0.4)):
 
