@@ -80,7 +80,7 @@ class Coupon(SkuBase):
         self.data['denomination'] = float(self.data.pop('denomination'))
         self.data['usedNum'] = int(self.data.pop('usedNum'))
         self.data['couponNum'] = int(self.data.pop('couponNum'))
-        self.data['cutPrice'] = self.data['quota'] - self.data['denomination']
+        self.data['cutPrice'] = 0.0
         self.data['validBeginTime'] = int(self.data.pop('validBeginTime'))
         self.data['validEndTime'] = int(self.data.pop('validEndTime'))
         self.data['couponValid'] = int(self.data.pop('couponValid'))
