@@ -75,6 +75,38 @@ class Evaluation:
             sql = 'DELETE FROM {} {}'.format(tableName, WHERE_CONDITION)
             self.db.query(sql)
 
+        self.updatePrices()
+
+    def updatePrices(self):
+
+        sql = '''   UPDATE
+                        CouponTable
+                    INNER JOIN (
+                        SELECT
+                            CouponTable.id AS id,
+                            ROUND(SkuTable.price - CouponTable.denomination, 2) AS cp
+                        FROM `CouponTable`
+                        INNER JOIN
+                            SkuTable
+                                ON SkuTable.skuid = CouponTable.skuid) AS T1
+                    ON
+                        CouponTable.id = T1.id
+                    SET
+                        CouponTable.cutPrice = T1.cp '''
+
+        self.db.query(sql)
+
+        sql = '''   UPDATE
+                        InformationTable
+                    INNER JOIN
+                        CouponTable
+                    ON
+                        CouponTable.skuid = InformationTable.skuid
+                    SET
+                        InformationTable.cutPrice = CouponTable.cutPrice '''
+
+        self.db.query(sql)
+
     def evaluate(self):
 
         self.specialList = list()
