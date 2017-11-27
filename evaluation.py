@@ -419,6 +419,11 @@ class Evaluation:
 
             key = segments[1].strip()
 
+            try:
+                key = int(key)
+            except ValueError:
+                pass
+
             lowPrice = None
             highPrice = None
 
