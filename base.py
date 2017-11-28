@@ -91,7 +91,8 @@ class Coupon(SkuBase):
         SkuBase.__init__(self, data)
 
         # Set as the same name
-        self.data['skuid'] = int(self.data.pop('skuId'))
+        if 'skuId' in self.data.keys():
+            self.data['skuid'] = int(self.data.pop('skuId'))
 
         # XXX: Sometimes quota is NOT as same as price in SKU, because the coupon
         # may be invalid then. So don't worry about that.

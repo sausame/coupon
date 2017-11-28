@@ -314,11 +314,23 @@ class CouponManager(SkuManagerBase):
 
     def create(self, param):
 
-        if self.db.findOne('CouponTable', skuid=self.getSkuId(param)):
-            # Already exists
-            return None
-
         coupon = Coupon(param)
+
+        record = self.db.findOne('CouponTable', skuid=coupon.data['skuid'])
+
+        if record is not None:
+
+            previous = Coupon(record)
+            recordId = previous.data.pop('id')
+
+            if coupon.equals(other=previous):
+                # Already exists
+                return None
+
+            print coupon.data['skuid'], 'is changed.'
+
+            self.deleteDb('CouponTable', recordId)
+
         coupon.insert(self.db, 'CouponTable')
 
         return coupon
@@ -339,7 +351,7 @@ class DiscountManager(SkuManagerBase):
 
         discount = Discount(param)
 
-        record = self.db.findOne('DiscountTable', skuid=self.getSkuId(param))
+        record = self.db.findOne('DiscountTable', skuid=discount.data['skuid'])
 
         if record is not None:
 
@@ -349,6 +361,8 @@ class DiscountManager(SkuManagerBase):
             if discount.equals(other=previous):
                 # Already exists
                 return None
+
+            print discount.data['skuid'], 'is changed.'
 
             self.deleteDb('DiscountTable', recordId)
 
