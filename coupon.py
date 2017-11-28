@@ -36,6 +36,20 @@ class SkuManagerBase:
                   WHERE skuid NOT IN ({}) '''.format(tableName, ', '.join(skuIdList))
         self.db.query(sql)
 
+    def deleteDb(self, tableName, recordId):
+
+        sql = ''' SELECT COUNT(*) AS num FROM `{}`
+                  WHERE id = {} '''.format(tableName, recordId)
+
+        result = self.db.query(sql)
+
+        for row in result:
+            print 'Delete', row['num'], 'records in', tableName
+
+        sql = ''' DELETE FROM `{}`
+                  WHERE id = {} '''.format(tableName, recordId)
+        self.db.query(sql)
+
     def searchSkuList(self, separator, templateUrl, listTagName, itemIds=None, itemId=None):
 
         if itemIds is not None:
@@ -323,11 +337,21 @@ class DiscountManager(SkuManagerBase):
 
     def create(self, param):
 
-        if self.db.findOne('DiscountTable', skuid=self.getSkuId(param)):
-            # Already exists
-            return None
-
         discount = Discount(param)
+
+        record = self.db.findOne('DiscountTable', skuid=self.getSkuId(param))
+
+        if record is not None:
+
+            previous = Discount(record)
+            recordId = previous.data.pop('id')
+
+            if discount.equals(other=previous):
+                # Already exists
+                return None
+
+            self.deleteDb('DiscountTable', recordId)
+
         discount.insert(self.db, 'DiscountTable')
 
         return discount

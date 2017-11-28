@@ -46,8 +46,27 @@ class SkuBase(BaseDict):
     def __init__(self, data):
         BaseDict.__init__(self, data)
 
-    def equals(self, skuid):
-        return skuid == self.data['skuid']
+    def equals(self, skuid=None, other=None):
+
+        if skuid is not None:
+            return skuid == self.data['skuid']
+
+        if other is not None:
+
+            if len(self.data.keys()) is not len(other.data.keys()):
+                return False
+
+            for key in self.data.keys():
+
+                if key not in other.data.keys():
+                    return False
+
+                if self.data[key] != other.data[key]:
+                    return False
+
+            return True
+
+        return False
 
 class Sku(SkuBase):
 
@@ -94,7 +113,9 @@ class Discount(SkuBase):
         SkuBase.__init__(self, data)
 
         self.data['skuid'] = int(self.data.pop('skuid'))
-        self.data['cutPrice'] = float(self.data.pop('promoPrice'))
+
+        if 'promoPrice' in self.data.keys():
+            self.data['cutPrice'] = float(self.data.pop('promoPrice'))
 
     def getAlterKeys(self):
         return ['skuid']
