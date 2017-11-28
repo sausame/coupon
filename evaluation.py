@@ -55,8 +55,8 @@ class Evaluation:
 
     def update(self):
 
-        WHERE_CONDITION = ''' WHERE skuid NOT IN ( SELECT CouponTable.skuid FROM CouponTable )
-                  AND skuid NOT IN ( SELECT DiscountTable.skuid FROM DiscountTable )
+        WHERE_CONDITION = ''' WHERE skuid NOT IN ( SELECT CouponTable.skuid FROM CouponTable WHERE CouponTable.couponValid = 1)
+                  AND skuid NOT IN ( SELECT DiscountTable.skuid FROM DiscountTable WHERE DiscountTable.haveDiscount = 1)
                   AND skuid NOT IN ( SELECT SeckillTable.skuid FROM SeckillTable )'''
 
         tableNames = ['SkuTable', 'InformationTable']
