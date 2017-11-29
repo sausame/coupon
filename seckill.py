@@ -171,7 +171,7 @@ class SeckillManager:
 
                 seckillInfo = SeckillInfo(gid, self.db)
 
-                if not seckillInfo.update(page):
+                if not seckillInfo.update(page, force=True):
                     continue
 
                 page = seckillInfo.seckillInfo['page'] + 1
