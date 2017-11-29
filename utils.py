@@ -462,13 +462,17 @@ class OutputPath:
 
 class ThreadWritableObject(threading.Thread):
 
-    def __init__(self, configFile, name):
+    def __init__(self, configFile, name, log=None):
 
         threading.Thread.__init__(self)
 
         self.running = True
 
-        self.path = os.path.join(OutputPath.LOG_OUTPUT_PATH, '{}.log'.format(name))
+        if log is not None:
+            self.path = os.path.realpath(log)
+        else:
+            self.path = os.path.join(OutputPath.LOG_OUTPUT_PATH, '{}.log'.format(name))
+
         self.contents = []
 
         self.mutex = threading.Lock()

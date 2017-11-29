@@ -43,11 +43,16 @@ run() {
 	local name=`echo $APP | cut -c1-$pos`
 
 	local code_path=$(get_property $config_file 'code-path')
-	local output_path=$(get_property $config_file 'output-path')
 
-	mkdir -p "$output_path/logs" -m 775
+	for last_arg; do true; done
 
-	local log_file="$output_path/logs/$name.log"
+	if [[ "$last_arg" == *.log ]]; then
+		local log_file=`realpath $last_arg`
+	else
+		local output_path=$(get_property $config_file 'output-path')
+		mkdir -p "$output_path/logs" -m 775
+		local log_file="$output_path/logs/$name.log"
+	fi
 
 	# Begin
 	local startDate=`TZ='Asia/Shanghai' date`
