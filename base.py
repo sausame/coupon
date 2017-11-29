@@ -136,6 +136,10 @@ class Seckill(BaseDict):
         self.data['cutPrice'] = float(self.data.pop('miaoShaPrice'))
         self.data['jdPrice'] = float(self.data.pop('jdPrice'))
 
+        if 'jump' in self.data.keys() and self.data['jump'] is not None and isinstance(self.data['jump'], dict):
+            self.data['jump'] = json.dumps(self.data.pop('jump'),
+                ensure_ascii=False, indent=4, sort_keys=True)
+
     def setPeriod(self, startTime, endTime):
 
         self.data['startTime'] = startTime
