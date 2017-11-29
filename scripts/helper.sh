@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ $# -lt 1 ]; then
-    echo -e "usages: \n\t$0 config-file [qr-path]\n"
+    echo -e "usages: \n\t$0 config-file [uuid] [log-file]\n"
     exit 1
 fi
 

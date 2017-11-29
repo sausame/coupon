@@ -11,7 +11,7 @@ from datetime import datetime
 from wx import WX
 from utils import OutputPath, ThreadWritableObject
 
-def run(configFile, name, uuid):
+def run(configFile, name, uuid, logFile):
 
     wx = None
 
@@ -31,7 +31,7 @@ def run(configFile, name, uuid):
 
     OutputPath.init(configFile)
 
-    thread = ThreadWritableObject(configFile, name)
+    thread = ThreadWritableObject(configFile, name, logFile)
     thread.start()
 
     sys.stdout = thread
@@ -57,17 +57,23 @@ if __name__ == '__main__':
     sys.setdefaultencoding('utf8')
 
     if len(sys.argv) < 2:
-        print 'Usage:\n\t', sys.argv[0], 'config-file [uuid]\n'
+        print 'Usage:\n\t', sys.argv[0], 'config-file [uuid] [log-file]\n'
         exit()
 
     os.environ['TZ'] = 'Asia/Shanghai'
     time.tzset()
 
     name = os.path.basename(sys.argv[0])[:-3] # Remove ".py"
-    configFile = sys.argv[1]
+    configFile = os.path.realpath(sys.argv[1])
+
+    uuid = None
+    logFile = None
 
     if len(sys.argv) > 2:
         uuid = sys.argv[2]
 
-    run(configFile, name, uuid)
+    if len(sys.argv) > 3:
+        logFile = sys.argv[3]
+
+    run(configFile, name, uuid, logFile)
 
