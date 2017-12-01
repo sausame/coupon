@@ -314,7 +314,7 @@ class Evaluation:
         where = ''' InformationTable.outputTime >= '{0}' AND InformationTable.outputTime <= '{1}'
                       AND InformationTable.cutPrice <= InformationTable.lowestPrice
                       AND InformationTable.totalDays > 30
-                      AND ((InformationTable.startTime <= '{0}' AND InformationTable.endTime >= '{1}')
+                      AND ((InformationTable.startTime <= '{1}' AND InformationTable.endTime >= '{1}')
                           OR InformationTable.startTime IS NULL OR InformationTable.endTime IS NULL)
                   '''.format(startTime, endTime)
 
@@ -331,7 +331,7 @@ class Evaluation:
                   LEFT OUTER JOIN SkuTable ON SkuTable.skuid = InformationTable.skuid 
                   WHERE {}
                   ORDER BY InformationTable.endTime ASC,
-                      `InformationTable`.`weight` ASC '''.format(where)
+                      `InformationTable`.`weight` ASC LIMIT 8 '''.format(where)
 
         result = self.db.query(sql)
 
