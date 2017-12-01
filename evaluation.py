@@ -316,6 +316,7 @@ class Evaluation:
                       AND InformationTable.totalDays > 30
                       AND ((InformationTable.startTime <= '{1}' AND InformationTable.endTime >= '{1}')
                           OR InformationTable.startTime IS NULL OR InformationTable.endTime IS NULL)
+                      AND 100 * `InformationTable`.`cutPrice` > `InformationTable`.`price`
                   '''.format(startTime, endTime)
 
         sql = ''' SELECT InformationTable.id, SkuTable.skuid,
