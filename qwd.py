@@ -35,6 +35,9 @@ class QWD:
         self.ploginUrl = getProperty(self.configFile, 'cps-qwd-plogin-url')
         self.ploginSeccessfulUrl = getProperty(self.configFile, 'cps-qwd-plogin-seccessful-url')
 
+        self.loginUrl = getProperty(self.configFile, 'cps-qwd-login-url')
+        self.qwsUrl = getProperty(self.configFile, 'cps-qwd-wqs-url')
+
         self.appid = getProperty(self.configFile, 'cps-qwd-appid')
         self.ctype = getProperty(self.configFile, 'cps-qwd-ctype')
         self.ie = getProperty(self.configFile, 'cps-qwd-ie')
@@ -86,9 +89,6 @@ class QWD:
         if self.apptoken is not None:
             return True
 
-        # Url
-        url = getProperty(self.configFile, 'cps-qwd-login-url')
-
         # Data
         data = {'appid': self.appid,
                 'ctype': self.ctype,
@@ -99,7 +99,7 @@ class QWD:
                 'uuid': self.uuid}
 
         # Request
-        r = requests.post(url, data=data)
+        r = requests.post(self.loginUrl, data=data)
         response = r.content
 
         obj = json.loads(response.decode('utf-8', 'ignore'))
@@ -108,7 +108,7 @@ class QWD:
         errCode = int(obj.pop('errCode'))
 
         if errCode is not 0:
-            print 'Failed to login to', url, ':\n', response
+            print 'Failed to login to', self.loginUrl, ':\n', response
             return False
 
         print('Logined to qwd.jd.com')
@@ -440,9 +440,7 @@ class QWD:
             print 'Loginned for', self.pin
 
             # Redirect to wqs
-            qwsUrl = getProperty(self.configFile, 'cps-qwd-wqs-url')
-
-            browser.get(qwsUrl)
+            browser.get(self.qwsUrl)
             time.sleep(10)
 
             # Save as type of cookie for requests
