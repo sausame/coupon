@@ -28,47 +28,78 @@ class QWD:
 
     def __init__(self, configFile):
 
-        self.configFile = configFile
+        with open(configFile, 'r') as fp:
+            content = fp.read()
 
-        self.loginMethod = int(getProperty(self.configFile, 'cps-qwd-login-method'))
+        try:
+            obj = json.loads(content.decode('utf-8', 'ignore'))
+        except ValueError as e:
+            raise Exception('{} is not valid config file.'.format(configFile))
 
-        self.ploginUrl = getProperty(self.configFile, 'cps-qwd-plogin-url')
-        self.ploginSeccessfulUrl = getProperty(self.configFile, 'cps-qwd-plogin-seccessful-url')
+        loginObj = obj.pop('login')
 
-        self.loginUrl = getProperty(self.configFile, 'cps-qwd-login-url')
-        self.qwsUrl = getProperty(self.configFile, 'cps-qwd-wqs-url')
+        ## Login
+        self.loginMethod = loginObj.pop('login-method')
 
-        self.appid = getProperty(self.configFile, 'cps-qwd-appid')
-        self.ctype = getProperty(self.configFile, 'cps-qwd-ctype')
-        self.ie = getProperty(self.configFile, 'cps-qwd-ie')
-        self.p = getProperty(self.configFile, 'cps-qwd-p')
-        self.qwd_chn = getProperty(self.configFile, 'cps-qwd-qwd_chn')
-        self.qwd_schn = getProperty(self.configFile, 'cps-qwd-qwd_schn')
-        self.login_mode = getProperty(self.configFile, 'cps-qwd-login_mode')
+        # Plogin
+        ploginObj = loginObj.pop('plogin')
 
-        self.pageindex = getProperty(self.configFile, 'cps-qwd-pageindex')
-        self.pagesize = getProperty(self.configFile, 'cps-qwd-pagesize')
-        self.uniquespu = getProperty(self.configFile, 'cps-qwd-uniquespu')
-        self.storestatus = getProperty(self.configFile, 'cps-qwd-storestatus')
-        self.comsrate = getProperty(self.configFile, 'cps-qwd-comsrate')
+        self.ploginUrl = ploginObj.pop('plogin-url')
+        self.ploginSeccessfulUrl = ploginObj.pop('plogin-seccessful-url')
+        self.qwsUrl = ploginObj.pop('wqs-url')
 
-        self.sortBy = getProperty(self.configFile, 'cps-qwd-sortby').split(';')
-        self.order = getProperty(self.configFile, 'cps-qwd-order').split(';')
+        # Login
+        loginObj = loginObj.pop('login')
 
-        self.coupon = getProperty(self.configFile, 'cps-qwd-coupon')
-        self.pwprice = getProperty(self.configFile, 'cps-qwd-pwprice')
-        self.delivery = getProperty(self.configFile, 'cps-qwd-delivery')
+        self.loginUrl = loginObj.pop('login-url')
+        self.appid = loginObj.pop('appid')
+        self.ctype = loginObj.pop('ctype')
+        self.ie = loginObj.pop('ie')
+        self.p = loginObj.pop('p')
+        self.qwd_chn = loginObj.pop('qwd_chn')
+        self.qwd_schn = loginObj.pop('qwd_schn')
+        self.login_mode = loginObj.pop('login_mode')
+        self.uuid = loginObj.pop('uuid')
 
-        self.uuid = getProperty(self.configFile, 'cps-qwd-uuid')
+        ## Search
+        searchObj = obj.pop('search')
 
-        self.pin = getProperty(self.configFile, 'cps-qwd-pin')
-        self.password = getProperty(self.configFile, 'cps-qwd-password')
-        self.tgt = getProperty(self.configFile, 'cps-qwd-tgt')
+        self.searchItemUrl = searchObj.pop('search-item-url')
+        self.pageindex = searchObj.pop('pageindex')
+        self.pagesize = searchObj.pop('pagesize')
+        self.uniquespu = searchObj.pop('uniquespu')
+        self.storestatus = searchObj.pop('storestatus')
+        self.comsrate = searchObj.pop('comsrate')
+        self.sortBy = searchObj.pop('sortby').split(';')
+        self.order = searchObj.pop('order').split(';')
+        self.coupon = searchObj.pop('coupon')
+        self.pwprice = searchObj.pop('pwprice')
+        self.delivery = searchObj.pop('delivery')
 
-        self.shareUrl = getProperty(self.configFile, 'cps-qwd-share-url')
-        self.searchItemUrl = getProperty(self.configFile, 'cps-qwd-search-item-url')
+        ## Share
+        shareObj = obj.pop('share')
 
-        self.userAgent = getProperty(self.configFile, 'cps-qwd-http-user-agent')
+        self.shareUrl = shareObj.pop('share-url')
+
+        ## User
+        userObj = obj.pop('user')
+
+        # Plogin
+        ploginObj = userObj.pop('plogin')
+
+        self.username = ploginObj.pop('username')
+        self.password = ploginObj.pop('password')
+
+        # Login
+        loginObj = userObj.pop('login')
+
+        self.pin = loginObj.pop('pin')
+        self.tgt = loginObj.pop('tgt')
+
+        ## Common
+        commonObj = obj.pop('common')
+
+        self.userAgent = commonObj.pop('http-user-agent')
 
         self.reset()
 
@@ -364,7 +395,7 @@ class QWD:
 
             # Username and password
             randomSleep(1, 2)
-            inputElement(browser.find_element_by_id('username'), self.pin)
+            inputElement(browser.find_element_by_id('username'), self.username)
 
             randomSleep(1, 2)
             inputElement(browser.find_element_by_id('password'), self.password)
@@ -385,7 +416,7 @@ class QWD:
                     times += 1
 
                     # Image to text
-                    path = OutputPath.getAuthPath(self.pin)
+                    path = OutputPath.getAuthPath(self.username)
 
                     ImageKit.saveCapture(browser, imageElement, path)
 
@@ -416,14 +447,14 @@ class QWD:
                         break
 
                     if u'验证码' not in error:
-                        raise Exception('Unable to login for "{}": {}'.format(self.pin, error))
+                        raise Exception('Unable to login for "{}": {}'.format(self.username, error))
 
                     randomSleep(1, 2)
                     codeElement.clear()
                     randomSleep(1, 2)
 
                 else:
-                    raise Exception('Unable to login for "{}"'.format(self.pin))
+                    raise Exception('Unable to login for "{}"'.format(self.username))
 
             else:
                 # Submit
@@ -435,9 +466,9 @@ class QWD:
                 error = self.getBrowserError(browser)
 
                 if error is not None:
-                    raise Exception('Unable to login for "{}": {}'.format(self.pin, error))
+                    raise Exception('Unable to login for "{}": {}'.format(self.username, error))
 
-            print 'Loginned for', self.pin
+            print 'Loginned for', self.username
 
             # Redirect to wqs
             browser.get(self.qwsUrl)
