@@ -10,7 +10,6 @@ from base import SpecialFormatter
 from datetime import datetime
 from db import Database
 from evaluation import Evaluation
-from qwd import QWD
 from utils import getchar, getProperty, reprDict, runCommand, OutputPath, ThreadWritableObject
 
 def run(configfile, name):
@@ -29,8 +28,6 @@ def run(configfile, name):
         db.initialize()
 
         evaluation = Evaluation(configFile, db)
-
-        qwd = QWD(configFile)
 
         evaluation.updateOverdue()
 

@@ -10,7 +10,6 @@ from base import SpecialFormatter
 from datetime import datetime
 from db import Database
 from evaluation import Evaluation
-from qwd import QWD
 from urlutils import unquote
 from utils import getchar, reprDict, runCommand, OutputPath
 
