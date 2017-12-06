@@ -46,7 +46,7 @@ class Evaluation:
         self.configFile = configFile
         self.db = db
 
-        self.qwd = QWD(configFile)
+        self.qwd = QWD()
 
         UrlUtils.init(configFile)
         Validation.init(configFile)

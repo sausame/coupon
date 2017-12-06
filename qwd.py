@@ -26,7 +26,7 @@ class CPS:
 
 class QWD:
 
-    def __init__(self, configFile):
+    def __init__(self, configFile='templates/share.json'):
 
         with open(configFile, 'r') as fp:
             content = fp.read()
