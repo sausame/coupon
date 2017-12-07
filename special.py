@@ -7,14 +7,13 @@ from base import SpecialFormatter
 from datetime import datetime
 from imgkit import ImageKit
 from network import Network
-from qwd import QWD
 from utils import getProperty, OutputPath
 
 class Searcher:
 
-    def __init__(self, configFile):
+    def __init__(self, configFile, qwd):
 
-        self.qwd = QWD(configFile)
+        self.qwd = qwd
 
         self.url = getProperty(configFile, 'search-url')
         self.configFile = configFile

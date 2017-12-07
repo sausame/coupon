@@ -5,17 +5,16 @@ import json
 import time
 import requests
 
-from qwd import QWD
 from base import SpecialFormatter
 from utils import datetime2Seconds, getProperty, LadyThread
 
 class Schedule(LadyThread):
 
-    def __init__(self, configFile):
+    def __init__(self, configFile, qwd):
 
         LadyThread.__init__(self)
 
-        self.qwd = QWD(configFile)
+        self.qwd = qwd
 
         self.url = getProperty(configFile, 'share-url')
         self.imageType = int(getProperty(configFile, 'share-image-type'))
