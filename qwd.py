@@ -26,17 +26,19 @@ class CPS:
 
 class QWD:
 
-    def __init__(self, configFile='templates/share.json'):
+    def __init__(self, configFile='templates/share.json', configObj=None):
 
-        with open(configFile, 'r') as fp:
-            content = fp.read()
+        if configObj is None:
 
-        try:
-            obj = json.loads(content.decode('utf-8', 'ignore'))
-        except ValueError as e:
-            raise Exception('{} is not valid config file.'.format(configFile))
+            with open(configFile, 'r') as fp:
+                content = fp.read()
 
-        loginObj = obj.pop('login')
+            try:
+                configObj = json.loads(content.decode('utf-8', 'ignore'))
+            except ValueError as e:
+                raise Exception('{} is not valid config file.'.format(configFile))
+
+        loginObj = configObj.pop('login')
 
         ## Login
         self.loginMethod = loginObj.pop('login-method')
@@ -62,7 +64,7 @@ class QWD:
         self.uuid = loginObj.pop('uuid')
 
         ## Search
-        searchObj = obj.pop('search')
+        searchObj = configObj.pop('search')
 
         self.searchItemUrl = searchObj.pop('search-item-url')
         self.pageindex = searchObj.pop('pageindex')
@@ -77,12 +79,12 @@ class QWD:
         self.delivery = searchObj.pop('delivery')
 
         ## Share
-        shareObj = obj.pop('share')
+        shareObj = configObj.pop('share')
 
         self.shareUrl = shareObj.pop('share-url')
 
         ## User
-        userObj = obj.pop('user')
+        userObj = configObj.pop('user')
 
         # Plogin
         ploginObj = userObj.pop('plogin')
@@ -97,7 +99,7 @@ class QWD:
         self.tgt = loginObj.pop('tgt')
 
         ## Common
-        commonObj = obj.pop('common')
+        commonObj = configObj.pop('common')
 
         self.userAgent = commonObj.pop('http-user-agent')
 
