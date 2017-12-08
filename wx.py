@@ -5,6 +5,7 @@ import random
 import itchat
 import time
 
+from qwd import QWD
 from schedule import Schedule
 from search import SearchingKeyRegex
 from special import Searcher
@@ -12,11 +13,13 @@ from utils import getProperty, randomSleep, reprDict
 
 class WX(Schedule):
 
-    def __init__(self, configFile):
+    def __init__(self, configFile, shareFile):
 
-        Schedule.__init__(self, configFile)
+        self.qwd = QWD(shareFile)
 
-        self.searcher = Searcher(configFile)
+        Schedule.__init__(self, configFile, self.qwd)
+
+        self.searcher = Searcher(configFile, self.qwd)
 
         self.configFile = configFile
 
