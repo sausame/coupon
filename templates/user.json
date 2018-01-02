@@ -1,0 +1,14 @@
+{
+  "user": {
+    "login": {
+      "pin": "",
+      "tgt": "",
+      "ctype": "apple",
+      "uuid": ""
+    },
+    "plogin": {
+      "username": "",
+      "password": ""
+    }
+  }
+}

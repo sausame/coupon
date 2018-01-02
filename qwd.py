@@ -26,17 +26,22 @@ class CPS:
 
 class QWD:
 
-    def __init__(self, configFile='templates/share.json', configObj=None):
+    def __init__(self, userConfigFile=None):
 
-        if configObj is None:
+        self.initShareConfig()
+        self.initUserConfig(userConfigFile)
 
-            with open(configFile, 'r') as fp:
-                content = fp.read()
+        self.reset()
 
-            try:
-                configObj = json.loads(content.decode('utf-8', 'ignore'))
-            except ValueError as e:
-                raise Exception('{} is not valid config file.'.format(configFile))
+    def initShareConfig(self):
+
+        with open('templates/share.json', 'r') as fp:
+            content = fp.read()
+
+        try:
+            configObj = json.loads(content.decode('utf-8', 'ignore'))
+        except ValueError as e:
+            raise Exception('{} is not valid config file.'.format(configFile))
 
         loginObj = configObj.pop('login')
 
@@ -55,13 +60,11 @@ class QWD:
 
         self.loginUrl = loginObj.pop('login-url')
         self.appid = loginObj.pop('appid')
-        self.ctype = loginObj.pop('ctype')
         self.ie = loginObj.pop('ie')
         self.p = loginObj.pop('p')
         self.qwd_chn = loginObj.pop('qwd_chn')
         self.qwd_schn = loginObj.pop('qwd_schn')
         self.login_mode = loginObj.pop('login_mode')
-        self.uuid = loginObj.pop('uuid')
 
         ## Search
         searchObj = configObj.pop('search')
@@ -83,6 +86,24 @@ class QWD:
 
         self.shareUrl = shareObj.pop('share-url')
 
+        ## Common
+        commonObj = configObj.pop('common')
+
+        self.userAgent = commonObj.pop('http-user-agent')
+
+    def initUserConfig(self, userConfigFile):
+
+        if userConfigFile is None:
+            return
+
+        with open(userConfigFile, 'r') as fp:
+            content = fp.read()
+
+        try:
+            configObj = json.loads(content.decode('utf-8', 'ignore'))
+        except ValueError as e:
+            raise Exception('{} is not valid config file.'.format(configFile))
+
         ## User
         userObj = configObj.pop('user')
 
@@ -98,12 +119,8 @@ class QWD:
         self.pin = loginObj.pop('pin')
         self.tgt = loginObj.pop('tgt')
 
-        ## Common
-        commonObj = configObj.pop('common')
-
-        self.userAgent = commonObj.pop('http-user-agent')
-
-        self.reset()
+        self.ctype = loginObj.pop('ctype')
+        self.uuid = loginObj.pop('uuid')
 
     def reset(self):
 

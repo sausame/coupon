@@ -7,13 +7,11 @@
     "login": {
       "login-url": "https://qwd.jd.com/cgi-bin/qwd_app_login",
       "appid": "161",
-      "ctype": "apple",
       "ie": "utf-8",
       "p": "1",
       "qwd_chn": "99",
       "qwd_schn": "2",
-      "login_mode": "1",
-      "uuid": ""
+      "login_mode": "1"
     },
     "plogin": {
       "plogin-url": "https://plogin.m.jd.com/user/login.action?appid=100",
@@ -36,15 +34,5 @@
   },
   "share": {
     "share-url": "https://qwd.jd.com/fcgi-bin/qwd_itemshare?skuid={}&type=1"
-  },
-  "user": {
-    "login": {
-      "pin": "",
-      "tgt": ""
-    },
-    "plogin": {
-      "username": "",
-      "password": ""
-    }
   }
 }
