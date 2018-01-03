@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ $# -lt 1 ]; then
-    echo -e "usages: \n\t$0 config-file share-config-file [savefile] [log-file]\n"
+    echo -e "usages: \n\t$0 config-file user-config-file share-file index [savefile] [log-file]\n"
     exit 1
 fi
 

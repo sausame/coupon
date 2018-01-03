@@ -2,12 +2,12 @@
 # -*- coding:utf-8 -*-
 
 import json
-import requests
 
 from base import SpecialFormatter
 from datetime import datetime
 from imgkit import ImageKit
 from network import Network
+from urlutils import JsonResult
 from utils import getProperty, randomSleep, OutputPath
 
 class Searcher:
@@ -69,35 +69,27 @@ class Viewer:
 
         self.qwd = qwd
 
-        self.url = getProperty(configFile, 'share-url')
         self.imageType = int(getProperty(configFile, 'share-image-type'))
 
-    def get(self):
+    def get(self, shareFile, index=0):
 
-        r = requests.get(self.url)
-        obj = json.loads(r.content)
+        with open(shareFile, 'r') as fp:
+            content = fp.read()
 
-        print 'Updated', obj['num'], 'SKU between', obj['startTime'], 'and', obj['endTime']
+        try:
+            obj = json.loads(content.decode('utf-8', 'ignore'))
+        except ValueError as e:
+            raise Exception('{} is not valid config file.'.format(shareFile))
 
-        if obj['num'] is 0:
-            return obj
+        if obj['num'] <= index:
+            return JsonResult.error()
 
-        dataList = list()
+        data = dict()
 
-        for special in obj.pop('list'):
+        formatter = SpecialFormatter.create(obj['list'][index])
 
-            data = dict()
+        data['plate'] = formatter.getPlate(self.qwd)
+        data['image'] = formatter.skuimgurl
 
-            formatter = SpecialFormatter.create(special)
-
-            data['plate'] = formatter.getPlate(self.qwd)
-            data['image'] = formatter.skuimgurl
-
-            dataList.append(data)
-
-            randomSleep(1, 2)
-
-        obj['list'] = dataList
-
-        return obj
+        return JsonResult.succeed(data)
 
