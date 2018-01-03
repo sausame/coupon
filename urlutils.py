@@ -10,6 +10,33 @@ from network import Network
 from urllib import unquote_plus as urlunquote
 from utils import getProperty
 
+class JsonResult:
+
+    @staticmethod
+    def create(data=None, code=0, message='', jsonrpc='2.0'):
+
+        result = dict()
+        result['data'] = data
+
+        errorResult = dict()
+
+        errorResult['code'] = code
+        errorResult['message'] = message
+
+        result['error'] = errorResult
+
+        result['jsonrpc'] = jsonrpc
+
+        return result
+
+    @staticmethod
+    def error(code=-1, message='unknown error'):
+        return JsonResult.create(None, code, message)
+
+    @staticmethod
+    def succeed(data=None, code=0, message='succeed'):
+        return JsonResult.create(data, code, message)
+
 def unquote(src):
 
     if not isinstance(src, str):
