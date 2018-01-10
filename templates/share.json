@@ -14,8 +14,10 @@
       "login_mode": "1"
     },
     "plogin": {
+      "plogin-type": "firefox",
       "plogin-url": "https://plogin.m.jd.com/user/login.action?appid=100",
       "plogin-seccessful-url": "https://m.jd.com/?sid=",
+      "wq-url": "https://wq.jd.com/mlogin/mpage/Login",
       "wqs-url": "https://wqs.jd.com/my/loginv1.shtml?sceneid=12300&state=2&rurl=https://qwd.jd.com/cgi-bin/qwd_portal?type=16&source=0&subsource=0"
     }
   },

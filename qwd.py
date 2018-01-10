@@ -26,10 +26,10 @@ class CPS:
 
 class QWD:
 
-    def __init__(self, userConfigFile=None):
+    def __init__(self, userConfigFile=None, entryCookiesFile=None, keyCookiesFile=None):
 
         self.initShareConfig()
-        self.initUserConfig(userConfigFile)
+        self.initUserConfig(userConfigFile, entryCookiesFile, keyCookiesFile)
 
         self.reset()
 
@@ -51,9 +51,11 @@ class QWD:
         # Plogin
         ploginObj = loginObj.pop('plogin')
 
+        self.ploginType = ploginObj.pop('plogin-type')
         self.ploginUrl = ploginObj.pop('plogin-url')
         self.ploginSeccessfulUrl = ploginObj.pop('plogin-seccessful-url')
-        self.qwsUrl = ploginObj.pop('wqs-url')
+        self.wqUrl = ploginObj.pop('wq-url')
+        self.wqsUrl = ploginObj.pop('wqs-url')
 
         # Login
         loginObj = loginObj.pop('login')
@@ -91,7 +93,7 @@ class QWD:
 
         self.userAgent = commonObj.pop('http-user-agent')
 
-    def initUserConfig(self, userConfigFile):
+    def initUserConfig(self, userConfigFile, entryCookiesFile, keyCookiesFile):
 
         if userConfigFile is None:
             return
@@ -121,6 +123,9 @@ class QWD:
 
         self.ctype = loginObj.pop('ctype')
         self.uuid = loginObj.pop('uuid')
+
+        self.entryCookiesFile = entryCookiesFile
+        self.keyCookiesFile = keyCookiesFile
 
     def reset(self):
 
@@ -400,110 +405,175 @@ class QWD:
         if self.pCookies is not None:
             return True
 
-        # https://github.com/mozilla/geckodriver/releases
-        # browser = webdriver.Firefox()
+        if self.entryCookiesFile is None or self.keyCookiesFile is None:
+            raise Exception('No config for cookie files')
+            return False
 
-        # https://chromedriver.storage.googleapis.com/index.html
-        browser = webdriver.Chrome()
+        cookies = None
 
-        try:
-            # Plogin
-            browser.get(self.ploginUrl)
+        if os.path.exists(self.entryCookiesFile):
 
-            # Login by username and password
+            with open(self.entryCookiesFile, 'r') as fp:
+                content = fp.read()
 
-            # Username and password
-            randomSleep(1, 2)
-            inputElement(browser.find_element_by_id('username'), self.username)
+            try:
+                cookies = json.loads(content.decode('utf-8', 'ignore'))
+            except ValueError as e:
+                pass
 
-            randomSleep(1, 2)
-            inputElement(browser.find_element_by_id('password'), self.password)
+        if cookies is None:
 
-            # Submit
-            buttonElement = browser.find_element_by_id('loginBtn')
+            if 'firefox' == self.ploginType:
 
-            # Code
-            codeElement = browser.find_element_by_id('code')
-            imageElement = browser.find_element_by_id('imgCode')
+                # https://github.com/mozilla/geckodriver/releases
+                browser = webdriver.Firefox()
 
-            times = 0
+            else: # Chrome
 
-            if codeElement.is_displayed():
+                # https://chromedriver.storage.googleapis.com/index.html
+                browser = webdriver.Chrome()
 
-                while codeElement.is_displayed() and times < 50:
+            try:
+                # Plogin
+                browser.get(self.ploginUrl)
 
-                    times += 1
+                # Login by username and password
 
-                    # Image to text
-                    path = OutputPath.getAuthPath(self.username)
+                # Username and password
+                randomSleep(1, 2)
+                inputElement(browser.find_element_by_id('username'), self.username)
 
-                    ImageKit.saveCapture(browser, imageElement, path)
+                randomSleep(1, 2)
+                inputElement(browser.find_element_by_id('password'), self.password)
 
-                    code = ImageKit.getText(path)
+                # Submit
+                buttonElement = browser.find_element_by_id('loginBtn')
 
-                    codeElement.send_keys(code)
+                # Code
+                codeElement = browser.find_element_by_id('code')
+                imageElement = browser.find_element_by_id('imgCode')
 
-                    if not isValidAuthCode(code):
+                times = 0
 
-                        # Refresh auth code
-                        randomSleep(0.5, 1)
-                        imageElement.click()
+                if codeElement.is_displayed():
 
-                        # Wait for updating auth code 
+                    while codeElement.is_displayed() and times < 50:
+
+                        times += 1
+
+                        # Image to text
+                        path = OutputPath.getAuthPath(self.username)
+
+                        ImageKit.saveCapture(browser, imageElement, path)
+
+                        code = ImageKit.getText(path)
+
+                        codeElement.send_keys(code)
+
+                        if not isValidAuthCode(code):
+
+                            # Refresh auth code
+                            randomSleep(0.5, 1)
+                            imageElement.click()
+
+                            # Wait for updating auth code 
+                            randomSleep(1, 2)
+                            codeElement.clear()
+
+                            continue
+
+                        # Submit
+                        randomSleep(1, 2)
+                        buttonElement.click()
+
+                        error = self.getBrowserError(browser)
+
+                        if error is None:
+                            print 'Succeed after', times, 'tries.'
+                            break
+
+                        if u'验证码' not in error:
+                            raise Exception('Unable to login for "{}": {}'.format(self.username, error))
+
                         randomSleep(1, 2)
                         codeElement.clear()
+                        randomSleep(1, 2)
 
-                        continue
+                    else:
+                        raise Exception('Unable to login for "{}"'.format(self.username))
 
+                else:
                     # Submit
                     randomSleep(1, 2)
                     buttonElement.click()
 
+                    wait = WebDriverWait(browser, 3)
+                  
                     error = self.getBrowserError(browser)
 
-                    if error is None:
-                        print 'Succeed after', times, 'tries.'
-                        break
-
-                    if u'验证码' not in error:
+                    if error is not None:
                         raise Exception('Unable to login for "{}": {}'.format(self.username, error))
 
-                    randomSleep(1, 2)
-                    codeElement.clear()
-                    randomSleep(1, 2)
+                print 'Loginned for', self.username
 
-                else:
-                    raise Exception('Unable to login for "{}"'.format(self.username))
+                # Redirect to wqs
+                time.sleep(1)
 
-            else:
-                # Submit
-                randomSleep(1, 2)
-                buttonElement.click()
+                # Save as type of cookie for requests
+                cookies = dict()
+                for cookie in browser.get_cookies():
 
-                wait = WebDriverWait(browser, 3)
-              
-                error = self.getBrowserError(browser)
+                    k = cookie['name']
+                    v = cookie['value']
 
-                if error is not None:
-                    raise Exception('Unable to login for "{}": {}'.format(self.username, error))
+                    cookies[k] = v
 
-            print 'Loginned for', self.username
+                with open(self.entryCookiesFile, 'w') as fp:
+                    fp.write(reprDict(cookies))
 
-            # Redirect to wqs
-            browser.get(self.qwsUrl)
-            time.sleep(10)
+            except Exception as e:
+                print 'Unable to get entry cookie with an error:\n', e
+                return False
+            finally:
+                browser.quit()
 
-            # Save as type of cookie for requests
-            self.pCookies = dict()
-            for cookie in browser.get_cookies():
+        # Update pCookies
+        self.pCookies = cookies
 
-                k = cookie['name']
-                v = cookie['value']
+        cookies = None
 
-                self.pCookies[k] = v
+        if os.path.exists(self.keyCookiesFile):
 
-        except Exception as e:
-            print e
-        finally:
-            browser.quit()
+            with open(self.keyCookiesFile, 'r') as fp:
+                content = fp.read()
+
+            try:
+                cookies = json.loads(content.decode('utf-8', 'ignore'))
+            except ValueError as e:
+                pass
+
+        if cookies is None:
+
+            try:
+                # Headers
+                headers = {'User-Agent': self.userAgent}
+
+                params = {'rurl': self.wqsUrl}
+
+                r = requests.get(self.wqUrl, params=params, cookies=self.pCookies, headers=headers, allow_redirects=False)
+            except Exception as e: 
+                print 'Unable to get key cookie with an error:\n', e
+                return False
+
+            cookies = dict()
+            for cookie in r.cookies:
+                cookies[cookie.name] = cookie.value
+
+            with open(self.keyCookiesFile, 'w') as fp:
+                fp.write(reprDict(cookies))
+
+        # Update pCookies
+        self.pCookies.update(cookies)
+
+        return True
 
