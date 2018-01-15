@@ -3,7 +3,6 @@
     "http-user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 10_2_1 like Mac OS X) AppleWebKit/602.4.6 (KHTML, like Gecko) Mobile/14D27 (5715086848) JXJ/1.3.5.70426"
   },
   "login": {
-    "login-method": 0,
     "login": {
       "login-url": "https://qwd.jd.com/cgi-bin/qwd_app_login",
       "appid": "161",

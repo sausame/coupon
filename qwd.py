@@ -46,9 +46,6 @@ class QWD:
 
         loginObj = configObj.pop('login')
 
-        ## Login
-        self.loginMethod = loginObj.pop('login-method')
-
         # Plogin
         ploginObj = loginObj.pop('plogin')
 
@@ -103,7 +100,7 @@ class QWD:
         self.userId = userId
 
         sql = ''' SELECT
-                      config, entryCookies, keyCookies
+                      config, entryCookies, keyCookies, loginType
                   FROM
                       `configs`
                   WHERE
@@ -115,8 +112,11 @@ class QWD:
 
         for row in result:
             config = row['config']
+
             self.entryCookies = row['entryCookies']
             self.keyCookies = row['keyCookies']
+
+            self.loginType = int(row['loginType'])
 
         if config is None:
             return
@@ -186,7 +186,7 @@ class QWD:
             print 'Failed to login to', self.loginUrl, ':\n', response
             return False
 
-        print('Logined to qwd.jd.com')
+        print 'Loginned for user', self.userId, 'with type', self.loginType
 
         obj = obj.pop('loginInfo')
 
@@ -224,7 +224,7 @@ class QWD:
             if retries is not 0:
                 time.sleep(1)
 
-            if self.loginMethod is 1:
+            if self.loginType is 1:
 
                 if not self.plogin(retries):
                     continue
@@ -548,7 +548,7 @@ class QWD:
                     if error is not None:
                         raise Exception('Unable to login for "{}": {}'.format(self.userId, error))
 
-                print 'Loginned for', self.userId
+                print 'Loginned for user', self.userId, 'with type', self.loginType
 
                 # Redirect to wqs
                 time.sleep(1)
