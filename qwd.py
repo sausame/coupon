@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 
+import base64
 import codecs
 import json
 import os
@@ -26,10 +27,10 @@ class CPS:
 
 class QWD:
 
-    def __init__(self, userConfigFile=None, entryCookiesFile=None, keyCookiesFile=None):
+    def __init__(self, db=None, userId=None):
 
         self.initShareConfig()
-        self.initUserConfig(userConfigFile, entryCookiesFile, keyCookiesFile)
+        self.initUserConfig(db, userId)
 
         self.reset()
 
@@ -93,18 +94,37 @@ class QWD:
 
         self.userAgent = commonObj.pop('http-user-agent')
 
-    def initUserConfig(self, userConfigFile, entryCookiesFile, keyCookiesFile):
+    def initUserConfig(self, db, userId):
 
-        if userConfigFile is None:
+        if db is None or userId is None:
             return
 
-        with open(userConfigFile, 'r') as fp:
-            content = fp.read()
+        self.db = db
+        self.userId = userId
+
+        sql = ''' SELECT
+                      config, entryCookies, keyCookies
+                  FROM
+                      `configs`
+                  WHERE
+                      userId = {}'''.format(self.userId)
+
+        result = self.db.query(sql)
+
+        config = None
+
+        for row in result:
+            config = row['config']
+            self.entryCookies = row['entryCookies']
+            self.keyCookies = row['keyCookies']
+
+        if config is None:
+            return
 
         try:
-            configObj = json.loads(content.decode('utf-8', 'ignore'))
+            configObj = json.loads(config.decode('utf-8', 'ignore'))
         except ValueError as e:
-            raise Exception('{} is not valid config file.'.format(configFile))
+            raise Exception('Config is invalid for user {}'.format(self.userId))
 
         ## User
         userObj = configObj.pop('user')
@@ -113,7 +133,8 @@ class QWD:
         ploginObj = userObj.pop('plogin')
 
         self.username = ploginObj.pop('username')
-        self.password = ploginObj.pop('password')
+        password = ploginObj.pop('password')
+        self.password = base64.b64decode(password)
 
         # Login
         loginObj = userObj.pop('login')
@@ -123,9 +144,6 @@ class QWD:
 
         self.ctype = loginObj.pop('ctype')
         self.uuid = loginObj.pop('uuid')
-
-        self.entryCookiesFile = entryCookiesFile
-        self.keyCookiesFile = keyCookiesFile
 
     def reset(self):
 
@@ -138,6 +156,8 @@ class QWD:
         self.cookies = dict()
 
         self.pCookies = None
+
+        self.dbUpdated = False
 
     def login(self):
 
@@ -195,43 +215,55 @@ class QWD:
 
     def getShareUrl(self, skuid):
 
-        if self.loginMethod is 1:
-            self.plogin()
-            cookies = self.pCookies
-        else:
-            self.login()
-            cookies = self.cookies
-
         url = self.shareUrl.format(skuid)
 
         headers = {'User-Agent': self.userAgent}
 
-        try:
-            r = requests.get(url, cookies=cookies, headers=headers)
-        except Exception as e: 
-            print 'Unable to get sharing URL for "', skuid, '" with an error:\n', e
-            return None
+        for retries in range(3):
 
-        if 200 != r.status_code:
-            print 'Unable to get sharing URL for "', skuid, '" with an error (', r.status_code, '):\n', r.text
-            return None
+            if retries is not 0:
+                time.sleep(1)
 
-        content = r.content.replace('\n', '')
-        data = getMatchString(content, r'itemshare\((.*?)\)')
+            if self.loginMethod is 1:
 
-        obj = json.loads(data.decode('utf-8', 'ignore'))
-        retCode = int(obj.pop('retCode'))
+                if not self.plogin(retries):
+                    continue
 
-        if retCode is not 0:
-            print 'Unable to get sharing URL for "', skuid, '" with an error (', r.status_code, '):\n', r.text
+                cookies = self.pCookies
 
-            # XXX: Reset but let this message failed because of less complicated logistic. It will re-login
-            #      when call the function again.
-            self.reset()
+            else:
+                if not self.login():
+                    continue
 
-            return None
+                cookies = self.cookies
 
-        return obj.pop('skuurl')
+            try:
+                r = requests.get(url, cookies=cookies, headers=headers)
+            except Exception as e: 
+                print 'Unable to get sharing URL for "', skuid, '" with an error:\n', e
+                continue
+
+            if 200 != r.status_code:
+                print 'Unable to get sharing URL for "', skuid, '" with an error (', r.status_code, '):\n', r.text
+                continue
+
+            content = r.content.replace('\n', '')
+            data = getMatchString(content, r'itemshare\((.*?)\)')
+
+            obj = json.loads(data.decode('utf-8', 'ignore'))
+            retCode = int(obj.pop('retCode'))
+
+            if retCode is not 0:
+                print 'Unable to get sharing URL for "', skuid, '" with an error (', r.status_code, '):\n', r.text
+                continue
+
+            return obj.pop('skuurl')
+
+        # XXX: Reset but let this message failed because of less complicated logistic. It will re-login
+        #      when call the function again.
+        self.reset()
+
+        return None
 
     def getSkuId(self, url):
 
@@ -382,7 +414,7 @@ class QWD:
         noticeElement = browser.find_element_by_xpath('//div[@class="notice"]')
         return browser.execute_script("return arguments[0].innerHTML", noticeElement)
 
-    def plogin(self):
+    def plogin(self, retries=0):
 
         def isValidAuthCode(code):
 
@@ -405,19 +437,21 @@ class QWD:
         if self.pCookies is not None:
             return True
 
-        if self.entryCookiesFile is None or self.keyCookiesFile is None:
-            raise Exception('No config for cookie files')
+        if retries is 0:
+            pass
+        elif retries is 1:
+            self.keyCookies = None
+        elif retries is 2:
+            self.entryCookies = None
+        else:
             return False
 
         cookies = None
 
-        if os.path.exists(self.entryCookiesFile):
-
-            with open(self.entryCookiesFile, 'r') as fp:
-                content = fp.read()
+        if self.entryCookies is not None:
 
             try:
-                cookies = json.loads(content.decode('utf-8', 'ignore'))
+                cookies = json.loads(self.entryCookies.decode('utf-8', 'ignore'))
             except ValueError as e:
                 pass
 
@@ -493,14 +527,14 @@ class QWD:
                             break
 
                         if u'验证码' not in error:
-                            raise Exception('Unable to login for "{}": {}'.format(self.username, error))
+                            raise Exception('Unable to login for "{}": {}'.format(self.userId, error))
 
                         randomSleep(1, 2)
                         codeElement.clear()
                         randomSleep(1, 2)
 
                     else:
-                        raise Exception('Unable to login for "{}"'.format(self.username))
+                        raise Exception('Unable to login for "{}"'.format(self.userId))
 
                 else:
                     # Submit
@@ -512,9 +546,9 @@ class QWD:
                     error = self.getBrowserError(browser)
 
                     if error is not None:
-                        raise Exception('Unable to login for "{}": {}'.format(self.username, error))
+                        raise Exception('Unable to login for "{}": {}'.format(self.userId, error))
 
-                print 'Loginned for', self.username
+                print 'Loginned for', self.userId
 
                 # Redirect to wqs
                 time.sleep(1)
@@ -528,8 +562,8 @@ class QWD:
 
                     cookies[k] = v
 
-                with open(self.entryCookiesFile, 'w') as fp:
-                    fp.write(reprDict(cookies))
+                self.dbUpdated = True
+                self.entryCookies = reprDict(cookies)
 
             except Exception as e:
                 print 'Unable to get entry cookie with an error:\n', e
@@ -542,13 +576,10 @@ class QWD:
 
         cookies = None
 
-        if os.path.exists(self.keyCookiesFile):
-
-            with open(self.keyCookiesFile, 'r') as fp:
-                content = fp.read()
+        if self.keyCookies is not None:
 
             try:
-                cookies = json.loads(content.decode('utf-8', 'ignore'))
+                cookies = json.loads(self.keyCookies.decode('utf-8', 'ignore'))
             except ValueError as e:
                 pass
 
@@ -569,11 +600,28 @@ class QWD:
             for cookie in r.cookies:
                 cookies[cookie.name] = cookie.value
 
-            with open(self.keyCookiesFile, 'w') as fp:
-                fp.write(reprDict(cookies))
+            self.dbUpdated = True
+            self.keyCookies = reprDict(cookies)
 
         # Update pCookies
         self.pCookies.update(cookies)
 
         return True
+
+    def updateDb(self):
+
+        if not self.dbUpdated:
+            return
+
+        self.dbUpdated = False
+
+        sql = ''' UPDATE
+                      `configs`
+                  SET
+                      `entryCookies`= '{}',
+                      `keyCookies`= '{}'
+                  WHERE
+                      `userId` = {} '''.format(self.entryCookies, self.keyCookies, self.userId)
+
+        self.db.query(sql)
 
