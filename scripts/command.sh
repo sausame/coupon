@@ -68,6 +68,36 @@ run() {
 	echo "Updated at $endDate" >> $log_file
 }
 
+create_display() {
+
+	VFB="Xvfb"
+	vfb="`which $VFB`"
+
+	if [ -z "$vfb" ]; then
+		echo -e "Please install $VFB firstly.\n"
+		exit 1
+	fi
+
+	found=false
+
+	processes="`ps -ef`"
+	printf '%s\n' "$processes" | while IFS= read -r line
+	do
+		if [[ $line == *"$VFB"* ]]; then
+			found=true
+			break
+		fi
+	done
+
+	if [ ! $found ]; then
+		$vfb :1 -screen 0 1024x768x24 &
+	fi
+
+	if [ -z "$DISPLAY" ]; then
+		export DISPLAY=:1.0
+	fi
+}
+
 # Sample:
 #
 # # Include command.sh

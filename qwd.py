@@ -159,6 +159,9 @@ class QWD:
 
         self.dbUpdated = False
 
+        self.entryCookies = None
+        self.keyCookies = None
+
     def login(self):
 
         if self.apptoken is not None:
@@ -414,7 +417,7 @@ class QWD:
         noticeElement = browser.find_element_by_xpath('//div[@class="notice"]')
         return browser.execute_script("return arguments[0].innerHTML", noticeElement)
 
-    def plogin(self, retries=0):
+    def plogin(self, retries=0, force=True):
 
         def isValidAuthCode(code):
 
@@ -436,6 +439,10 @@ class QWD:
 
         if self.pCookies is not None:
             return True
+
+        if force:
+            self.entryCookies = None
+            self.keyCookies = None
 
         if retries is 0:
             pass
@@ -608,10 +615,17 @@ class QWD:
 
         return True
 
-    def updateDb(self):
+    def updateDb(self, force=False):
 
         if not self.dbUpdated:
-            return
+
+            if self.loginType is not 1:
+                return
+
+            if not force:
+                return
+
+            self.plogin(force=True)
 
         self.dbUpdated = False
 
