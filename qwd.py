@@ -110,6 +110,9 @@ class QWD:
 
         config = None
 
+        self.entryCookies = None
+        self.keyCookies = None
+
         for row in result:
             config = row['config']
 
@@ -147,20 +150,20 @@ class QWD:
 
     def reset(self):
 
-        self.apptoken = None
-        self.pinType = None
-        self.jxjpin = None
+        if self.loginType is 1:
 
-        #XXX: Can NOT use session to store cookie because these fields are not
-        #     valid http cookie.
-        self.cookies = dict()
+            self.pCookies = None
+            self.dbUpdated = False
 
-        self.pCookies = None
+        else: # 0
 
-        self.dbUpdated = False
+            self.apptoken = None
+            self.pinType = None
+            self.jxjpin = None
 
-        self.entryCookies = None
-        self.keyCookies = None
+            #XXX: Can NOT use session to store cookie because these fields are not
+            #     valid http cookie.
+            self.cookies = dict()
 
     def login(self):
 
@@ -225,6 +228,8 @@ class QWD:
         for retries in range(3):
 
             if retries is not 0:
+
+                self.reset()
                 time.sleep(1)
 
             if self.loginType is 1:
@@ -262,8 +267,6 @@ class QWD:
 
             return obj.pop('skuurl')
 
-        # XXX: Reset but let this message failed because of less complicated logistic. It will re-login
-        #      when call the function again.
         self.reset()
 
         return None
@@ -417,7 +420,7 @@ class QWD:
         noticeElement = browser.find_element_by_xpath('//div[@class="notice"]')
         return browser.execute_script("return arguments[0].innerHTML", noticeElement)
 
-    def plogin(self, retries=0, force=True):
+    def plogin(self, retries=0, force=False):
 
         def isValidAuthCode(code):
 
