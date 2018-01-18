@@ -153,7 +153,6 @@ class QWD:
         if self.loginType is 1:
 
             self.pCookies = None
-            self.dbUpdated = False
 
         else: # 0
 
@@ -164,6 +163,8 @@ class QWD:
             #XXX: Can NOT use session to store cookie because these fields are not
             #     valid http cookie.
             self.cookies = dict()
+
+        self.dbUpdated = False
 
     def login(self):
 
