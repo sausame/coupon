@@ -1,0 +1,7 @@
+{
+  "config": {
+    "driver": "firefox",
+    "login-url": "https://plogin.m.jd.com/user/login.action?appid=100",
+    "verification-url": "https://plogin.m.jd.com/cgi-bin/m/warning?mode=0"
+  }
+}

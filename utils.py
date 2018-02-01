@@ -58,6 +58,31 @@ def atoi(src):
         return n
     return 0
 
+def findElement(driver, name, nameType=None, error='ignore'):
+
+    if nameType is None:
+
+        if name.startswith('//'):
+            nameType = 'xpath'
+        else:
+            nameType = 'id'
+
+    try:
+        if 'id' == nameType:
+            element = driver.find_element_by_id(name)
+        elif 'xpath' == nameType:
+            element = driver.find_element_by_xpath(name)
+        else:
+            element = None
+
+        return element
+
+    except Exception as e:
+        if 'ignore' != error:
+            print 'Error to find "', name, '" with type "', nameType, '"'
+
+    return None
+
 def inputElement(element, content, normalSpeed=(0.1, 0.2), slowSpeed=(0.2, 0.4)):
 
     def randomChar():
