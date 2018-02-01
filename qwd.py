@@ -34,9 +34,9 @@ class QWD:
 
         self.reset()
 
-    def initShareConfig(self):
+    def initShareConfig(self, configFile='templates/share.json'):
 
-        with open('templates/share.json', 'r') as fp:
+        with open(configFile, 'r') as fp:
             content = fp.read()
 
         try:
