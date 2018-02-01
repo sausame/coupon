@@ -12,11 +12,12 @@ from datetime import tzinfo, timedelta, datetime
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
-from utils import randomSleep, reprDict, findElement, inputElement
+from urlutils import JsonResult
+from utils import randomSleep, remove, reprDict, findElement, inputElement
 
 class Inputter:
 
-    def __init__(self, inputPath=None, outputPath=None, retries=100):
+    def __init__(self, inputPath=None, outputPath=None, retries=10):
 
         self.inputPath = inputPath
         self.outputPath = outputPath
@@ -28,18 +29,22 @@ class Inputter:
     def reset(self):
 
         self.content = None
+        self.code = 1
+
+        if self.inputPath is not None:
+            remove(self.inputPath)
 
     def getInput(self, notice=None, msg=None, prompt=None, length=0):
 
         if self.inputPath is not None:
-            self.getInputFromFile(notice, msg, prompt, length)
+            content = self.getInputFromFile(notice, msg, prompt, length)
         else:
-            self.getInputFromStdin(notice, msg, prompt, length)
+            content = self.getInputFromStdin(notice, msg, prompt, length)
 
-        if isinstance(self.content, str):
-            self.content = self.content.decode('utf-8', 'ignore')
+        if content is not None and isinstance(content, str):
+            content = content.decode('utf-8', 'ignore')
 
-        return self.content
+        return content
 
     def getInputFromFile(self, notice, msg, prompt, length):
 
@@ -49,7 +54,10 @@ class Inputter:
 
             content['notice'] = notice
             content['msg'] = msg
+            content['image'] = None
             content['prompt'] = prompt
+
+            content = JsonResult.create(content, self.code, prompt)
 
             fp.write(reprDict(content))
 
@@ -67,10 +75,14 @@ class Inputter:
                         and self.content != content:
 
                         self.content = content
+                        self.code += 1 # Increase code
+
                         break
 
             except IOError as e:
                 pass
+        else:
+            return None
 
         return self.content
 
@@ -87,6 +99,8 @@ class Inputter:
             if (length is not 0 and len(content) is length) or (length is 0 and len(content) > 0):
                 self.content = content
                 break
+        else:
+            return None
 
         return self.content
 
@@ -130,7 +144,9 @@ class Account:
         password = obj.pop('password')
         self.password = base64.b64decode(password)
 
-    def login(self, inputPath=None, outputPath=None, config='templates/login.json', retries=100):
+    def login(self, inputPath=None, outputPath=None, config='templates/login.json', retries=10):
+
+        result = JsonResult.error()
 
         if config is None:
             config='templates/login.json'
@@ -141,7 +157,7 @@ class Account:
         try:
             configObj = json.loads(content.decode('utf-8', 'ignore'))
         except ValueError as e:
-            raise Exception('{} is not valid config file.'.format(config))
+            raise Exception('{} is not valid config file for user {}.'.format(config, self.userId))
 
         obj = configObj.pop('config')
 
@@ -194,6 +210,8 @@ class Account:
                 # Verification
                 if self.verify(driver, verificationInputter):
                     continue
+            else:
+                raise Exception('Unable to login for user {} in {}.'.format(self.userId, loginUrl))
 
             codeInputter = Inputter(inputPath, outputPath)
 
@@ -205,10 +223,14 @@ class Account:
                 time.sleep(1)
 
                 self.inputCode(driver, codeInputter)
+            else:
+                raise Exception('Unable to login for user {} in {}.'.format(self.userId, verificationUrl))
 
             time.sleep(3)
 
             self.updateDb(driver)
+
+            result = JsonResult.succeed()
 
         except KeyboardInterrupt:
             pass
@@ -219,6 +241,8 @@ class Account:
             driver.quit()
 
         time.sleep(1)
+
+        return result
 
     def needCode(self, driver):
 
@@ -322,6 +346,9 @@ class Account:
             prompt = element.get_attribute('placeholder')
 
             content = inputter.getInput(notice, msg, prompt)
+
+            if content is None:
+                return
 
             element.send_keys(content)
 

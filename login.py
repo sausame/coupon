@@ -9,7 +9,8 @@ import traceback
 from account import Account
 from datetime import tzinfo, timedelta, datetime
 from db import Database
-from utils import OutputPath, ThreadWritableObject
+from urlutils import JsonResult
+from utils import reprDict, OutputPath, ThreadWritableObject
 
 def run(configFile, userId, name, inputPath, outputPath, loginConfigFile, logFile):
 
@@ -21,12 +22,14 @@ def run(configFile, userId, name, inputPath, outputPath, loginConfigFile, logFil
     sys.stdout = thread
     sys.errout = thread # XXX: Actually, it does NOT work
 
+    result = JsonResult.error()
+
     try:
         db = Database(configFile, 'register')
         db.initialize()
 
         account = Account(db, userId)
-        account.login(inputPath, outputPath, loginConfigFile)
+        result = account.login(inputPath, outputPath, loginConfigFile)
 
     except KeyboardInterrupt:
         pass
@@ -39,6 +42,16 @@ def run(configFile, userId, name, inputPath, outputPath, loginConfigFile, logFil
                 db.quit()
         except:
             pass
+
+    try:
+        if outputPath is not None:
+            with open(outputPath, 'w') as fp:
+                fp.write(reprDict(result))
+    except KeyboardInterrupt:
+        pass
+    except Exception as e:
+        print 'Error occurs at', datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        traceback.print_exc(file=sys.stdout)
 
     thread.quit()
     thread.join()

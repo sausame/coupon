@@ -40,6 +40,10 @@ def chmod(path, mode=stat.S_IRUSR|stat.S_IWUSR|stat.S_IXUSR|stat.S_IRGRP|stat.S_
     if os.path.exists(path):
         os.chmod(path, mode)
 
+def remove(path):
+    if os.path.exists(path):
+        os.remove(path)
+
 def getchar():
     print 'Please press return key to continue'
     sys.stdin.read(1)
