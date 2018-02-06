@@ -443,6 +443,7 @@ class OutputPath:
     LOG_OUTPUT_PATH = None
     DATA_OUTPUT_PATH = None
     AUTH_OUTPUT_PATH = None
+    SHARE_OUTPUT_PATH = None
 
     @staticmethod
     def init(configFile):
