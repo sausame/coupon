@@ -9,15 +9,19 @@ import time
 import traceback
 
 from datetime import tzinfo, timedelta, datetime
+from imgkit import ImageKit
+from pyvirtualdisplay import Display
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from urlutils import JsonResult
-from utils import randomSleep, remove, reprDict, findElement, inputElement
+from utils import randomSleep, remove, reprDict, findElement, inputElement, OutputPath
 
 class Inputter:
 
-    def __init__(self, inputPath=None, outputPath=None, retries=10):
+    def __init__(self, aId=None, inputPath=None, outputPath=None, retries=10):
+
+        self.aId = aId
 
         self.inputPath = inputPath
         self.outputPath = outputPath
@@ -34,28 +38,37 @@ class Inputter:
         if self.inputPath is not None:
             remove(self.inputPath)
 
-    def getInput(self, notice=None, msg=None, prompt=None, length=0):
+    def getInput(self, notice=None, msg=None, image=None, prompt=None, length=-1):
 
         if self.inputPath is not None:
-            content = self.getInputFromFile(notice, msg, prompt, length)
+            content = self.getInputFromFile(notice, msg, image, prompt, length)
         else:
-            content = self.getInputFromStdin(notice, msg, prompt, length)
+            content = self.getInputFromStdin(notice, msg, image, prompt, length)
 
         if content is not None and isinstance(content, str):
             content = content.decode('utf-8', 'ignore')
 
         return content
 
-    def getInputFromFile(self, notice, msg, prompt, length):
+    def getInputFromFile(self, notice, msg, image, prompt, length):
 
         with open(self.outputPath, 'w') as fp:
 
             content = dict()
 
+            content['id'] = self.aId
+
             content['notice'] = notice
-            content['msg'] = msg
+            content['message'] = msg
+
             content['image'] = None
+
+            if image is not None:
+                with open(image) as imageFp:
+                    content['image'] = base64.b64encode(imageFp.read())
+
             content['prompt'] = prompt
+            content['length'] = length
 
             content = JsonResult.create(content, self.code, prompt)
 
@@ -71,7 +84,7 @@ class Inputter:
                     content = fp.read()
                     content = content.strip()
 
-                    if ((length is not 0 and len(content) is length) or (length is 0 and len(content) > 0)) \
+                    if ((length > 0 and len(content) is length) or (length < 0 and len(content) > 0)) \
                         and self.content != content:
 
                         self.content = content
@@ -86,7 +99,7 @@ class Inputter:
 
         return self.content
 
-    def getInputFromStdin(self, notice, msg, prompt, length):
+    def getInputFromStdin(self, notice, msg, image, prompt, length):
 
         for i in range(self.retries):
 
@@ -144,6 +157,9 @@ class Account:
         password = obj.pop('password')
         self.password = base64.b64decode(password)
 
+        self.image = OutputPath.getAuthPath('user_{}'.format(self.userId))
+        self.tmpImage = '{}.tmp'.format(self.image)
+
     def login(self, inputPath=None, outputPath=None, config='templates/login.json', retries=10):
 
         result = JsonResult.error()
@@ -165,6 +181,9 @@ class Account:
 
         loginUrl = obj.pop('login-url')
         verificationUrl = obj.pop('verification-url')
+
+        display = Display(visible=0, size=(800, 600))
+        display.start()
 
         if 'firefox' == driverType:
 
@@ -194,7 +213,7 @@ class Account:
             randomSleep(1, 2)
             buttonElement.click()
 
-            verificationInputter = Inputter(inputPath, outputPath)
+            verificationInputter = Inputter('Verification', inputPath, outputPath)
 
             for i in range(retries):
 
@@ -213,7 +232,7 @@ class Account:
             else:
                 raise Exception('Unable to login for user {} in {}.'.format(self.userId, loginUrl))
 
-            codeInputter = Inputter(inputPath, outputPath)
+            codeInputter = Inputter('Code', inputPath, outputPath)
 
             for i in range(retries):
 
@@ -268,6 +287,9 @@ class Account:
 
         print 'Phone code is needed ...'
 
+        driver.save_screenshot(self.tmpImage)
+        ImageKit.resize(self.image, self.tmpImage, newSize=(400,300))
+
         # Notice
         element = findElement(driver, tipsName) 
 
@@ -278,7 +300,8 @@ class Account:
 
         if element is not None:
             element.click()
-            time.sleep(1)
+            time.sleep(3)
+            return # Wait for next code
 
         element = findElement(driver, inputName)
 
@@ -286,7 +309,7 @@ class Account:
 
             prompt = element.get_attribute('placeholder')
 
-            content = inputter.getInput(notice, '', prompt, 6)
+            content = inputter.getInput(notice, '', self.image, prompt, 6)
 
             if content is None:
                 return
@@ -325,6 +348,9 @@ class Account:
 
         print 'Verification is needed ...'
 
+        ImageKit.saveCapture(driver, element, self.tmpImage)
+        ImageKit.resize(self.image, self.tmpImage, newSize=(400,300))
+
         element = findElement(driver, verifyNoticeName)
 
         if element is not None:
@@ -345,7 +371,7 @@ class Account:
 
             prompt = element.get_attribute('placeholder')
 
-            content = inputter.getInput(notice, msg, prompt)
+            content = inputter.getInput(notice, msg, self.image, prompt)
 
             if content is None:
                 return
