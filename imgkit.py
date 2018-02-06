@@ -32,7 +32,7 @@ class ImageKit:
         pass
 
     @staticmethod
-    def fromHtml(htmlFile, imgFile=None, start=(0,0), size=None, resize=None, resolution=300, pageSize=None):
+    def fromHtml(htmlFile, imgFile=None, start=(0,0), size=None, newSize=None, resolution=300, pageSize=None):
 
         htmlFile = os.path.realpath(htmlFile)
 
@@ -72,18 +72,8 @@ class ImageKit:
             # Only parse first page
             ret = runCommand('/usr/bin/pdftk {} cat 1 output {}'.format(pdfFile, outFile))
 
-            with WandImage(filename=outFile, resolution=resolution) as img:
+            ImageKit.resize(imgFile, outFile, start, size, newSize, resolution)
 
-                if size is None:
-                    size = (img.width - start[0], img.height - start[1])
-
-                with WandImage(width=size[0], height=size[1], background=Color('white')) as bg:
-
-                    bg.composite(img, start[0], start[1])
-                    if resize is not None:
-                        bg.resize(resize[0], resize[1])
-
-                    bg.save(filename=imgFile)
         except Exception as e:
             print e
             return None
@@ -211,4 +201,31 @@ class ImageKit:
         image.save(dstPath)
 
         return dstPath
+
+    @staticmethod
+    def resize(dstFile, srcFile, start=(0,0), size=None, newSize=None, resolution=300):
+    
+        with WandImage(filename=srcFile, resolution=resolution) as img:
+
+            if size is None:
+                size = (img.width - start[0], img.height - start[1])
+
+            with WandImage(width=size[0], height=size[1], background=Color('white')) as bg:
+
+                bg.composite(img, start[0], start[1])
+
+                if newSize is not None:
+
+                    ratio = float(size[0]) / float(size[1])
+
+                    temp = int(newSize[1] * ratio)
+
+                    if temp <= newSize[0]:
+                        newSize = (temp, newSize[1])
+                    else:
+                        newSize = (newSize[0], int(newSize[0] / ratio))
+
+                    bg.resize(newSize[0], newSize[1])
+
+                bg.save(filename=dstFile)
 
