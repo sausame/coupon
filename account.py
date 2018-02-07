@@ -4,6 +4,7 @@
 import base64
 import json
 import os
+import requests
 import sys
 import time
 import traceback
@@ -15,7 +16,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from urlutils import JsonResult
-from utils import randomSleep, remove, reprDict, findElement, inputElement, OutputPath
+from utils import displayImage, randomSleep, remove, reprDict, findElement, inputElement, OutputPath, getchar
 
 class Inputter:
 
@@ -102,6 +103,8 @@ class Inputter:
     def getInputFromStdin(self, notice, msg, image, prompt, length):
 
         for i in range(self.retries):
+
+            displayImage(image)
 
             print 'Notice:', notice
             print 'Message:', msg
@@ -213,6 +216,7 @@ class Account:
             randomSleep(1, 2)
             buttonElement.click()
 
+            authCodeInputter = Inputter('AuthCode', inputPath, outputPath)
             verificationInputter = Inputter('Verification', inputPath, outputPath)
 
             for i in range(retries):
@@ -222,8 +226,21 @@ class Account:
 
                 time.sleep(1)
 
+                error = self.getLoginError(driver)
+
+                if error is not None:
+
+                    if u'账号或密码不正确' in error:
+                        return JsonResult.error(message=error)
+
+                    if u'验证码' not in error:
+                        return JsonResult.error(message=error)
+
+                if self.inputAuthCode(driver, authCodeInputter, error):
+                    continue
+
                 # Need code
-                if self.needCode(driver):
+                if self.isPhoneCodeNeeded(driver):
                     continue
 
                 # Verification
@@ -241,7 +258,7 @@ class Account:
 
                 time.sleep(1)
 
-                self.inputCode(driver, codeInputter)
+                self.inputPhoneCode(driver, codeInputter)
             else:
                 raise Exception('Unable to login for user {} in {}.'.format(self.userId, verificationUrl))
 
@@ -258,12 +275,84 @@ class Account:
             traceback.print_exc(file=sys.stdout)
         finally:
             driver.quit()
+            display.stop()
 
         time.sleep(1)
 
         return result
 
-    def needCode(self, driver):
+    def getLoginError(self, driver):
+
+        noticeName = '//div[@class="notice"]'
+
+        element = findElement(driver, noticeName)
+
+        if element is None or not element.is_displayed() or not element.is_enabled():
+            return None
+
+        notice = element.text
+
+        if '&nbsp;' == notice:
+            return None
+
+        return notice
+
+    def inputAuthCode(self, driver, inputter, notice):
+
+        divAuthCodeId = 'input-code'
+        divImgVerfiyName = '//div[@class="txt-imgverify"]'
+        imgAutoCodeId = 'imgCode'
+        inputAuthCodeId = 'code'
+        loginButtonId = 'loginBtn'
+
+        msg = None
+
+        element = findElement(driver, divAuthCodeId)
+
+        if element is None or not element.is_displayed() or not element.is_enabled():
+            return False
+
+        print 'Auth code is needed.'
+
+        element = findElement(driver, divImgVerfiyName)
+
+        if element is not None:
+            msg = element.text
+
+        element = findElement(driver, imgAutoCodeId)
+
+        if element is None:
+            return True
+
+        ImageKit.saveCapture(driver, element, self.image)
+
+        element = findElement(driver, inputAuthCodeId)
+
+        if element is None:
+            return False
+
+        prompt = element.get_attribute('placeholder')
+
+        content = inputter.getInput(notice, msg, self.image, prompt, 4)
+
+        if content is None:
+            return True
+
+        element.clear()
+        element.send_keys(content);
+
+        print 'Auth code is sent.'
+
+        time.sleep(1)
+
+        element = findElement(driver, loginButtonId)
+        element.click()
+
+        time.sleep(3) # Sleep a little longer
+
+        return True
+
+    def isPhoneCodeNeeded(self, driver):
 
         continueButtonName = '//a[@class="btn-pop btn-continue"]'
 
@@ -278,7 +367,7 @@ class Account:
 
         return True
 
-    def inputCode(self, driver, inputter):
+    def inputPhoneCode(self, driver, inputter):
 
         tipsName = '//div[@class="item item-tips"]'
         retransmitButtonName = '//a[@class="btn-retransmit"]'
