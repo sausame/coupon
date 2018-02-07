@@ -6,6 +6,7 @@ import binascii
 import cStringIO
 import json
 import os
+import platform
 import pprint
 import random
 import re
@@ -183,6 +184,17 @@ def runCommand(cmd, shell=False):
         raise subprocess.CalledProcessError(retcode, cmd)
 
     return retcode
+
+def displayImage(path):
+
+    os = platform.system()
+
+    if os == 'Darwin':
+        subprocess.call(['open', path])
+    elif os == 'Linux':
+        subprocess.call(['xdg-open', path])
+    else:
+        os.startfile(path)
 
 # update property of name to value
 def updateProperty(path, name, value):
