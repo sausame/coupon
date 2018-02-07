@@ -161,9 +161,14 @@ class Account:
         self.password = base64.b64decode(password)
 
         self.image = OutputPath.getAuthPath('user_{}'.format(self.userId))
-        self.tmpImage = '{}.tmp'.format(self.image)
+        self.originalImage = OutputPath.getAuthPath('user_{}_original'.format(self.userId))
 
-    def login(self, inputPath=None, outputPath=None, config='templates/login.json', retries=10):
+    def saveScreenshot(self, driver, screenshotPath):
+
+        driver.save_screenshot(self.originalImage)
+        ImageKit.resize(screenshotPath, self.originalImage, newSize=(400, 300))
+
+    def login(self, screenshotPath=None, inputPath=None, outputPath=None, config='templates/login.json', retries=10):
 
         result = JsonResult.error()
 
@@ -210,6 +215,8 @@ class Account:
             randomSleep(1, 2)
             inputElement(driver.find_element_by_id('password'), self.password)
 
+            self.saveScreenshot(driver, screenshotPath);
+
             # Submit
             buttonElement = driver.find_element_by_id('loginBtn')
 
@@ -225,6 +232,8 @@ class Account:
                     break
 
                 time.sleep(1)
+
+                self.saveScreenshot(driver, screenshotPath);
 
                 error = self.getLoginError(driver)
 
@@ -258,6 +267,8 @@ class Account:
 
                 time.sleep(1)
 
+                self.saveScreenshot(driver, screenshotPath);
+
                 self.inputPhoneCode(driver, codeInputter)
             else:
                 raise Exception('Unable to login for user {} in {}.'.format(self.userId, verificationUrl))
@@ -275,7 +286,9 @@ class Account:
             traceback.print_exc(file=sys.stdout)
         finally:
             driver.quit()
-            display.stop()
+
+            if display is not None:
+                display.stop()
 
         time.sleep(1)
 
@@ -376,9 +389,6 @@ class Account:
 
         print 'Phone code is needed ...'
 
-        driver.save_screenshot(self.tmpImage)
-        ImageKit.resize(self.image, self.tmpImage, newSize=(400,300))
-
         # Notice
         element = findElement(driver, tipsName) 
 
@@ -437,8 +447,7 @@ class Account:
 
         print 'Verification is needed ...'
 
-        ImageKit.saveCapture(driver, element, self.tmpImage)
-        ImageKit.resize(self.image, self.tmpImage, newSize=(400,300))
+        ImageKit.saveCapture(driver, element, self.image)
 
         element = findElement(driver, verifyNoticeName)
 

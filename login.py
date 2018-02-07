@@ -12,7 +12,7 @@ from db import Database
 from urlutils import JsonResult
 from utils import reprDict, OutputPath, ThreadWritableObject
 
-def run(configFile, userId, name, inputPath, outputPath, loginConfigFile, logFile):
+def run(configFile, userId, name, screenshotPath, inputPath, outputPath, loginConfigFile, logFile):
 
     OutputPath.init(configFile)
 
@@ -29,7 +29,7 @@ def run(configFile, userId, name, inputPath, outputPath, loginConfigFile, logFil
         db.initialize()
 
         account = Account(db, userId)
-        result = account.login(inputPath, outputPath, loginConfigFile)
+        result = account.login(screenshotPath, inputPath, outputPath, loginConfigFile)
 
     except KeyboardInterrupt:
         pass
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     sys.setdefaultencoding('utf8')
 
     if len(sys.argv) < 3:
-        print 'Usage:\n\t', sys.argv[0], 'config-file user-id [login-config-file] [input-path] [output-path] [log-file]\n'
+        print 'Usage:\n\t', sys.argv[0], 'config-file user-id [screenshot-path] [input-path] [output-path] [login-config-file] [log-file]\n'
         exit()
 
     os.environ['TZ'] = 'Asia/Shanghai'
@@ -72,22 +72,26 @@ if __name__ == '__main__':
     configFile = os.path.realpath(sys.argv[1])
     userId = int(sys.argv[2])
 
-    loginConfigFile = None
+    screenshotPath = None
     inputPath = None
     outputPath = None
+    loginConfigFile = None
     logFile = None
 
     if len(sys.argv) > 3:
-        inputPath = os.path.realpath(sys.argv[3])
+        screenshotPath = os.path.realpath(sys.argv[3])
 
     if len(sys.argv) > 4:
-        outputPath = os.path.realpath(sys.argv[4])
+        inputPath = os.path.realpath(sys.argv[4])
 
     if len(sys.argv) > 5:
-        loginConfigFile = os.path.realpath(sys.argv[5])
+        outputPath = os.path.realpath(sys.argv[5])
 
     if len(sys.argv) > 6:
-        logFile = sys.argv[6]
+        loginConfigFile = os.path.realpath(sys.argv[6])
 
-    run(configFile, userId, name, inputPath, outputPath, loginConfigFile, logFile)
+    if len(sys.argv) > 7:
+        logFile = sys.argv[7]
+
+    run(configFile, userId, name, screenshotPath, inputPath, outputPath, loginConfigFile, logFile)
 
