@@ -165,6 +165,9 @@ class Account:
 
     def saveScreenshot(self, driver, screenshotPath):
 
+        if screenshotPath is None:
+            return
+
         driver.save_screenshot(self.originalImage)
         ImageKit.resize(screenshotPath, self.originalImage, newSize=(400, 300))
 
@@ -190,8 +193,11 @@ class Account:
         loginUrl = obj.pop('login-url')
         verificationUrl = obj.pop('verification-url')
 
-        display = Display(visible=0, size=(800, 600))
-        display.start()
+        display = None
+
+        if screenshotPath is not None:
+            display = Display(visible=0, size=(800, 600))
+            display.start()
 
         if 'firefox' == driverType:
 
