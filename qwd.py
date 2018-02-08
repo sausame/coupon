@@ -100,7 +100,7 @@ class QWD:
         self.userId = userId
 
         sql = ''' SELECT
-                      config, entryCookies, keyCookies, loginType
+                      config, entryCookies, keyCookies
                   FROM
                       `configs`
                   WHERE
@@ -119,7 +119,7 @@ class QWD:
             self.entryCookies = row['entryCookies']
             self.keyCookies = row['keyCookies']
 
-            self.loginType = int(row['loginType'])
+            self.loginType = 1 # TODO: removed
 
         if config is None:
             return
@@ -129,24 +129,12 @@ class QWD:
         except ValueError as e:
             raise Exception('Config is invalid for user {}'.format(self.userId))
 
-        ## User
-        userObj = configObj.pop('user')
-
-        # Plogin
-        ploginObj = userObj.pop('plogin')
-
-        self.username = ploginObj.pop('username')
-        password = ploginObj.pop('password')
-        self.password = base64.b64decode(password)
-
         # Login
-        loginObj = userObj.pop('login')
+        loginObj = configObj.pop('login')
 
-        self.pin = loginObj.pop('pin')
-        self.tgt = loginObj.pop('tgt')
-
-        self.ctype = loginObj.pop('ctype')
-        self.uuid = loginObj.pop('uuid')
+        self.username = loginObj.pop('username')
+        password = loginObj.pop('password')
+        self.password = base64.b64decode(password)
 
     def reset(self):
 
@@ -455,6 +443,7 @@ class QWD:
         elif retries is 2:
             self.entryCookies = None
         else:
+            self.dbUpdated = True
             return False
 
         cookies = None
