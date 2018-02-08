@@ -414,7 +414,7 @@ class Account:
 
             prompt = element.get_attribute('placeholder')
 
-            content = inputter.getInput(notice, '', self.image, prompt, 6)
+            content = inputter.getInput(notice, '', None, prompt, 6)
 
             if content is None:
                 return
