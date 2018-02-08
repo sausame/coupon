@@ -309,9 +309,9 @@ class Account:
         if element is None or not element.is_displayed() or not element.is_enabled():
             return None
 
-        notice = element.text
+        notice = element.text.strip()
 
-        if '&nbsp;' == notice:
+        if '' == notice or '&nbsp;' == notice:
             return None
 
         return notice
