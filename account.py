@@ -214,6 +214,8 @@ class Account:
             driver.get(loginUrl)
             driver.set_script_timeout(10)
 
+            self.saveScreenshot(driver, screenshotPath);
+
             # Username and password
             randomSleep(1, 2)
             inputElement(driver.find_element_by_id('username'), self.username)
@@ -241,17 +243,7 @@ class Account:
 
                 self.saveScreenshot(driver, screenshotPath);
 
-                error = self.getLoginError(driver)
-
-                if error is not None:
-
-                    if u'账号或密码不正确' in error:
-                        return JsonResult.error(message=error)
-
-                    if u'验证码' not in error:
-                        return JsonResult.error(message=error)
-
-                if self.inputAuthCode(driver, authCodeInputter, error):
+                if self.inputAuthCode(driver, authCodeInputter):
                     continue
 
                 # Need code
@@ -261,6 +253,16 @@ class Account:
                 # Verification
                 if self.verify(driver, verificationInputter):
                     continue
+
+                error = self.getLoginError(driver)
+
+                if error is not None:
+
+                    if u'账号或密码不正确' in error:
+                        return JsonResult.error(message=error)
+
+                    if u'验证码' not in error:
+                        return JsonResult.error(message=error)
             else:
                 raise Exception('Unable to login for user {} in {}.'.format(self.userId, loginUrl))
 
@@ -316,7 +318,7 @@ class Account:
 
         return notice
 
-    def inputAuthCode(self, driver, inputter, notice):
+    def inputAuthCode(self, driver, inputter):
 
         divAuthCodeId = 'input-code'
         divImgVerfiyName = '//div[@class="txt-imgverify"]'
@@ -352,7 +354,7 @@ class Account:
 
         prompt = element.get_attribute('placeholder')
 
-        content = inputter.getInput(notice, msg, self.image, prompt, 4)
+        content = inputter.getInput(None, msg, self.image, prompt, 4)
 
         if content is None:
             return True
