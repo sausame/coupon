@@ -524,9 +524,12 @@ class SpecialFormatter:
         else:
             self.plateCouponLink = ''
 
-        self.plateShareUrl = qwd.getShareUrl(self.skuid)
+        self.plateShareUrl = ''
 
-    def getPlate(self, qwd):
+        if qwd is not None:
+            self.plateShareUrl = qwd.getShareUrl(self.skuid)
+
+    def getPlate(self, qwd=None):
 
         self.preparePlate(qwd)
 

@@ -71,6 +71,17 @@ class Viewer:
 
         self.imageType = int(getProperty(configFile, 'share-image-type'))
 
+    def create(self, data):
+
+        result = dict()
+
+        formatter = SpecialFormatter.create(data)
+
+        result['plate'] = formatter.getPlate(self.qwd)
+        result['image'] = formatter.skuimgurl
+
+        return result
+
     def get(self, shareFile, index=0):
 
         with open(shareFile, 'r') as fp:
@@ -81,15 +92,21 @@ class Viewer:
         except ValueError as e:
             raise Exception('{} is not valid config file.'.format(shareFile))
 
-        if obj['num'] <= index:
-            return JsonResult.error()
+        if index >= 0 and index < obj['num']: # Get one
+            data = self.create(obj['list'][index])
+            return JsonResult.succeed(data)
 
-        data = dict()
+        # Get all
+        dataList = list()
 
-        formatter = SpecialFormatter.create(obj['list'][index])
+        for special in obj.pop('list'):
 
-        data['plate'] = formatter.getPlate(self.qwd)
-        data['image'] = formatter.skuimgurl
+            dataList.append(self.create(special))
 
-        return JsonResult.succeed(data)
+            randomSleep(1, 2)
+
+        obj['list'] = dataList
+
+        return JsonResult.succeed(obj)
+
 

@@ -139,6 +139,8 @@ class QWD:
         password = loginObj.pop('password')
         self.password = base64.b64decode(password)
 
+        print 'Get configs for user', self.userId
+
     def reset(self):
 
         if self.loginType is 1:
