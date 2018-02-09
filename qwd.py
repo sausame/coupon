@@ -10,6 +10,7 @@ import requests
 import time
 
 from imgkit import ImageKit
+from pyvirtualdisplay import Display
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from utils import chmod, getMatchString, getProperty, inputElement, randomSleep, reprDict, OutputPath
@@ -93,6 +94,8 @@ class QWD:
 
     def initUserConfig(self, db, userId):
 
+        self.dbUpdated = False
+
         if db is None or userId is None:
             return
 
@@ -151,8 +154,6 @@ class QWD:
             #XXX: Can NOT use session to store cookie because these fields are not
             #     valid http cookie.
             self.cookies = dict()
-
-        self.dbUpdated = False
 
     def login(self):
 
@@ -443,7 +444,6 @@ class QWD:
         elif retries is 2:
             self.entryCookies = None
         else:
-            self.dbUpdated = True
             return False
 
         cookies = None
@@ -456,6 +456,11 @@ class QWD:
                 pass
 
         if cookies is None:
+
+            self.dbUpdated = True
+
+            display = Display(visible=0, size=(800, 600))
+            display.start()
 
             if 'firefox' == self.ploginType:
 
@@ -562,7 +567,6 @@ class QWD:
 
                     cookies[k] = v
 
-                self.dbUpdated = True
                 self.entryCookies = reprDict(cookies)
 
             except Exception as e:
@@ -570,6 +574,9 @@ class QWD:
                 return False
             finally:
                 browser.quit()
+
+                if display is not None:
+                    display.stop()
 
         # Update pCookies
         self.pCookies = cookies
@@ -584,6 +591,8 @@ class QWD:
                 pass
 
         if cookies is None:
+
+            self.dbUpdated = True
 
             try:
                 # Headers
@@ -600,7 +609,6 @@ class QWD:
             for cookie in r.cookies:
                 cookies[cookie.name] = cookie.value
 
-            self.dbUpdated = True
             self.keyCookies = reprDict(cookies)
 
         # Update pCookies
