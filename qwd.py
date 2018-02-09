@@ -496,6 +496,8 @@ class QWD:
 
                 if codeElement.is_displayed():
 
+                    print 'Auth code is needed ...'
+
                     while codeElement.is_displayed() and times < 50:
 
                         times += 1
