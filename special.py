@@ -19,6 +19,17 @@ class Searcher:
         self.url = getProperty(configFile, 'search-url')
         self.configFile = configFile
 
+    def create(self, data):
+
+        result = dict()
+
+        formatter = SpecialFormatter.create(data)
+
+        result['plate'] = formatter.getPlate(self.qwd)
+        result['image'] = formatter.skuimgurl
+
+        return result
+
     def search(self, content):
 
         r = Network.post(self.url, data={'content': content})
@@ -62,6 +73,43 @@ class Searcher:
         self.image = ImageKit.concatUrlsTo(path, urls)
 
         return True
+
+    def explore(self, content):
+
+        if content is None:
+            return JsonResult.error(-101, 'Empty inputted content')
+
+        r = Network.post(self.url, data={'content': content})
+
+        if r is None:
+            print 'No result for', content
+            return JsonResult.error(-102, 'No result')
+
+        try:
+            obj = json.loads(r.content.decode('utf-8', 'ignore'))
+        except ValueError as e:
+            print 'Error (', e, ') of json: "', r.content, '"'
+            return JsonResult.error(-103, 'Parse result error')
+
+        num = obj['num']
+        if num is 0:
+            print 'Error content: "', r.content, '"'
+            return JsonResult.error(-104, 'No result')
+
+        print 'Found', num, 'SKUs with "', content, '"'
+
+        # Get all
+        dataList = list()
+
+        for special in obj.pop('list'):
+
+            dataList.append(self.create(special))
+
+            randomSleep(1, 2)
+
+        obj['list'] = dataList
+
+        return JsonResult.succeed(obj)
 
 class Viewer:
 
