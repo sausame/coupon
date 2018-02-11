@@ -636,6 +636,12 @@ class QWD:
 
         self.dbUpdated = False
 
+        if self.entryCookies is None:
+            self.entryCookies = ''
+
+        if self.keyCookies is None:
+            self.keyCookies = ''
+
         sql = ''' UPDATE
                       `configs`
                   SET
