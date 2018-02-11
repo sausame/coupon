@@ -30,6 +30,8 @@ class QWD:
 
     def __init__(self, db=None, userId=None):
 
+        self.loginType = 1 # TODO: removed
+
         self.initShareConfig()
         self.initUserConfig(db, userId)
 
