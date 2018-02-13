@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
+import base64
 import os
 import sys
 import time
@@ -81,7 +82,7 @@ if __name__ == '__main__':
     name = os.path.basename(sys.argv[0])[:-3] # Remove ".py"
     configFile = os.path.realpath(sys.argv[1])
     userId = int(sys.argv[2])
-    content = sys.argv[3]
+    content = base64.b64decode(sys.argv[3].strip())
     savefile = sys.argv[4]
 
     logFile = None
