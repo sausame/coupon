@@ -266,7 +266,7 @@ class Account:
             else:
                 raise Exception('Unable to login for user {} in {}.'.format(self.userId, loginUrl))
 
-            codeInputter = Inputter('Code', inputPath, outputPath)
+            codeInputter = Inputter('Code', inputPath, outputPath, 30)
 
             for i in range(retries):
 
