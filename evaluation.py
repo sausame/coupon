@@ -332,7 +332,7 @@ class Evaluation:
                   LEFT OUTER JOIN SkuTable ON SkuTable.skuid = InformationTable.skuid 
                   WHERE {}
                   ORDER BY InformationTable.endTime ASC,
-                      `InformationTable`.`weight` ASC LIMIT 8 '''.format(where)
+                      `InformationTable`.`weight` ASC LIMIT 12 '''.format(where)
 
         result = self.db.query(sql)
 
