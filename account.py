@@ -298,6 +298,8 @@ class Account:
         except Exception as e:
             print 'Error occurs at', datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             traceback.print_exc(file=sys.stdout)
+
+            result = JsonResult.error(message=e.message)
         finally:
             driver.quit()
 
@@ -408,6 +410,9 @@ class Account:
 
         if element is not None:
             notice = element.text
+
+            if '过于频繁' in notice:
+                raise Exception(notice);
 
         element = findElement(driver, retransmitButtonName) 
 
