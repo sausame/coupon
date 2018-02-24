@@ -10,7 +10,7 @@ import time
 from datetime import tzinfo, timedelta, datetime
 from functools import total_ordering
 from imgkit import ImageKit
-from infor import getSlogan, getComments
+from infor import Infor
 from network import Network
 from operator import attrgetter
 from urlutils import UrlUtils
@@ -235,6 +235,9 @@ class SkuInformation(BaseDict):
             else:
                 self.data['outputTime'] = self.data['startTime']
 
+    def setImage(self, url):
+        self.data['imageUrl'] = url
+
     def setSlogan(self, slogan):
         self.data['slogan'] = slogan
 
@@ -363,14 +366,19 @@ class SkuInformation(BaseDict):
         self.data['discount'] = discount
         self.data['lowestRatio'] = lowestRatio
 
-    def updateSlogan(self):
+    def updateImage(self, infor):
 
-        slogan = getSlogan(self.data['skuid'])
+        url = infor.getImage()
+        self.setImage(url)
+
+    def updateSlogan(self, infor):
+
+        slogan = infor.getSlogan()
         self.setSlogan(slogan)
 
-    def updateComments(self):
+    def updateComments(self, infor):
 
-        comments = getComments(self.data['skuid'])
+        comments = infor.getComments()
 
         if comments is not None:
             self.setComments(comments)
@@ -390,9 +398,12 @@ class SkuInformation(BaseDict):
 
     def update(self):
 
+        infor = Infor(self.data['skuid'])
+
         self.updatePrices()
-        self.updateSlogan()
-        self.updateComments()
+        self.updateImage(infor)
+        self.updateSlogan(infor)
+        self.updateComments(infor)
         self.updateCouponLink()
 
 @total_ordering
@@ -476,7 +487,13 @@ class SpecialFormatter:
         if self.slogan is None:
             self.slogan = ''
 
-        self.skuimgurl = self.data['skuimgurl']
+        # Default is a large image 
+        url = self.data['imageUrl']
+
+        if url is not None and '' != url:
+            self.skuimgurl = url
+        else: # XXX Actually, it isn't needed because each ware must has a large image
+            self.skuimgurl = self.data['skuimgurl']
 
         self.price = self.data['price']
         self.lowestPrice = self.data['lowestPrice']

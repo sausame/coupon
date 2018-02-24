@@ -171,7 +171,7 @@ class Evaluation:
                       InformationTable.goodCnt, InformationTable.allCnt, InformationTable.percentOfGoodComments,
                       SkuTable.salecount, InformationTable.comRate,
                       InformationTable.totalDays, InformationTable.weight,
-                      SkuTable.title, InformationTable.slogan, SkuTable.skuimgurl,
+                      SkuTable.title, InformationTable.slogan, SkuTable.skuimgurl, InformationTable.imageUrl,
                       InformationTable.couponLink, InformationTable.commentList,
                       InformationTable.startTime, InformationTable.endTime
                   FROM InformationTable 
@@ -231,7 +231,7 @@ class Evaluation:
                       InformationTable.goodCnt, InformationTable.allCnt, InformationTable.percentOfGoodComments,
                       SkuTable.salecount, InformationTable.comRate,
                       InformationTable.totalDays, InformationTable.weight,
-                      SkuTable.title, InformationTable.slogan, SkuTable.skuimgurl,
+                      SkuTable.title, InformationTable.slogan, SkuTable.skuimgurl, InformationTable.imageUrl,
                       InformationTable.couponLink, InformationTable.commentList,
                       InformationTable.startTime, InformationTable.endTime
                   FROM InformationTable 
@@ -325,7 +325,7 @@ class Evaluation:
                       InformationTable.goodCnt, InformationTable.allCnt, InformationTable.percentOfGoodComments,
                       SkuTable.salecount, InformationTable.comRate,
                       InformationTable.totalDays, InformationTable.weight,
-                      SkuTable.title, InformationTable.slogan, SkuTable.skuimgurl,
+                      SkuTable.title, InformationTable.slogan, SkuTable.skuimgurl, InformationTable.imageUrl,
                       InformationTable.couponLink, InformationTable.commentList,
                       InformationTable.outputTime, InformationTable.startTime, InformationTable.endTime
                   FROM InformationTable 
