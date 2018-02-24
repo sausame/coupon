@@ -482,8 +482,8 @@ class OutputPath:
         return '{}/{}.{}'.format(OutputPath.DATA_OUTPUT_PATH, key, suffix)
 
     @staticmethod
-    def getAuthPath(name):
-        return '{}/{}.png'.format(OutputPath.AUTH_OUTPUT_PATH, name)
+    def getAuthPath(name, suffix='png'):
+        return '{}/{}.{}'.format(OutputPath.AUTH_OUTPUT_PATH, name, suffix)
 
     @staticmethod
     def getSharePath():

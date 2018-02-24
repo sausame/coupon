@@ -163,10 +163,16 @@ class Account:
         self.image = OutputPath.getAuthPath('user_{}'.format(self.userId))
         self.originalImage = OutputPath.getAuthPath('user_{}_original'.format(self.userId))
 
+        self.source = OutputPath.getAuthPath('user_{}'.format(self.userId), 'html')
+
     def saveScreenshot(self, driver, screenshotPath):
 
         if screenshotPath is None:
             return
+
+        with open(self.source, 'w') as fp:
+            page = driver.page_source
+            fp.write(page)
 
         driver.save_screenshot(self.originalImage)
         ImageKit.resize(screenshotPath, self.originalImage, newSize=(400, 300))
