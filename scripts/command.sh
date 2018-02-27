@@ -43,29 +43,44 @@ run() {
 	local name=`echo $APP | cut -c1-$pos`
 
 	local code_path=$(get_property $config_file 'code-path')
+	local output_path=$(get_property $config_file 'output-path')
+
+	local proc=`echo "$*" | sed -e "s/ /-/g" | sed -e "s/\//_/g"`
+
+	mkdir -p "$output_path/proc" -m 775
+	local proc_file="$output_path/proc/$proc.log"
 
 	for last_arg; do true; done
 
 	if [[ "$last_arg" == *.log ]]; then
 		local log_file=`realpath $last_arg`
 	else
-		local output_path=$(get_property $config_file 'output-path')
 		mkdir -p "$output_path/logs" -m 775
 		local log_file="$output_path/logs/$name.log"
 	fi
 
-	# Begin
-	local startDate=`TZ='Asia/Shanghai' date`
-	echo "Updating at $startDate ..." >> $log_file
+	# Process
+	if [ -f "$proc_file" ]
+	then
+		echo "$name application has been running." >> $log_file
+	else
+		touch $proc_file
 
-	# Running
-	cd $code_path \
-	&& source env/bin/activate \
-	&& python $@ 1>> $log_file 2>> $log_file || err_exit $log_file
+		# Begin
+		local startDate=`TZ='Asia/Shanghai' date`
+		echo "Updating at $startDate ..." >> $log_file
 
-	# End
-	endDate=`TZ='Asia/Shanghai' date`
-	echo "Updated at $endDate" >> $log_file
+		# Running
+		cd $code_path \
+		&& source env/bin/activate \
+		&& python $@ 1>> $log_file 2>> $log_file || err_exit $log_file
+
+		# End
+		endDate=`TZ='Asia/Shanghai' date`
+		echo "Updated at $endDate" >> $log_file
+
+		rm $proc_file
+	fi
 }
 
 create_display() {
