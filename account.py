@@ -365,6 +365,7 @@ class Account:
         content = inputter.getInput(None, msg, self.image, prompt, 4)
 
         if content is None:
+            print 'Auth code is not inputted.'
             return True
 
         element.clear()
@@ -417,8 +418,12 @@ class Account:
         element = findElement(driver, retransmitButtonName) 
 
         if element is not None:
+
+            print 'Phone code is retransmitted ...'
+
             element.click()
             time.sleep(3)
+
             return # Wait for next code
 
         element = findElement(driver, inputName)
@@ -430,6 +435,7 @@ class Account:
             content = inputter.getInput(notice, '', None, prompt, 6)
 
             if content is None:
+                print 'Phone code is not inputted.'
                 return
 
             element = findElement(driver, inputName)
@@ -491,6 +497,7 @@ class Account:
             content = inputter.getInput(notice, msg, self.image, prompt)
 
             if content is None:
+                print 'Verification code is not inputted.'
                 return
 
             element.send_keys(content)
