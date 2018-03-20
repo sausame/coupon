@@ -255,11 +255,15 @@ class QWD:
             obj = json.loads(data.decode('utf-8', 'ignore'))
             retCode = int(obj.pop('retCode'))
 
-            if retCode is not 0:
-                print 'Unable to get sharing URL for "', skuid, '" with an error (', r.status_code, '):\n', r.text
+            if retCode is 0:
+                return obj.pop('skuurl')
+
+            elif retCode is 1000: # Unlogin
+                print 'Unlogin to get sharing URL for "', skuid, '" with an error (', retCode, '):\n', r.text
                 continue
 
-            return obj.pop('skuurl')
+            print 'Unable to get sharing URL for "', skuid, '" with an error (', retCode, '):\n', r.text
+            return None
 
         self.reset()
 
