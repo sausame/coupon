@@ -258,7 +258,7 @@ class QWD:
             if retCode is 0:
                 return obj.pop('skuurl')
 
-            elif retCode is 1000: # Unlogin
+            elif 1000 == retCode: # Unlogin
                 print 'Unlogin to get sharing URL for "', skuid, '" with an error (', retCode, '):\n', r.text
                 continue
 
