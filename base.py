@@ -529,6 +529,9 @@ class SpecialFormatter:
         else:
             self.platePeriod = ''
 
+        if self.percentOfGoodComments is None:
+            self.percentOfGoodComments = '100%'
+
         self.plateComments = ''
 
         for comment in self.comments:
