@@ -541,7 +541,7 @@ class SpecialFormatter:
         else:
             self.plateCouponLink = ''
 
-        self.plateShareUrl = ''
+        self.plateShareUrl = None
 
         if qwd is not None:
             self.plateShareUrl = qwd.getShareUrl(self.skuid)
