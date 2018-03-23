@@ -11,7 +11,6 @@
 --
 卖出数量：{0.salecount}个
 用户评价（{0.percentOfGoodComments} 好评）
-{0.plateComments}
 --------------------
 {0.plateCouponLink}
 购买：{0.plateShareUrl}
