@@ -506,6 +506,8 @@ class SpecialFormatter:
         self.startTime = self.data['startTime']
         self.endTime = self.data['endTime']
 
+        self.salecount = self.data['salecount']
+
         self.comments = self.data['commentList']
 
         self.couponLink = self.data['couponLink']
