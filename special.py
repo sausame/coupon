@@ -26,6 +26,10 @@ class Searcher:
         formatter = SpecialFormatter.create(data)
 
         result['plate'] = formatter.getPlate(self.qwd)
+
+        if formatter.plateShareUrl is None:
+            return None
+
         result['image'] = formatter.skuimgurl
 
         return result
@@ -103,10 +107,14 @@ class Searcher:
 
         for special in obj.pop('list'):
 
-            dataList.append(self.create(special))
+            data = self.create(special)
+
+            if data is not None:
+                dataList.append(data)
 
             randomSleep(1, 2)
 
+        obj['num'] = len(dataList)
         obj['list'] = dataList
 
         return JsonResult.succeed(obj)
