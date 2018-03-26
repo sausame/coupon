@@ -1,4 +1,4 @@
-import httplib  
+import httplib
 import os
 import random
 import requests
@@ -10,6 +10,7 @@ from utils import chmod
 class Network:
 
     _instance = None
+    timeout = 10
 
     def __init__(self):
         self.isLocal = True
@@ -26,7 +27,7 @@ class Network:
     def get(url, params=None, **kwargs):
 
         try:
-            return requests.get(url, params=params, **kwargs)
+            return requests.get(url, params=params, timeout=Network.timeout, **kwargs)
         except Exception as e:
             print 'Error to get', url, ':', e
 
@@ -36,7 +37,7 @@ class Network:
     def post(url, data=None, json=None, **kwargs):
 
         try:
-            return requests.post(url, data=data, json=json, **kwargs)
+            return requests.post(url, data=data, json=json, timeout=Network.timeout, **kwargs)
         except Exception as e:
             print 'Error to post', url, ':', e
 
@@ -98,7 +99,7 @@ class Network:
         chmod(pathname)
 
         return 0
- 
+
     @staticmethod
     def saveHttpData(pathname, url, host=None, force=False):
 
@@ -127,7 +128,7 @@ class Network:
             url = url[start+end:]
 
         for i in range(0, 3):
-            conn = httplib.HTTPConnection(host, timeout=10)  
+            conn = httplib.HTTPConnection(host, timeout=10)
 
             try:
                 conn.request("GET", url)
