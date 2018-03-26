@@ -32,7 +32,7 @@ class SeckillInfo:
             url = 'https://ms.m.jd.com/seckill/seckillListPage.json?isPagination=true&gid={}&page={}'.format(self.gid,
                     page)
 
-        ret = Network.saveHttpData(path, url, force=force)
+        ret = Network.saveGetUrl(path, url, force=force)
         if ret < 0:
             return False
 

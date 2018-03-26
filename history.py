@@ -76,7 +76,7 @@ class PriceHistoryManager:
         # Get price histories
         path = OutputPath.getDataPath(skuid, 'js')
 
-        ret = Network.saveHttpData(path, url)
+        ret = Network.saveGetUrl(path, url, retries=3)
         #print 'Update', path, ':', ret, ':', title
 
         if ret < 0:
