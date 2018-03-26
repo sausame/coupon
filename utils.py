@@ -538,11 +538,15 @@ class ThreadWritableObject(threading.Thread):
 
         threadname = threading.currentThread().getName()
 
+        continueEmptyCount = 0
+
         while self.running:
 
             self.mutex.acquire()
 
             if 0 != len(self.contents):
+
+                continueEmptyCount = 0
 
                 MAX_SIZE = 2*1024*1024
 
@@ -553,6 +557,14 @@ class ThreadWritableObject(threading.Thread):
                 output(self.path, self.contents)
 
                 del self.contents[:]
+
+            else:
+
+                continueEmptyCount += 1
+
+                if 0 == continueEmptyCount % 6: # 1 minute
+                    content = 'No output at {}\n'.format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                    output(self.path, [content])
 
             self.mutex.release()
 
