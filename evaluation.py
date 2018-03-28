@@ -313,6 +313,7 @@ class Evaluation:
         data['list'] = list()
 
         where = ''' InformationTable.outputTime >= '{0}' AND InformationTable.outputTime <= '{1}'
+                      AND InformationTable.cutPrice <= 500
                       AND InformationTable.cutPrice <= InformationTable.lowestPrice
                       AND InformationTable.totalDays > 30
                       AND ((InformationTable.startTime <= '{1}' AND InformationTable.endTime >= '{1}')
