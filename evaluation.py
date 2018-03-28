@@ -6,6 +6,7 @@ import time
 
 from base import Sku, SkuInformation, Special
 from clock import Clock
+from coupon import SkuManager
 from datetime import timedelta, datetime
 from history import PriceHistoryManager
 from nlp import NLP
@@ -358,6 +359,12 @@ class Evaluation:
         results = self.qwd.search(key, price=price, sortByType=2, orderType=1)
         if results is None:
             return None
+
+        skuIds = [result.pop('skuid') for result in results]
+
+        # XXX: Search with skuid, because sale count is wrong
+        skuManager = SkuManager(self.configFile, self.db) 
+        results = skuManager.search(skuIds)
 
         priceHistoryManager = PriceHistoryManager()
         specialList = list()
