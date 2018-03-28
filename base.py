@@ -534,6 +534,11 @@ class SpecialFormatter:
         if self.percentOfGoodComments is None:
             self.percentOfGoodComments = '100%'
 
+        if self.salecount is not 0:
+            self.plateSalecount = '卖出数量：{}个'.format(self.salecount)
+        else:
+            self.plateSalecount = ''
+
         self.plateComments = ''
 
         for comment in self.comments:

@@ -9,7 +9,7 @@
 特惠价：￥{0.cutPrice}
 {0.platePeriod}
 --
-卖出数量：{0.salecount}个
+{0.plateSalecount}
 用户评价（{0.percentOfGoodComments} 好评）
 --------------------
 {0.plateCouponLink}
